@@ -1,7 +1,6 @@
 'use client'
 
-import { useQuery } from "@tanstack/react-query"
-import { ReactElement, JSXElementConstructor, ReactNode, ReactPortal, AwaitedReactNode } from "react";
+import { useQuery } from "@tanstack/react-query";
 
 
 export default function Dashboard() {
@@ -14,7 +13,8 @@ export default function Dashboard() {
     };
 
     const { data: users } = useQuery({ queryKey: ['pokemonData'], queryFn: getPokemonInfo })
-    console.log(users);
+    // console.log(users);
+    
 
 
     return (
