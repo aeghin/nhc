@@ -1,6 +1,7 @@
 'use client'
 
 import { useQuery } from "@tanstack/react-query";
+import { UserButton } from '@clerk/nextjs';
 
 
 export default function Dashboard() {
@@ -14,12 +15,20 @@ export default function Dashboard() {
 
     const { data: users } = useQuery({ queryKey: ['pokemonData'], queryFn: getPokemonInfo })
     // console.log(users);
-    
+
 
 
     return (
-        <div>{users?.map((user: any) => (
-            <h1 className="flex justify-center" key={user.id}>{user.name}</h1>
-        ))}</div>
+
+        <>  
+        <div className="flex">
+            <UserButton />
+        </div>
+            <div>{users?.map((user: any) => (
+                <h1 className="flex justify-center" key={user.id}>{user.name}</h1>
+            ))}</div>
+
+
+        </>
     )
 };
