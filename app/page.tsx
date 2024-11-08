@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ArrowRight, CheckCircle, Menu, X, ChevronDown } from "lucide-react"
-import { SignUpButton } from "@clerk/nextjs";
+import { SignUpButton, SignInButton } from "@clerk/nextjs";
 import Image from "next/image"
 import Link from "next/link"
 
@@ -27,7 +27,7 @@ export default function Home() {
         <div className="container mx-auto flex justify-between items-center">
           <Link href="/" className="flex items-center space-x-2">
             <Image src="/placeholder.svg" alt="Logo" width={32} height={32} className="rounded-full" />
-            <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-600">ModernBrand</span>
+            <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-orange-600">New Hope Church</span>
           </Link>
           <nav className="hidden md:flex space-x-8">
             {['Features', 'Pricing', 'Contact'].map((item) => (
@@ -37,8 +37,12 @@ export default function Home() {
             ))}
           </nav>
           <div className="hidden md:flex space-x-4">
-            <Button variant="ghost">Log in</Button>
-            <SignUpButton />
+            <SignInButton>
+              <Button variant="ghost">Log in</Button>
+            </SignInButton>
+            <SignUpButton>
+              <Button>Sign up</Button>
+            </SignUpButton>
           </div>
           <button className="md:hidden" onClick={() => setIsMenuOpen(!isMenuOpen)}>
             {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -74,7 +78,7 @@ export default function Home() {
         {/* Hero Section */}
         <section className="py-20 px-4 sm:px-6 lg:px-8">
           <div className="container mx-auto text-center">
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-600">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary to-orange-600">
               Revolutionize Your Workflow
             </h1>
             <p className="text-xl mb-8 max-w-2xl mx-auto text-muted-foreground">
@@ -197,8 +201,8 @@ export default function Home() {
         <div className="container mx-auto flex flex-col md:flex-row justify-between items-center">
           <div className="text-center md:text-left mb-4 md:mb-0">
             <Image src="/placeholder.svg" alt="Logo" width={32} height={32} className="inline-block mr-2 rounded-full" />
-            <span className="text-xl font-semibold">ModernBrand</span>
-            <p className="text-sm text-muted-foreground mt-2">© 2023 ModernBrand. All rights reserved.</p>
+            <span className="text-xl font-semibold bg-clip-text text-transparent bg-gradient-to-r from-primary to-orange-600">New Hope Church</span>
+            <p className="text-sm text-muted-foreground mt-2">© 2024 New Hope Church. All rights reserved.</p>
           </div>
           <nav className="flex flex-wrap justify-center md:justify-end gap-4">
             {["Privacy Policy", "Terms of Service", "Contact Us"].map((item) => (

@@ -21,7 +21,7 @@ model User {
   organizations UserOrganization[]
   invitations   Invitation[]
   createdAt     DateTime           @default(now())
-  updatedAt     DateTime           @updatedAt
+  updatedAt     DateTime           @default(now()) @updatedAt
   Organization  Organization[]
 }
 
@@ -33,7 +33,7 @@ model Organization {
   members     UserOrganization[]
   invitations Invitation[]
   createdAt   DateTime           @default(now())
-  updatedAt   DateTime           @updatedAt
+  updatedAt   DateTime           @default(now()) @updatedAt
 }
 
 model UserOrganization {
