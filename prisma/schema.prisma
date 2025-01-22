@@ -13,35 +13,50 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Role {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum Status {
+  PENDING
+  ACCEPTED
+  DECLINED
+  EXPIRED
+}
+
 model User {
-  id            String             @id @default(uuid())
-  userId        String             @unique
-  name          String
-  email         String
-  organizations UserOrganization[]
-  invitations   Invitation[]
-  createdAt     DateTime           @default(now())
-  updatedAt     DateTime           @default(now()) @updatedAt
-  Organization  Organization[]
+  id                 String             @id @default(uuid())
+  userId             String             @unique
+  name               String
+  email              String
+  organizations      UserOrganization[]
+  organizationsOwned Organization[]
+  invitations        Invitation[]
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @default(now()) @updatedAt
 }
 
 model Organization {
   id          String             @id @default(uuid())
   name        String
   ownerId     String
-  owner       User               @relation(fields: [ownerId], references: [id])
+  owner       User               @relation(fields: [ownerId], references: [userId])
   members     UserOrganization[]
   invitations Invitation[]
   createdAt   DateTime           @default(now())
   updatedAt   DateTime           @default(now()) @updatedAt
+
+  @@index([ownerId])
 }
 
 model UserOrganization {
   id             String       @id @default(uuid())
   userId         String
   organizationId String
-  role           String
-  user           User         @relation(fields: [userId], references: [id])
+  role           Role         @default(MEMBER)
+  user           User         @relation(fields: [userId], references: [userId])
   organization   Organization @relation(fields: [organizationId], references: [id])
   createdAt      DateTime     @default(now())
 
@@ -51,12 +66,12 @@ model UserOrganization {
 model Invitation {
   id             String       @id @default(uuid())
   email          String
-  status         String       @default("pending")
+  status         Status       @default(PENDING)
   role           String
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id])
   invitedById    String
-  invitedBy      User         @relation(fields: [invitedById], references: [id])
+  invitedBy      User         @relation(fields: [invitedById], references: [userId])
   createdAt      DateTime     @default(now())
   expiresAt      DateTime
 }
