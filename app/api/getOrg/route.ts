@@ -26,5 +26,5 @@ export async function GET(req: Request) {
 
     } catch (err) {
         console.log(err)
-    }
+    };
 };
