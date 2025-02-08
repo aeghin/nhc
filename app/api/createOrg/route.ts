@@ -1,7 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
 import { NextResponse } from "next/server";
-import { Oranienbaum } from "next/font/google";
+import { Role } from "prisma/client"; 
 
 export async function POST(req: Request) {
     
@@ -26,6 +26,14 @@ export async function POST(req: Request) {
     if (!organization) {
         return NextResponse.json('error creating organization', { status: 404 });
     };
+
+    const userOrg = await db.userorganization.create({
+        data: {
+          userId,
+          organizationId: organization.id 
+          role: Role.OWNER
+    }
+});
 
     return NextResponse.json(organization);
 
