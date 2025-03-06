@@ -1,10 +1,10 @@
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
 import { NextResponse } from "next/server";
-import { Role } from "@prisma/client"; 
+import { Role } from "@prisma/client";
 
 export async function POST(req: Request) {
-    
+
     const { name } = await req.json();
     const { userId } = await auth();
 
@@ -29,11 +29,16 @@ export async function POST(req: Request) {
 
     const userOrg = await db.userOrganization.create({
         data: {
-          userId,
-          organizationId: organization.id,
-          role: Role.OWNER
-    }
-});
+            userId,
+            organizationId: organization.id,
+            role: Role.OWNER
+        }
+    });
+
+
+    if (!userOrg) {
+        return NextResponse.json('error creating user organization', { status: 404 });
+    };
 
     return NextResponse.json(userOrg);
 
