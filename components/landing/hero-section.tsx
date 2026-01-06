@@ -30,7 +30,7 @@ export function HeroSection() {
 
           {/* Subheadline */}
           <p className="mt-8 text-xl text-muted-foreground max-w-2xl mx-auto text-pretty leading-relaxed">
-            NHC is the modern platform for volunteer coordination. Manage events, assign roles, and keep your entire
+            NHW is the modern platform for volunteer coordination. Manage events, assign roles, and keep your entire
             worship team in perfect harmony.
           </p>
 

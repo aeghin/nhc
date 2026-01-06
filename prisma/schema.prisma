@@ -8,7 +8,9 @@ datasource db {
 }
 
 model User {
-  id      String @id @default(cuid())
-  clerkId String @unique
-  email   String @unique
+  id        String @id @default(uuid())
+  clerkId   String @unique
+  email     String @unique
+  firstName String
+  lastName  String
 }

@@ -4,7 +4,7 @@ import { Star } from "lucide-react"
 const testimonials = [
   {
     quote:
-      "NHC completely transformed how we manage our worship team. We went from chaotic group chats to a seamless scheduling system. Our volunteers actually know when they're serving now!",
+      "NHW completely transformed how we manage our worship team. We went from chaotic group chats to a seamless scheduling system. Our volunteers actually know when they're serving now!",
     author: "Sarah Mitchell",
     role: "Worship Director",
     org: "Grace Community Church",
@@ -28,7 +28,7 @@ const testimonials = [
   },
   {
     quote:
-      "We tried three other platforms before NHC. Nothing else understood the unique needs of worship teams. The role-based system for musicians is exactly what we needed.",
+      "We tried three other platforms before NHW. Nothing else understood the unique needs of worship teams. The role-based system for musicians is exactly what we needed.",
     author: "David Park",
     role: "Senior Pastor",
     org: "Restoration Church",
@@ -48,7 +48,7 @@ export function TestimonialsSection() {
             Loved by worship teams everywhere
           </h2>
           <p className="mt-6 text-lg text-muted-foreground">
-            Join thousands of churches and organizations who trust NHC.
+            Join thousands of churches and organizations who trust NHW.
           </p>
         </div>
 

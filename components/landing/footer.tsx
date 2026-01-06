@@ -114,7 +114,7 @@ export function Footer() {
         </div>
 
         <div className="mt-16 pt-8 border-t border-border flex flex-col md:flex-row items-center justify-between gap-6">
-          <p className="text-sm text-muted-foreground">&copy; {new Date().getFullYear()} NHC. All rights reserved.</p>
+          <p className="text-sm text-muted-foreground">&copy; {new Date().getFullYear()} NHW. All rights reserved.</p>
           <div className="flex items-center gap-6">
             <Link
               href="#"

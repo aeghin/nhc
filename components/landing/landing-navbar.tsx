@@ -1,24 +1,27 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Menu, X } from "lucide-react"
+import Link from "next/link";
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Menu, X } from "lucide-react";
+import { SignInButton, SignUpButton } from "@clerk/nextjs";
 
 export function LandingNavbar() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [scrolled, setScrolled] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 10)
-    window.addEventListener("scroll", handleScroll)
-    return () => window.removeEventListener("scroll", handleScroll)
-  }, [])
+    const handleScroll = () => setScrolled(window.scrollY > 10);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled ? "bg-background/95 backdrop-blur-md border-b border-border" : "bg-transparent"
+        scrolled
+          ? "bg-background/95 backdrop-blur-md border-b border-border"
+          : "bg-transparent"
       }`}
     >
       <nav className="mx-auto max-w-7xl px-6 lg:px-8">
@@ -26,9 +29,11 @@ export function LandingNavbar() {
           <div className="flex items-center gap-10">
             <Link href="/" className="flex items-center gap-3 group">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-br from-primary to-primary/70 shadow-lg shadow-primary/25 group-hover:shadow-primary/40 transition-shadow">
-                <span className="text-lg font-bold text-primary-foreground">N</span>
+                <span className="text-lg font-bold text-primary-foreground">
+                  N
+                </span>
               </div>
-              <span className="text-2xl font-bold tracking-tight">NHC</span>
+              <span className="text-2xl font-bold tracking-tight">NHW</span>
             </Link>
 
             <div className="hidden lg:flex items-center gap-8">
@@ -60,20 +65,31 @@ export function LandingNavbar() {
           </div>
 
           <div className="hidden lg:flex items-center gap-3">
-            <Link href="/dashboard">
-              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
+            <SignInButton>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-muted-foreground hover:text-foreground"
+              >
                 Sign in
               </Button>
-            </Link>
-            <Link href="/dashboard">
+            </SignInButton>
+            <SignUpButton>
               <Button size="sm" className="shadow-lg shadow-primary/25">
                 Get started free
               </Button>
-            </Link>
+            </SignUpButton>
           </div>
 
-          <button className="lg:hidden p-2 -mr-2" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-            {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          <button
+            className="lg:hidden p-2 -mr-2"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            {mobileMenuOpen ? (
+              <X className="h-6 w-6" />
+            ) : (
+              <Menu className="h-6 w-6" />
+            )}
           </button>
         </div>
 
@@ -105,19 +121,19 @@ export function LandingNavbar() {
                 Pricing
               </Link>
               <div className="flex flex-col gap-3 pt-4 border-t border-border">
-                <Link href="/dashboard">
+                <SignInButton>
                   <Button variant="outline" className="w-full bg-transparent">
                     Sign in
                   </Button>
-                </Link>
-                <Link href="/dashboard">
+                </SignInButton>
+                <SignUpButton>
                   <Button className="w-full">Get started free</Button>
-                </Link>
+                </SignUpButton>
               </div>
             </div>
           </div>
         )}
       </nav>
     </header>
-  )
+  );
 }

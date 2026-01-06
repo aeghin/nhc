@@ -19,7 +19,7 @@ export function CTASection() {
                 Ready to transform how your team coordinates?
               </h2>
               <p className="mt-6 text-lg text-muted-foreground max-w-2xl mx-auto">
-                Join thousands of churches and organizations already using NHC to streamline their volunteer management.
+                Join thousands of churches and organizations already using NHW to streamline their volunteer management.
                 Get started in minutes.
               </p>
               <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
