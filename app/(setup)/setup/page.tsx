@@ -15,9 +15,9 @@ export default function SetupPage() {
     <div className="flex min-h-screen flex-col">
       {/* Header */}
       <header className="border-b bg-card">
-        <div className="mx-auto flex h-16 max-w-screen-xl items-center justify-between px-6">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
           <Link href="/" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/70 shadow-lg shadow-primary/25 group-hover:shadow-primary/40 transition-shadow text-primary-foreground font-bold text-sm">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-linear-to-br from-primary to-primary/70 shadow-lg shadow-primary/25 group-hover:shadow-primary/40 transition-shadow text-primary-foreground font-bold text-sm">
               N
             </div>
             <span className="text-lg font-semibold">NHW</span>
@@ -88,8 +88,8 @@ export default function SetupPage() {
       </main>
 
       {/* Modals */}
-      {/* <CreateOrganizationModal open={createModalOpen} onOpenChange={setCreateModalOpen} />
-      <JoinOrganizationModal open={joinModalOpen} onOpenChange={setJoinModalOpen} /> */}
+      <CreateOrganizationModal open={createModalOpen} onOpenChange={setCreateModalOpen} />
+      <JoinOrganizationModal open={joinModalOpen} onOpenChange={setJoinModalOpen} />
     </div>
   )
 }

@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
         const email = event.data.email_addresses[0].email_address;
         const firstName = event.data.first_name!;
         const lastName = event.data.last_name!;
-        console.log(event.data);
+        // console.log(event.data);
 
         await prisma.user.upsert({
             where: { clerkId: userId },
