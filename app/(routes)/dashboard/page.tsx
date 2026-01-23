@@ -13,7 +13,7 @@ const DashboardPage = async () => {
 
     return (
         <>
-            <div>Dashboard Page, only if authenticated. Hello, {user?.firstName}!</div>
+            <div>Dashboard Page, only if authenticated. Hello, {user?.firstName}</div>
             <UserButton />
         </>
     )
