@@ -1,10 +1,10 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+import { NextResponse } from 'next/server';
 
 const isProtectedRoute = createRouteMatcher([
   "/dashboard(.*)",
   "/api/(.*)",
   "/setup(.*)",
-  "/onboard(.*)",
 ]);
 
 const isWebhookRoute = createRouteMatcher([
@@ -12,11 +12,28 @@ const isWebhookRoute = createRouteMatcher([
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
+  // console.log('--- PROXY HIT ---')
+  // console.log('pathname:', req.nextUrl.pathname)
+  
+
   if (isWebhookRoute(req)) return;
 
   if (isProtectedRoute(req)) {
     await auth.protect();
+  }
+
+  const { userId } = await auth();
+  
+
+  if (!userId) return;
+
+  if (req.nextUrl.pathname.startsWith('/dashboard')) {
+    const userOnboarded = true;
+
+    if (!userOnboarded) return NextResponse.redirect(new URL('/setup', req.url));
+    
   };
+
 });
 
 export const config = {
