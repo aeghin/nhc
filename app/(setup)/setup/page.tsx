@@ -5,11 +5,17 @@ import { Building2, Users, ArrowRight } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { CreateOrganizationModal } from "@/components/setup/create-organization-modal"
 import { JoinOrganizationModal } from "@/components/setup/join-organization-modal"
+
+import { useRouter } from "next/navigation";
+
+
 import Link from "next/link"
 
 export default function SetupPage() {
-  const [createModalOpen, setCreateModalOpen] = useState(false)
-  const [joinModalOpen, setJoinModalOpen] = useState(false)
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [joinModalOpen, setJoinModalOpen] = useState(false);
+
+  const router = useRouter();
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -88,7 +94,7 @@ export default function SetupPage() {
       </main>
 
       {/* Modals */}
-      <CreateOrganizationModal open={createModalOpen} onOpenChange={setCreateModalOpen} />
+      <CreateOrganizationModal open={createModalOpen} onOpenChange={setCreateModalOpen} onSuccess={() => router.push('/dashboard')}/>
       <JoinOrganizationModal open={joinModalOpen} onOpenChange={setJoinModalOpen} />
     </div>
   )

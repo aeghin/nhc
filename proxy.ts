@@ -1,5 +1,6 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
+import prisma from './lib/prisma';
 
 const isProtectedRoute = createRouteMatcher([
   "/dashboard(.*)",
@@ -28,9 +29,14 @@ export default clerkMiddleware(async (auth, req) => {
   if (!userId) return;
 
   if (req.nextUrl.pathname.startsWith('/dashboard')) {
-    const userOnboarded = true;
 
-    if (!userOnboarded) return NextResponse.redirect(new URL('/setup', req.url));
+    const hasOrg = await prisma.organization.count({
+      where: {
+        ownerId: userId
+      }
+    });
+
+    if (hasOrg < 1) return NextResponse.redirect(new URL('/setup', req.url));
     
   };
 

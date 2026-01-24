@@ -3,6 +3,7 @@
 import { auth } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
 import { organizationSchema, OrganizationInput } from "@/lib/validations/organization";
+import { revalidatePath } from "next/cache";
 
 type ActionResponse =
   | { success: true; orgId: string }
@@ -38,8 +39,9 @@ export async function createOrganization(data: OrganizationInput): Promise<Actio
             }
         });
 
+        revalidatePath('/dashboard');
+        
         return { success: true, orgId: organization.id }
-
         
     } catch (error) {
 
