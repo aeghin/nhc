@@ -28,7 +28,7 @@ import {
 import { createOrganization } from "@/app/actions/organizations";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-// import { useRouter } from "next/navigation";
+
 import {
   OrganizationInput,
   organizationSchema,
@@ -47,7 +47,7 @@ export function CreateOrganizationModal({
   onOpenChange,
   onSuccess,
 }: CreateOrganizationModalProps) {
-  // const router = useRouter();
+ 
   const [isPending, startTransition] = useTransition();
 
   const form = useForm<OrganizationInput>({

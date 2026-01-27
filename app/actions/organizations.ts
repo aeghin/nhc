@@ -4,6 +4,7 @@ import { auth } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
 import { organizationSchema, OrganizationInput } from "@/lib/validations/organization";
 import { revalidatePath } from "next/cache";
+import { OrgRole } from "@/generated/prisma/enums";
 
 type ActionResponse =
   | { success: true; orgId: string }
@@ -18,12 +19,23 @@ export async function createOrganization(data: OrganizationInput): Promise<Actio
 
         if (!userId) return { success: false, error: "Unauthorized" };
 
+        const user = await prisma.user.findUnique({
+            where: { clerkId: userId }
+        });
+
+        if (!user) return { success: false, error: "Unauthorized" };
+
         const { name, description } = organizationSchema.parse(data);
 
         const orgExists = await prisma.organization.findFirst({
             where: {
                 name,
-                ownerId: userId
+                memberships: {
+                    some: {
+                        userId: user.id,
+                        role: OrgRole.OWNER
+                    }
+                }
             },
         });
 
@@ -31,12 +43,23 @@ export async function createOrganization(data: OrganizationInput): Promise<Actio
             return { success: false, error: 'Organization exists' }
         };
 
-        const organization = await prisma.organization.create({
-            data: {
-                name, 
-                description, 
-                ownerId: userId
-            }
+        const organization = await prisma.$transaction(async (trx) => {
+            const org = await trx.organization.create({
+                data: {
+                    name,
+                    description
+                }
+            });
+
+            await trx.membership.create({
+                data: {
+                    userId: user.id,
+                    organizationId: org.id,
+                    role: OrgRole.OWNER
+                }
+            });
+
+            return org;
         });
 
         revalidatePath('/dashboard');

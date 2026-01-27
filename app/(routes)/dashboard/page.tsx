@@ -4,16 +4,22 @@ import { auth } from "@clerk/nextjs/server";
 import { CreateOrg } from "@/components/dashboard/create-org-button";
 
 const DashboardPage = async () => {
+  
   const { userId } = await auth();
 
   const user = await prisma.user.findFirst({
     where: { clerkId: userId! },
     include: {
-      Organizations: true,
+      memberships: {
+        include: {
+          organization: true,
+        }
+      }
     },
   });
 
-  const organizations = user?.Organizations;
+  const organizations = user?.memberships.map(membership => membership.organization) || [];
+  const role = user?.memberships.map(mem => mem.role)
 
   return (
     <>
