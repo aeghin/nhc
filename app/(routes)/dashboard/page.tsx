@@ -19,7 +19,7 @@ const DashboardPage = async () => {
   });
 
   const organizations = user?.memberships.map(membership => membership.organization) || [];
-  const role = user?.memberships.map(mem => mem.role)
+  const role = user?.memberships.map(mem => mem.role);
 
   return (
     <>

@@ -25,18 +25,15 @@ export default clerkMiddleware(async (auth, req) => {
 
   const { userId } = await auth();
   
-
   if (!userId) return;
 
   if (req.nextUrl.pathname.startsWith('/dashboard')) {
 
-    const hasOrg = await prisma.organization.count({
-      where: {
-        ownerId: userId
-      }
+    const membershipsCount = await prisma.membership.count({
+      where: { user : { clerkId: userId } },
     });
 
-    if (hasOrg < 1) return NextResponse.redirect(new URL('/setup', req.url));
+    if (membershipsCount < 1) return NextResponse.redirect(new URL('/setup', req.url));
     
   };
 
