@@ -13,8 +13,7 @@ const isWebhookRoute = createRouteMatcher([
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
-  // console.log('--- PROXY HIT ---')
-  // console.log('pathname:', req.nextUrl.pathname)
+
   
 
   if (isWebhookRoute(req)) return;
