@@ -23,7 +23,7 @@ interface InvitePersonModalProps {
   onOpenChange: (open: boolean) => void
   organizationId?: string
   organizationName?: string
-}
+};
 
 export function InvitePersonModal({
   open,
@@ -32,14 +32,14 @@ export function InvitePersonModal({
   organizationName,
 }: InvitePersonModalProps) {
 
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(false);
 
-  const [isSuccess, setIsSuccess] = useState(false)
+  const [isSuccess, setIsSuccess] = useState(false);
 
   const [formData, setFormData] = useState({
     email: "",
     volunteerRoles: [] as VolunteerRole[],
-  })
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -130,7 +130,7 @@ export function InvitePersonModal({
                 return (
                 <label
                   key={role}
-                  className="flex cursor-pointer items-center gap-3 rounded-md p-2 hover:bg-muted/50"
+                  className="flex cursor-pointer items-center gap-3 rounded-md p-2 hover:bg-muted/75"
                 >
                   <Checkbox
                     checked={formData.volunteerRoles.includes(role)}
