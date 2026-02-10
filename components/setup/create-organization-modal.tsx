@@ -25,7 +25,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
-import { createOrganization } from "@/app/actions/organizations";
+import { createOrganization } from "@/lib/actions/organizations";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
