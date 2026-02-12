@@ -36,7 +36,7 @@ export function HeroSection() {
 
           {/* CTAs */}
           <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link href="/dashboard">
+            <Link href="/sign-up">
               <Button
                 size="lg"
                 className="gap-2 px-8 h-14 text-base shadow-xl shadow-primary/25 hover:shadow-primary/40 transition-shadow"

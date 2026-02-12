@@ -99,7 +99,7 @@ export function PricingSection() {
                 ))}
               </ul>
 
-              <Link href="/dashboard">
+              <Link href="/sign-up">
                 <Button
                   className={`w-full h-12 ${plan.popular ? "shadow-lg shadow-primary/25" : ""}`}
                   variant={plan.popular ? "default" : "outline"}

@@ -6,6 +6,12 @@ import { revalidatePath } from "next/cache";
 import { orgInvitationSchema, OrgInvitationInput } from "../validations/invitations";
 import { OrgRole, InvitationStatus } from "@/generated/prisma/enums";
 
+import { Resend } from "resend";
+import InvitationEmail from "@/components/email/email-template";
+
+const resend = new Resend(process.env.RESEND_EMAIL_API_KEY);
+
+
     
 type ActionResponse =
   | { success: true }
@@ -32,7 +38,7 @@ export async function inviteMember(data: OrgInvitationInput): Promise<ActionResp
             where: {
                 userId_organizationId: { userId: user.id, organizationId: orgId }
             },
-            select: { role: true }
+            select: { role: true, organization: true }
         }); 
 
         if (!membership) return { success: false, error: "Not a member" };
@@ -80,6 +86,18 @@ export async function inviteMember(data: OrgInvitationInput): Promise<ActionResp
                 invitedById: user.id,
                 organizationId: orgId,
             }
+        });
+
+        await resend.emails.send({
+            from: "New Hope Church <no-reply@aeghin.com>",
+            to: email,
+            subject: `You've been invited to join ${membership.organization.name}`,
+            react: InvitationEmail({ 
+                organizationName: membership.organization.name,
+                invitedByName: user.firstName,
+                volunteerRoles: volunteerRoles,
+                inviteLink: `${process.env.NEXT_PUBLIC_APP_URL}/invite/${invitation.token}`
+            })
         });
 
         return { success: true };

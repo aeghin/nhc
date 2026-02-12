@@ -23,7 +23,7 @@ export function CTASection() {
                 Get started in minutes.
               </p>
               <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-                <Link href="/dashboard">
+                <Link href="/sign-up">
                   <Button size="lg" className="gap-2 px-8 h-14 text-base shadow-xl shadow-primary/25">
                     Get started for free
                     <ArrowRight className="h-5 w-5" />
