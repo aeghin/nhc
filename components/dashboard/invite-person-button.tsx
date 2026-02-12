@@ -7,9 +7,10 @@ import { InvitePersonModal } from "@/components/setup/invite-person-modal";
 
 interface OrganizationActionButtonsProps {
     organizationId: string
+    organizationName: string
 }
 
-export function InviteMemberButton({ organizationId }: OrganizationActionButtonsProps) {
+export function InviteMemberButton({ organizationId, organizationName }: OrganizationActionButtonsProps) {
 
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
 
@@ -23,7 +24,7 @@ export function InviteMemberButton({ organizationId }: OrganizationActionButtons
           <Plus className="mr-2 h-4 w-4" />
           Invite Member
         </Button>
-      <InvitePersonModal open={inviteModalOpen} onOpenChange={setInviteModalOpen} organizationId={organizationId}/>
+      <InvitePersonModal open={inviteModalOpen} onOpenChange={setInviteModalOpen} organizationId={organizationId} organizationName={organizationName}/>
     </>
   )
 }

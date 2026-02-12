@@ -167,7 +167,7 @@ export default async function OrganizationPage({ params }: { params: Promise<{ i
 
               {canManage && (
                 <div className="flex items-center gap-3">
-                <InviteMemberButton organizationId={data}/>
+                <InviteMemberButton organizationId={data} organizationName={organization?.name}/>
                 </div>
               )}
             </div>

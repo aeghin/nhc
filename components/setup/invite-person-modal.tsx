@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
+
 import {
   Dialog,
   DialogContent,
@@ -9,14 +10,33 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { UserPlus, Loader2, Check } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
+
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+
 import { VolunteerRole } from "@/generated/prisma/enums";
 import { volunteerRoleConfig } from "@/lib/config/roles";
+
+import { inviteMember } from "@/lib/actions/invitation";
+
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { OrgInvitationInput, orgInvitationSchema } from "@/lib/validations/invitations";
+
+import { toast } from "sonner";
 
 interface InvitePersonModalProps {
   open: boolean
@@ -32,47 +52,51 @@ export function InvitePersonModal({
   organizationName,
 }: InvitePersonModalProps) {
 
-  const [isLoading, setIsLoading] = useState(false);
-
+  const [isPending, startTransition] = useTransition();
   const [isSuccess, setIsSuccess] = useState(false);
 
-  const [formData, setFormData] = useState({
-    email: "",
-    volunteerRoles: [] as VolunteerRole[],
+  const form = useForm<OrgInvitationInput>({
+    resolver: zodResolver(orgInvitationSchema),
+    defaultValues: {
+      email: "",
+      volunteerRoles: [],
+      orgId: organizationId,
+    },
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500))
-    setIsLoading(false)
-    setIsSuccess(true)
-    
-    // Reset after showing success
-    setTimeout(() => {
-      setIsSuccess(false)
-      setFormData({ email: "", volunteerRoles: [] })
-      onOpenChange(false)
-    }, 2000)
-  }
+  const { isValid } = form.formState;
 
-  const handleClose = () => {
-    if (!isLoading) {
-      setFormData({ email: "", volunteerRoles: [] })
-      setIsSuccess(false)
-      onOpenChange(false)
-    }
-  }
+  const volunteerRoles = form.watch("volunteerRoles");
 
   const toggleRole = (role: VolunteerRole) => {
-  setFormData((prev) => ({
-    ...prev,
-    volunteerRoles: prev.volunteerRoles.includes(role)
-      ? prev.volunteerRoles.filter((r) => r !== role)
-      : [...prev.volunteerRoles, role],
-  }))
-}
+    const current = form.getValues("volunteerRoles");
+    const updated = current.includes(role)
+      ? current.filter((r) => r !== role)
+      : [...current, role];
+    form.setValue("volunteerRoles", updated, { shouldValidate: true });
+  };
+
+
+
+  const handleSubmit = async (values: OrgInvitationInput) => {
+    startTransition(async () => {
+      const result = await inviteMember(values);
+
+      if (result.success) {
+        setIsSuccess(true);
+      } else {
+        toast.error(result.error, { position: "top-center" });
+      };
+    });
+  };
+
+  const handleClose = () => {
+  if (!isPending) {
+    form.reset();
+    setIsSuccess(false);
+    onOpenChange(false);
+  }
+};
 
   if (isSuccess) {
     return (
@@ -84,7 +108,7 @@ export function InvitePersonModal({
             </div>
             <DialogTitle className="mb-2 text-xl">Invitation Sent!</DialogTitle>
             <DialogDescription className="text-center">
-              An invitation has been sent to {formData.email}
+              An invitation has been sent to {form.getValues("email")}
               {organizationName && ` to join ${organizationName}`}.
             </DialogDescription>
           </div>
@@ -107,82 +131,102 @@ export function InvitePersonModal({
               : "Send an invitation to join your organization"}
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4 py-4">
-          <div className="space-y-2">
-            <Label htmlFor="invite-email">Email Address</Label>
-            <Input
-              id="invite-email"
-              type="email"
-              placeholder="volunteer@example.com"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              required
-            />
-            <p className="text-xs text-muted-foreground">
-              They'll receive an invitation link to join your organization.
-            </p>
-          </div>
-          <div className="space-y-3">
-            <Label>Volunteer Roles</Label>
-            <div className="max-h-60 space-y-2 overflow-y-auto rounded-lg border border-border/50 bg-muted/30 p-3">
-              {Object.values(VolunteerRole).map((role) => {
-                const config = volunteerRoleConfig[role];
-                return (
-                <label
-                  key={role}
-                  className="flex cursor-pointer items-center gap-3 rounded-md p-2 hover:bg-muted/75"
-                >
-                  <Checkbox
-                    checked={formData.volunteerRoles.includes(role)}
-                    onCheckedChange={() => toggleRole(role)}
-                  />
-                  <span className="text-lg">{config.icon}</span>
-                  <span className="text-sm font-medium">{config.label}</span>
-                </label>
-                )
-})}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Select one or more volunteer roles for this person.
-            </p>
-          </div>
-          {formData.volunteerRoles.length > 0 && (
-            <div className="rounded-lg border border-border/50 bg-muted/50 p-3">
-              <p className="mb-2 text-xs font-medium text-muted-foreground">
-                Selected Roles ({formData.volunteerRoles.length}):
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {formData.volunteerRoles.map((r) => {
-                  const role = volunteerRoleConfig[r];
-                  return (
-                    <Badge key={r} variant="outline" className="gap-1">
-                      <span>{role.icon}</span>
-                      <span>{role.label}</span>
-                    </Badge>
-                  )
-                })}
-              </div>
-            </div>
-          )}
-          <DialogFooter className="pt-4">
-            <Button type="button" variant="outline" onClick={handleClose} disabled={isLoading} className="cursor-pointer">
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isLoading || !formData.email || formData.volunteerRoles.length === 0}>
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Sending...
-                </>
-              ) : (
-                <>
-                  <UserPlus className="mr-2 h-4 w-4" />
-                  Send Invitation
-                </>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4 py-4">
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email Address</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      type="email"
+                      placeholder="volunteer@example.com"
+                      disabled={isPending}
+                    />
+                  </FormControl>
+                  <p className="text-xs text-muted-foreground">
+                    They'll receive an invitation link to join your organization.
+                  </p>
+                  <FormMessage />
+                </FormItem>
               )}
-            </Button>
-          </DialogFooter>
-        </form>
+            />
+
+            <FormField
+              control={form.control}
+              name="volunteerRoles"
+              render={() => (
+                <FormItem>
+                  <FormLabel>Volunteer Roles</FormLabel>
+                  <div className="max-h-60 space-y-2 overflow-y-auto rounded-lg border border-border/50 bg-muted/30 p-3">
+                    {Object.values(VolunteerRole).map((role) => {
+                      const config = volunteerRoleConfig[role];
+                      return (
+                        <label
+                          key={role}
+                          className="flex cursor-pointer items-center gap-3 rounded-md p-2 hover:bg-muted/75"
+                        >
+                          <Checkbox
+                            checked={volunteerRoles.includes(role)}
+                            onCheckedChange={() => toggleRole(role)}
+                            disabled={isPending}
+                          />
+                          <span className="text-lg">{config.icon}</span>
+                          <span className="text-sm font-medium">{config.label}</span>
+                        </label>
+                      )
+                    })}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Select one or more volunteer roles for this person.
+                  </p>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {volunteerRoles.length > 0 && (
+              <div className="rounded-lg border border-border/50 bg-muted/50 p-3">
+                <p className="mb-2 text-xs font-medium text-muted-foreground">
+                  Selected Roles ({volunteerRoles.length}):
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {volunteerRoles.map((r) => {
+                    const role = volunteerRoleConfig[r];
+                    return (
+                      <Badge key={r} variant="outline" className="gap-1">
+                        <span>{role.icon}</span>
+                        <span>{role.label}</span>
+                      </Badge>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
+            <DialogFooter className="pt-4">
+              <Button type="button" variant="outline" onClick={handleClose} disabled={isPending} className="cursor-pointer">
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isPending || !isValid} className="cursor-pointer">
+                {isPending ? (
+                  <>
+                    <Spinner data-icon="inline-start" />
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    <UserPlus className="mr-2 h-4 w-4" />
+                    Send Invitation
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   )
