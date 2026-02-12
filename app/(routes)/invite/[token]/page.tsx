@@ -14,8 +14,8 @@ const InvitePage = async ({ params }: { params: Promise<{ token: string }>}) => 
     if (!invitation) return <h1>Invalid or expired invitation</h1>
 
     return (
-    <h1>I sent you an invite for testing purposes.</h1>
+    <h1>I sent you an invite for testing purposes. Thank you for helping me test! ❤️ love you!!!</h1>
 );
 };
 
-export default InvitePage;
+export default InvitePage; 
