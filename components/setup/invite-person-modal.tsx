@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { UserPlus, Loader2, Check } from "lucide-react";
+import { UserPlus, Check } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 
 import {
@@ -92,9 +92,9 @@ export function InvitePersonModal({
 
   const handleClose = () => {
   if (!isPending) {
+    onOpenChange(false);
     form.reset();
     setIsSuccess(false);
-    onOpenChange(false);
   }
 };
 

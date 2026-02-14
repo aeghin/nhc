@@ -11,10 +11,13 @@ import {
   Tailwind,
 } from "@react-email/components";
 
+import { volunteerRoleConfig } from "@/lib/config/roles";
+import { VolunteerRole } from "@/generated/prisma/enums";
+
 interface InvitationEmailProps {
   organizationName: string;
   invitedByName: string;
-  volunteerRoles: string[];
+  volunteerRoles: VolunteerRole[];
   inviteLink: string;
   expiresInDays?: number;
 };
@@ -55,11 +58,14 @@ export default function InvitationEmail({
                 You've been assigned the following role{volunteerRoles.length > 1 ? "s" : ""}:
               </Text>
               <Section className="mt-2 rounded-lg bg-gray-50 p-4">
-                {volunteerRoles.map((role) => (
-                  <Text key={role} className="my-1 text-sm text-gray-800">
-                    • {role}
+                {volunteerRoles.map((role) => {
+                  const { label, icon } = volunteerRoleConfig[role];
+                  return (
+                    <Text key={label} className="my-1 text-sm text-gray-800">
+                    • {label} {icon}
                   </Text>
-                ))}
+                  )
+                })}
               </Section>
             </Section>
 
