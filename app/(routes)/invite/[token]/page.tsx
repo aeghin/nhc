@@ -44,14 +44,6 @@ const InvitePage = async ({
   const roles = invitation.volunteerRoles;
   const email = invitation.email;
 
-  const handleAccept = () => {
-    console.log("accepted");
-  };
-
-  const handleDecline = () => {
-    console.log("declined");
-  };
-
   let status = "pending";
 
   return (
@@ -137,14 +129,12 @@ const InvitePage = async ({
                 <Button
                   variant="outline"
                   className="flex-1 cursor-pointer"
-                  onClick={handleDecline}
                   disabled={status === "accepting"}
                 >
                   Decline
                 </Button>
                 <Button
                   className="flex-1 cursor-pointer shadow-lg shadow-primary/25"
-                  onClick={handleAccept}
                   disabled={status === "accepting"}
                 >
                   {status === "accepting" ? (
