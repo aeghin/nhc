@@ -52,6 +52,8 @@ const InvitePage = async ({
     console.log("declined");
   };
 
+  let status = "pending";
+
   return (
     <div className="flex min-h-screen flex-col">
       <header className="border-b bg-card">
