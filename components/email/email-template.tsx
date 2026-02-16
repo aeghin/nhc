@@ -75,7 +75,7 @@ export default function InvitationEmail({
                 href={inviteLink}
                 className="rounded-lg bg-black px-6 py-3 text-sm font-semibold text-white no-underline"
               >
-                Accept Invitation
+                View Invitation
               </Button>
             </Section>
 
