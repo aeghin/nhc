@@ -19,6 +19,8 @@ import {
 import { Spinner } from "@/components/ui/spinner";
 
 import { volunteerRoleConfig } from "@/lib/config/roles";
+import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
 
 const InvitePage = async ({
   params,
@@ -38,6 +40,10 @@ const InvitePage = async ({
   });
 
   if (!invitation) return <h1>Invalid or expired invitation</h1>;
+
+  const { userId } = await auth();
+
+  if (!userId) redirect(`/sign-up?redirect_url=/invite/${token}`);
 
   const organizationName = invitation.organization.name;
   const invitedBy = invitation.invitedBy.firstName;
