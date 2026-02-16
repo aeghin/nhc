@@ -53,7 +53,7 @@ export default function InvitationEmail({
             <Hr className="my-6 border-gray-200" />
 
             
-            <Section>
+            <Section className="text-center">
               <Text className="text-sm font-medium text-gray-700">
                 You've been assigned the following role{volunteerRoles.length > 1 ? "s" : ""}:
               </Text>
