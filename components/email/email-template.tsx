@@ -9,6 +9,7 @@ import {
   Button,
   Hr,
   Tailwind,
+  Img,
 } from "@react-email/components";
 
 import { volunteerRoleConfig } from "@/lib/config/roles";
@@ -20,7 +21,7 @@ interface InvitationEmailProps {
   volunteerRoles: VolunteerRole[];
   inviteLink: string;
   expiresInDays?: number;
-};
+}
 
 export default function InvitationEmail({
   organizationName,
@@ -33,63 +34,85 @@ export default function InvitationEmail({
     <Tailwind>
       <Html>
         <Head />
-        <Preview>You've been invited to join {organizationName}</Preview>
+        <Preview>
+          {invitedByName} invited you to join {organizationName}
+        </Preview>
         <Body className="bg-gray-100 font-sans">
-          <Container className="mx-auto my-10 max-w-120 rounded-xl bg-white p-8 shadow-sm">
-            
-            
-            <Section className="text-center">
-              <Text className="text-2xl font-bold text-gray-900">
-                You're Invited!
+          <Container className="mx-auto my-10 max-w-120 rounded-2xl bg-white shadow-sm overflow-hidden">
+            <Section className="bg-linear-to-br from-gray-50 to-gray-100 px-8 pt-10 pb-8 text-center">
+              <Section className="mx-auto mb-4 w-16 h-16 rounded-2xl bg-black text-center leading-16">
+                <Text className="text-2xl font-bold text-white m-0">N</Text>
+              </Section>
+              <Text className="text-2xl font-bold tracking-tight text-gray-900 m-0">
+                You&apos;re Invited
               </Text>
-              <Text className="mt-1 text-sm text-gray-500">
-                {invitedByName} has invited you to join
-              </Text>
-              <Text className="mt-1 text-lg font-semibold text-gray-900">
-                {organizationName}
+              <Text className="mt-2 text-sm text-gray-500 m-0">
+                You&apos;ve been invited to join an organization
               </Text>
             </Section>
 
-            <Hr className="my-6 border-gray-200" />
-
             
-            <Section className="text-center">
-              <Text className="text-sm font-medium text-gray-700">
-                You've been assigned the following role{volunteerRoles.length > 1 ? "s" : ""}:
-              </Text>
-              <Section className="mt-2 rounded-lg bg-gray-50 p-4">
+            <Section className="px-8 py-6">
+              
+              <Section className="rounded-xl border border-gray-200 p-4 mb-4">
+                <Text className="text-xs text-gray-500 m-0 mb-1">
+                  Organization
+                </Text>
+                <Text className="text-base font-semibold text-gray-900 m-0">
+                  {organizationName}
+                </Text>
+              </Section>
+
+              
+              <Section className="rounded-xl border border-gray-200 p-4 mb-4">
+                <Text className="text-xs text-gray-500 m-0 mb-1">
+                  Invited by
+                </Text>
+                <Text className="text-sm font-medium text-gray-900 m-0">
+                  {invitedByName}
+                </Text>
+              </Section>
+
+              
+              <Section className="rounded-xl border border-gray-200 p-4 mb-6">
+                <Text className="text-xs text-gray-500 m-0 mb-2">
+                  Role{volunteerRoles.length > 1 ? "s" : ""}
+                </Text>
                 {volunteerRoles.map((role) => {
                   const { label, icon } = volunteerRoleConfig[role];
                   return (
-                    <Text key={label} className="my-1 text-sm text-gray-800">
-                    • {label} {icon}
-                  </Text>
-                  )
+                    <Text
+                      key={label}
+                      className="text-sm font-medium text-gray-900 m-0 my-1"
+                    >
+                      {icon} {label}
+                    </Text>
+                  );
                 })}
               </Section>
+
+              
+              <Section className="text-center">
+                <Button
+                  href={inviteLink}
+                  className="rounded-xl bg-black px-8 py-3 text-sm font-semibold text-white no-underline shadow-lg"
+                >
+                  View Invitation
+                </Button>
+              </Section>
+
+              <Text className="mt-4 text-center text-xs text-gray-400 m-0">
+                This invitation expires in {expiresInDays} days.
+              </Text>
             </Section>
 
             
-            <Section className="mt-8 text-center">
-              <Button
-                href={inviteLink}
-                className="rounded-lg bg-black px-6 py-3 text-sm font-semibold text-white no-underline"
-              >
-                View Invitation
-              </Button>
+            <Section className="border-t border-gray-200 px-8 py-6">
+              <Text className="text-center text-xs text-gray-400 m-0">
+                If you didn&apos;t expect this invitation, you can safely ignore
+                this email.
+              </Text>
             </Section>
-
-            
-            <Text className="mt-6 text-center text-xs text-gray-400">
-              This invitation expires in {expiresInDays} days.
-            </Text>
-
-            <Hr className="my-6 border-gray-200" />
-
-            
-            <Text className="text-center text-xs text-gray-400">
-              If you didn't expect this invitation, you can safely ignore this email.
-            </Text>
           </Container>
         </Body>
       </Html>
