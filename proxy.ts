@@ -26,6 +26,10 @@ export default clerkMiddleware(async (auth, req) => {
   
   if (!userId) return;
 
+  if (req.nextUrl.pathname === '/' && userId) {
+  return NextResponse.redirect(new URL('/dashboard', req.url));
+}
+
   if (req.nextUrl.pathname.startsWith('/dashboard')) {
 
     const membershipsCount = await prisma.membership.count({
