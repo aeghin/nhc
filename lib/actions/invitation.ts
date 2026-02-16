@@ -2,7 +2,6 @@
 
 import { auth } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
-import { revalidatePath } from "next/cache";
 import { orgInvitationSchema, OrgInvitationInput } from "../validations/invitations";
 import { OrgRole, InvitationStatus } from "@/generated/prisma/enums";
 
@@ -105,3 +104,4 @@ export async function inviteMember(data: OrgInvitationInput): Promise<ActionResp
         return { success: false, error: "Failed to send invitation" };
     };
 };
+

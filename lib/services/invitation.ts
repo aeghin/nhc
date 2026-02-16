@@ -1,4 +1,5 @@
 
+
 import prisma from "../prisma";
 
 export const verifyInvitationByToken = async (token: string) => {
@@ -13,7 +14,8 @@ export const verifyInvitationByToken = async (token: string) => {
     },
   });
 
-  if (!invitation) return { success: false, error: "Invitation not found", status: "Invalid" }
+  if (!invitation) return null
 
+  return invitation;
 
-}
+};
