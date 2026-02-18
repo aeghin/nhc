@@ -7,13 +7,13 @@ import { OrgRole, InvitationStatus } from "@/generated/prisma/enums";
 
 import { Resend } from "resend";
 import InvitationEmail from "@/components/email/email-template";
+import { verifyInvitationByToken } from "../services/invitation";
+
 
 const resend = new Resend(process.env.RESEND_EMAIL_API_KEY);
 
-
-    
 type ActionResponse =
-  | { success: true }
+  | { success: true; orgId?: string }
   | { success: false; error: string }
 
 export async function inviteMember(data: OrgInvitationInput): Promise<ActionResponse> {
@@ -28,7 +28,7 @@ export async function inviteMember(data: OrgInvitationInput): Promise<ActionResp
             where: { clerkId: userId } 
         });
 
-        if (!user) return { success: false, error: "User not found"};
+        if (!user) return { success: false, error: "User not found" };
 
 
         const { email, volunteerRoles, orgId } = orgInvitationSchema.parse(data);
@@ -42,7 +42,7 @@ export async function inviteMember(data: OrgInvitationInput): Promise<ActionResp
 
         if (!membership) return { success: false, error: "Not a member" };
 
-        if (membership.role === OrgRole.MEMBER) return { success: false, error: "Insufficient Permissions"};
+        if (membership.role === OrgRole.MEMBER) return { success: false, error: "Insufficient Permissions" };
 
         const existingMember = await prisma.membership.findFirst({
             where: {
@@ -51,19 +51,7 @@ export async function inviteMember(data: OrgInvitationInput): Promise<ActionResp
             }
         });
         
-        if (existingMember) return { success: false, error: "User is member"};
-
-        const hasInvitation = await prisma.invitation.findUnique({
-            where: {
-                email_organizationId: {
-                    email: email, organizationId: orgId
-                } 
-            },
-        });
-
-        if (hasInvitation?.status === InvitationStatus.ACCEPTED) {
-            return { success: false, error: "User has accepted an invitation already"};
-        };
+        if (existingMember) return { success: false, error: "User is member" };
 
         const invitation = await prisma.invitation.upsert({
             where: {
@@ -102,6 +90,109 @@ export async function inviteMember(data: OrgInvitationInput): Promise<ActionResp
         return { success: true };
     } catch (err) {
         return { success: false, error: "Failed to send invitation" };
+    };
+};
+
+
+export async function acceptOrgInvite(token: string): Promise<ActionResponse> {
+
+    try {
+
+        const { userId } = await auth();
+
+        if (!userId) return { success: false, error: "Unauthorized" };
+
+        const user = await prisma.user.findUnique({
+            where: {
+                clerkId: userId,
+            },
+        });
+
+         if (!user) return { success: false, error: "User not found"};
+
+         const invitation = await verifyInvitationByToken(token);
+
+         if (!invitation) return { success: false, error: "Invalid invitation" };
+         
+         if (invitation.expiresAt < new Date()) return { success: false, error: "Invitation has expired"};
+         
+         if (invitation.status !== InvitationStatus.PENDING) return { success: false, error: "This invitation is no longer valid" };
+         
+         if (user.email !== invitation.email) {
+            return { success: false, error: "Incorrect Invitation"}
+         };
+         
+         const acceptedInvitation = await prisma.$transaction(async (trx) => {
+            const inv = await trx.invitation.update({
+                where: {
+                    id: invitation.id,
+                },
+                data: {
+                    status: InvitationStatus.ACCEPTED
+                }
+            });
+
+            await trx.membership.create({
+                data: {
+                    volunteerRoles: invitation.volunteerRoles,
+                    userId: user.id,
+                    organizationId: invitation.organizationId,
+                }
+            })
+
+            return inv
+        
+         });
+
+         return { success: true, orgId: acceptedInvitation.organizationId }
+
+    } catch (error) {
+
+        return { success: false, error: "Something went wrong; unable to accept invite" }
+    };
+};
+
+export async function declineOrgInvite(token: string): Promise<ActionResponse> {
+
+    try {
+
+    const { userId } = await auth();
+
+    if (!userId) return { success: false, error: "Unauthorized" };
+
+    const user = await prisma.user.findUnique({
+            where: {
+                clerkId: userId,
+            },
+        });
+
+    if (!user) return { success: false, error: "User not found" };
+
+    const invitation = await verifyInvitationByToken(token);
+    
+    if (!invitation) return { success: false, error: "Invalid invitation" };
+
+    if (invitation.expiresAt < new Date()) return { success: false, error: "Invitation has expired"};
+
+    if (user.email !== invitation.email) return { success: false, error: "Incorrect Invitation"};
+
+    if (invitation.status !== InvitationStatus.PENDING) return { success: false, error: "This invitation is no longer valid" };
+
+    await prisma.invitation.update({
+        where: {
+            id: invitation.id,
+        },
+        data: {
+            status: InvitationStatus.DECLINED
+        }
+    });
+
+    return { success: true };
+
+    } catch (error) {
+
+        return { success: false, error: "Unable to decline invitation" };
+
     };
 };
 

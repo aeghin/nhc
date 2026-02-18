@@ -1,29 +1,54 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle2, XCircle, ArrowLeft } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
+import { toast } from "sonner";
 
-type InviteStatus = "idle" | "accepting" | "declining" | "accepted" | "declined";
+import { acceptOrgInvite, declineOrgInvite } from "@/lib/actions/invitation";
 
 interface InviteActionsProps {
   token: string;
   organizationName: string;
 }
 
-export const InviteActions = ({ token, organizationName }: InviteActionsProps) => {
+type InviteStatus = "idle" | "accepting" | "declining" | "accepted" | "declined";
 
-    const [status, setStatus] = useState<InviteStatus>();
+export const InviteActions = ({ token, organizationName }: InviteActionsProps) => {
+  const [isPending, startTransition] = useTransition();
+  const [status, setStatus] = useState<InviteStatus>("idle");
+  const [orgId, setOrgId] = useState<string>();
 
   const handleAccept = async () => {
-    setStatus("accepted");
+    setStatus("accepting");
+    startTransition(async () => {
+      const result = await acceptOrgInvite(token);
+
+      if (result.success) {
+        setStatus("accepted");
+        setOrgId(result.orgId ?? undefined);
+      } else {
+        setStatus("idle");
+        toast.error(result.error);
+      }
+    });
   };
 
   const handleDecline = async () => {
-    setStatus('declined');
+    setStatus("declining");
+    startTransition(async () => {
+      const result = await declineOrgInvite(token);
+
+      if (result.success) {
+        setStatus("declined");
+      } else {
+        setStatus("idle");
+        toast.error(result.error);
+      }
+    });
   };
 
   if (status === "accepted") {
@@ -43,7 +68,7 @@ export const InviteActions = ({ token, organizationName }: InviteActionsProps) =
             </span>
             .
           </p>
-          <Link href="/dashboard">
+          <Link href={`/dashboard/organizations/${orgId}`}>
             <Button className="cursor-pointer shadow-lg shadow-primary/25">
               Go to Dashboard
             </Button>
@@ -87,7 +112,7 @@ export const InviteActions = ({ token, organizationName }: InviteActionsProps) =
         variant="outline"
         className="flex-1 cursor-pointer"
         onClick={handleDecline}
-        // disabled={status === "accepting" || status === "declining"}
+        disabled={isPending}
       >
         {status === "declining" ? (
           <>
@@ -101,7 +126,7 @@ export const InviteActions = ({ token, organizationName }: InviteActionsProps) =
       <Button
         className="flex-1 cursor-pointer shadow-lg shadow-primary/25"
         onClick={handleAccept}
-        // disabled={status === "accepting" || status === "declining"}
+        disabled={isPending}
       >
         {status === "accepting" ? (
           <>
@@ -109,7 +134,7 @@ export const InviteActions = ({ token, organizationName }: InviteActionsProps) =
             Accepting...
           </>
         ) : (
-          "Accept Invitation"
+          "Accept"
         )}
       </Button>
     </>

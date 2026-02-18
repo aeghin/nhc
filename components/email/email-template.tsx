@@ -98,7 +98,7 @@ export default function InvitationEmail({
                 View Invitation
               </Button>
 
-              <Text className="mt-4 text-xs text-gray-400 m-0">
+              <Text className="mt-8 text-xs text-gray-400 m-0">
                 This invitation expires in {expiresInDays} days.
               </Text>
             </Section>
