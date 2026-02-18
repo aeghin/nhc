@@ -60,7 +60,7 @@ export function CreateOrganizationModal({
 
   const { isValid } = form.formState;
 
-  const handleSubmit = async (values: OrganizationInput) => {
+  const handleSubmit = (values: OrganizationInput) => {
     startTransition(async () => {
       const result = await createOrganization(values);
 

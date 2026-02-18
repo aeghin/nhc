@@ -9,13 +9,11 @@ import {
 import { Button } from "@/components/ui/button";
 import {
   Mail,
-  Building2,
   XCircle,
   ArrowLeft,
   Clock,
 } from "lucide-react";
 
-import { volunteerRoleConfig } from "@/lib/config/roles";
 import { auth } from "@clerk/nextjs/server";
 import { verifyInvitationByToken } from "@/lib/services/invitation";
 import { InviteActions } from "@/components/invites/org-invite-buttons";
@@ -237,68 +235,15 @@ const InvitePage = async ({
   );
 };
 
-  return (
+return (
     <PageWrapper>
-      <Card className="border-2 overflow-hidden">
-        <CardContent className="bg-linear-to-br from-primary/5 to-primary/10 pb-8 pt-8 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-            <Mail className="h-8 w-8" />
-          </div>
-          <h1 className="text-2xl font-bold tracking-tight">
-            {"You're Invited"}
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            {"You've been invited to join an organization"}
-          </p>
-        </CardContent>
-
-        <CardContent className="p-6">
-          <div className="space-y-4">
-            <div className="flex items-center gap-3 rounded-xl border border-border/60 p-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                <Building2 className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Organization</p>
-                <p className="font-semibold">{organizationName}</p>
-              </div>
-            </div>
-
-            <div className="rounded-xl border border-border/60 p-3">
-              <p className="text-xs text-muted-foreground mb-0.5">
-                Invited by
-              </p>
-              <p className="text-sm font-medium">{invitedBy}</p>
-            </div>
-
-            <div className="rounded-xl border border-border/60 p-3">
-              <p className="text-xs text-muted-foreground mb-1.5">Roles</p>
-              <div className="flex flex-wrap gap-1.5">
-                {roles.map((role) => {
-                  const { label, icon } = volunteerRoleConfig[role];
-                  return (
-                    <span
-                      key={role}
-                      className="inline-flex items-center gap-1 rounded-md bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary"
-                    >
-                      {icon} {label}
-                    </span>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="rounded-xl border border-border/60 p-3">
-              <p className="text-xs text-muted-foreground mb-0.5">Sent to</p>
-              <p className="text-sm font-medium">{email}</p>
-            </div>
-          </div>
-        </CardContent>
-
-        <CardContent className="flex gap-3 p-6 pt-0">
-          <InviteActions token={token} organizationName={organizationName} />
-        </CardContent>
-      </Card>
+      <InviteActions
+        token={token}
+        organizationName={organizationName}
+        invitedBy={invitedBy}
+        roles={roles}
+        email={email}
+      />
     </PageWrapper>
   );
 };
