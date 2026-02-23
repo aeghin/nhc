@@ -1,19 +1,15 @@
 import { Suspense } from "react";
 import { Navbar } from "@/components/dashboard/navbar";
-import { DashboardHeader } from "@/components/dashboard/dashboard-header";
+// import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 // import { DashboardStats } from "@/components/dashboard/dashboard-stats"
 import { OrganizationsGrid } from "@/components/dashboard/organizations-grid";
 import {
-  DashboardHeaderSkeleton,
-  DashboardStatsSkeleton,
+  // DashboardHeaderSkeleton,
+  // DashboardStatsSkeleton,
   OrganizationsGridSkeleton,
 } from "@/components/dashboard/skeletons";
 // import { getNotifications, getCurrentUser } from "@/lib/services/data";
 
-import { auth } from "@clerk/nextjs/server";
-import prisma from "@/lib/prisma";
-import { redirect } from "next/navigation";
-import Link from "next/link";
 
 export default async function DashboardPage() {
 
