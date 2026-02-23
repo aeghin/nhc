@@ -8,6 +8,8 @@ import { JoinOrganizationModal } from "@/components/setup/join-organization-moda
 
 import { useRouter } from "next/navigation";
 
+import { UserButton } from "@clerk/nextjs"
+
 
 import Link from "next/link"
 
@@ -28,6 +30,7 @@ export default function SetupPage() {
             </div>
             <span className="text-lg font-semibold">NHW</span>
           </Link>
+          <UserButton />
         </div>
       </header>
 

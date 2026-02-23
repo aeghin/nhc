@@ -1,46 +1,47 @@
-import { UserButton } from "@clerk/nextjs";
-import prisma from "@/lib/prisma";
+import { Suspense } from "react";
+import { Navbar } from "@/components/dashboard/navbar";
+import { DashboardHeader } from "@/components/dashboard/dashboard-header";
+// import { DashboardStats } from "@/components/dashboard/dashboard-stats"
+import { OrganizationsGrid } from "@/components/dashboard/organizations-grid";
+import {
+  DashboardHeaderSkeleton,
+  DashboardStatsSkeleton,
+  OrganizationsGridSkeleton,
+} from "@/components/dashboard/skeletons";
+// import { getNotifications, getCurrentUser } from "@/lib/services/data";
+
 import { auth } from "@clerk/nextjs/server";
-import { CreateOrg } from "@/components/dashboard/create-org-button";
+import prisma from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 
-const DashboardPage = async () => {
-  const { userId } = await auth();
+export default async function DashboardPage() {
 
-  if (!userId) redirect("/sign-in");
-
-  const user = await prisma.user.findUnique({
-    where: {
-      clerkId: userId,
-    },
-    include: {
-      memberships: {
-        include: {
-          organization: true,
-        },
-      },
-    },
-  });
-
-  
-  const organizations = user?.memberships.map((m) => m.organization) || [];
-  
+  // const [user, notifications] = await Promise.all([
+  //   getCurrentUser(),
+  //   getNotifications(),
+  // ])
 
   return (
-    <>
-      <div>
-        Dashboard Page, only if authenticated. Hello, {user?.firstName}.
-      </div>
-      <ul>
-        {organizations?.map((org) => (
-          <Link key={org.id} href={`/dashboard/organizations/${org.id}`}>{org.name}</Link>
-        ))}
-      </ul>
-      <UserButton />
-      <CreateOrg />
-    </>
-  );
-};
+    <div className="min-h-screen bg-linear-to-br from-background via-background to-muted/20">
+      <Navbar />
 
-export default DashboardPage;
+      <main className="mx-auto max-w-screen-2xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+        <div className="space-y-8">
+          {/* <Suspense fallback={<DashboardHeaderSkeleton />}>
+            <DashboardHeader />
+          </Suspense>
+
+          <Suspense fallback={<DashboardStatsSkeleton />}>
+            <DashboardStats />
+          </Suspense> */}
+
+          <Suspense fallback={<OrganizationsGridSkeleton />}>
+            <OrganizationsGrid />
+          </Suspense>
+
+        </div>
+      </main>
+    </div>
+  )
+}
