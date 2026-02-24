@@ -29,6 +29,8 @@ export function OrganizationCard({ organization, invitationCount, upcomingEvents
   const roleConfig = ROLE_CONFIGS[organization.role]
   const RoleIcon = roleConfig.icon;
 
+  const isAdmin = organization.role === 'owner' || organization.role === 'admin';
+
 
   return (
     <Link href={`/dashboard/organizations/${organization.id}`}>
@@ -89,7 +91,7 @@ export function OrganizationCard({ organization, invitationCount, upcomingEvents
                 <span>upcoming</span>
               </div>
             )}
-            {invitationCount > 0 && (
+            {invitationCount > 0 && isAdmin && (
               <Badge variant="secondary" className="bg-primary/10 text-primary font-medium text-xs">
                 {invitationCount} pending
               </Badge>

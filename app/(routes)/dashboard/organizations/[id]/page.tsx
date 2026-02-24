@@ -126,8 +126,6 @@ export default async function OrganizationPage({ params }: { params: Promise<{ i
   const RoleIcon = roleConfig.icon;
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-background via-background to-secondary/20">
-      {/* <Navbar notifications={notifications} user={user} /> */}
       <main className="mx-auto max-w-screen-2xl px-6 py-8">
         <div className="space-y-8">
           {/* Back Button */}
@@ -403,7 +401,6 @@ export default async function OrganizationPage({ params }: { params: Promise<{ i
           </Tabs> */}
         </div>
       </main>
-    </div>
   )
 }
 

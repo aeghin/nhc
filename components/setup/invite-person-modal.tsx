@@ -59,6 +59,7 @@ export function InvitePersonModal({
     resolver: zodResolver(orgInvitationSchema),
     defaultValues: {
       email: "",
+      phoneNumber: "",
       volunteerRoles: [],
       orgId: organizationId,
     },
@@ -144,6 +145,25 @@ export function InvitePersonModal({
                       {...field}
                       type="email"
                       placeholder="volunteer@example.com"
+                      disabled={isPending}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="phoneNumber"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Phone Number</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      type="tel"
+                      placeholder="1234567890"
                       disabled={isPending}
                     />
                   </FormControl>

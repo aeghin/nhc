@@ -9,6 +9,12 @@ import { Resend } from "resend";
 import InvitationEmail from "@/components/email/email-template";
 import { verifyInvitationByToken } from "../services/invitation";
 
+// import twilio from 'twilio';
+
+// const twilioClient = twilio(
+//   process.env.TWILIO_ACCOUNT_SID!,
+//   process.env.TWILIO_AUTH_TOKEN!
+// );
 
 const resend = new Resend(process.env.RESEND_EMAIL_API_KEY);
 
@@ -31,7 +37,7 @@ export async function inviteMember(data: OrgInvitationInput): Promise<ActionResp
         if (!user) return { success: false, error: "User not found" };
 
 
-        const { email, volunteerRoles, orgId } = orgInvitationSchema.parse(data);
+        const { email, volunteerRoles, orgId, phoneNumber } = orgInvitationSchema.parse(data);
 
         const membership = await prisma.membership.findUnique({
             where: {
@@ -86,6 +92,12 @@ export async function inviteMember(data: OrgInvitationInput): Promise<ActionResp
                 inviteLink: `${process.env.NEXT_PUBLIC_APP_URL}/invite/${invitation.token}`
             })
         });
+
+        // await twilioClient.messages.create({
+        //      body: `${user.firstName} has invited you to join ${membership.organization.name}! Accept here: ${process.env.NEXT_PUBLIC_APP_URL}/invite/${invitation.token}`,
+        //      from: process.env.TWILIO_PHONE_NUMBER!,
+        //      to: `+1${phoneNumber}`,
+        //     });
 
         return { success: true };
     } catch (err) {
