@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { Command, Shield } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { NavLinks } from "./nav-links";
+// import { NavLinks } from "./nav-links";
 // import { NotificationsMenu } from "./notifications-menu";
 // import type { Notification, User } from "@/lib/types"
 import { UserButton } from "@clerk/nextjs";
