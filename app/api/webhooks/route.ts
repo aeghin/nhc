@@ -13,12 +13,13 @@ export async function POST(req: NextRequest) {
         const email = event.data.email_addresses[0].email_address;
         const firstName = event.data.first_name!;
         const lastName = event.data.last_name!;
+        const phoneNumber = event.data.phone_numbers[0].phone_number;
         
 
         await prisma.user.upsert({
             where: { clerkId: userId },
             update: {},
-            create: { clerkId: userId, email, firstName, lastName },
+            create: { clerkId: userId, email, firstName, lastName, phoneNumber },
         });
     };
 

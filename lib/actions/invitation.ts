@@ -76,7 +76,7 @@ export async function inviteMember(data: OrgInvitationInput): Promise<ActionResp
         });
 
         await resend.emails.send({
-            from: "New Hope Church <no-reply@aeghin.com>",
+            from: `${membership.organization.name} <no-reply@aeghin.com>`,
             to: email,
             subject: `You've been invited to join ${membership.organization.name}`,
             react: InvitationEmail({ 

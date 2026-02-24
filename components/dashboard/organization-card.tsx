@@ -39,13 +39,13 @@ export function OrganizationCard({ organization, invitationCount, upcomingEvents
           "hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5",
         )}
       >
-        {/* Background gradient on hover */}
+       
         <div className="absolute inset-0 bg-linear-to-br from-primary/2 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
         <CardContent className="relative p-5">
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 space-y-4">
-              {/* Org Avatar & Name */}
+              
               <div className="flex items-center gap-3">
                 <div
                   className={cn(
@@ -63,7 +63,7 @@ export function OrganizationCard({ organization, invitationCount, upcomingEvents
                 </div>
               </div>
 
-              {/* Badges */}
+              
               <div className="flex flex-wrap items-center gap-2">
                 <Badge variant="outline" className={cn("text-xs font-medium", roleConfig.className)}>
                   <RoleIcon className="mr-1.5 h-3 w-3" />
@@ -75,7 +75,7 @@ export function OrganizationCard({ organization, invitationCount, upcomingEvents
             <ArrowUpRight className="h-5 w-5 text-muted-foreground opacity-0 transition-all duration-200 group-hover:opacity-100 group-hover:text-primary group-hover:translate-x-0.5 group-hover:-translate-y-0.5 shrink-0" />
           </div>
 
-          {/* Footer Stats */}
+         
           <div className="mt-5 flex items-center gap-4 border-t border-border/40 pt-4">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Users className="h-4 w-4" />

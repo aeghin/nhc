@@ -38,6 +38,7 @@ model User {
   email     String @unique
   firstName String
   lastName  String
+  phoneNumber String
 
   memberships Membership[]
   sentInvitations Invitation[] 
