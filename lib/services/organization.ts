@@ -66,3 +66,15 @@ export const getUserOrganizations = async (userId: string) => {
 
     return organizations;
 };
+
+export const orgCountByUserId = async (userId: string) => {
+    
+  const orgCount = await prisma.membership.count({
+  where: {
+    user: { clerkId: userId }
+  }
+  });
+
+  return orgCount;
+  
+};

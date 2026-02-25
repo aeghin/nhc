@@ -1,10 +1,10 @@
 import { Suspense } from "react";
 // import { DashboardHeader } from "@/components/dashboard/dashboard-header";
-// import { DashboardStats } from "@/components/dashboard/dashboard-stats"
+import { DashboardStats } from "@/components/dashboard/dashboard-stats"
 import { OrganizationsGrid } from "@/components/dashboard/organizations-grid";
 import {
   // DashboardHeaderSkeleton,
-  // DashboardStatsSkeleton,
+  DashboardStatsSkeleton,
   OrganizationsGridSkeleton,
 } from "@/components/dashboard/skeletons";
 
@@ -16,11 +16,11 @@ export default async function DashboardPage() {
         <div className="space-y-8">
           {/* <Suspense fallback={<DashboardHeaderSkeleton />}>
             <DashboardHeader />
-          </Suspense>
+          </Suspense> */}
 
           <Suspense fallback={<DashboardStatsSkeleton />}>
             <DashboardStats />
-          </Suspense> */}
+          </Suspense>
 
           <Suspense fallback={<OrganizationsGridSkeleton />}>
             <OrganizationsGrid />
