@@ -8,7 +8,7 @@ import { OrganizationCard } from "./organization-card"
 
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import prisma from "@/lib/prisma";
+import { getUserOrganizations } from "@/lib/services/organization";
 
 
 export async function OrganizationsGrid() {
@@ -20,33 +20,9 @@ export async function OrganizationsGrid() {
 
   const { userId } = await auth();
   
-    if (!userId) redirect("/sign-in");
+  if (!userId) redirect("/sign-in");
   
-    const user = await prisma.user.findUnique({
-  where: { clerkId: userId },
-  include: {
-    memberships: {
-      include: {
-        organization: {
-          include: {
-            _count: {
-              select: { memberships: true },
-            },
-          },
-        },
-      },
-    },
-  },
-});
-  
-    
-    const organizations = user?.memberships.map((m) => ({
-      id: m.organization.id,
-      name: m.organization.name,
-      description: m.organization.description,
-      role: m.role.toLowerCase() as "owner" | "admin" | "member",
-      memberCount: m.organization._count.memberships,
-    }));
+  const organizations = await getUserOrganizations(userId);
 
   // Fetch event counts per org in parallel
   // const orgEventArrays = await Promise.all(
@@ -75,7 +51,7 @@ export async function OrganizationsGrid() {
   //   {} as Record<string, number>
   // )
 
-  const invitationCount = 2;
+  
   const upcomingEvents = 1;
 
   return (
@@ -93,7 +69,6 @@ export async function OrganizationsGrid() {
           <OrganizationCard
             key={org.id}
             organization={org}
-            invitationCount={invitationCount}
             upcomingEvents={upcomingEvents}
           />
         ))}

@@ -1,35 +1,36 @@
-import Link from "next/link"
-import { ArrowUpRight, Calendar, Crown, Shield, User, Users } from "lucide-react"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
+import Link from "next/link";
+import { ArrowUpRight, Calendar, Crown, Shield, User, Users } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 // import type { Organization } from "@/lib/types"
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
+import { OrgRole } from "@/generated/prisma/enums";
 
 interface OrganizationCardProps {
   organization: {
     id: string
     name: string
     description: string
-    role: "owner" | "admin" | "member"
+    role: OrgRole
     memberCount: number
+    invitationCount: number
   }
-  invitationCount: number
   upcomingEvents?: number
-}
+};
 
-// Define outside component - static configuration
+
 const ROLE_CONFIGS = {
-  owner: { icon: Crown, label: "Owner", className: "bg-chart-4/10 text-chart-4 border-chart-4/20" },
-  admin: { icon: Shield, label: "Admin", className: "bg-primary/10 text-primary border-primary/20" },
-  member: { icon: User, label: "Member", className: "bg-muted text-muted-foreground border-border" },
-} as const
+  OWNER: { icon: Crown, label: "Owner", className: "bg-amber-500/10 text-amber-600 border-amber-500/20" },
+  ADMIN: { icon: Shield, label: "Admin", className: "bg-primary/10 text-primary border-primary/20" },
+  MEMBER: { icon: User, label: "Member", className: "bg-muted text-muted-foreground border-border" },
+} as const;
 
-export function OrganizationCard({ organization, invitationCount, upcomingEvents }: OrganizationCardProps ) {
+export function OrganizationCard({ organization, upcomingEvents }: OrganizationCardProps ) {
   
   const roleConfig = ROLE_CONFIGS[organization.role]
   const RoleIcon = roleConfig.icon;
 
-  const isAdmin = organization.role === 'owner' || organization.role === 'admin';
+  const isAdmin = organization.role === OrgRole.OWNER || organization.role === OrgRole.ADMIN;
 
 
   return (
@@ -91,9 +92,9 @@ export function OrganizationCard({ organization, invitationCount, upcomingEvents
                 <span>upcoming</span>
               </div>
             )}
-            {invitationCount > 0 && isAdmin && (
+            {organization.invitationCount > 0 && isAdmin && (
               <Badge variant="secondary" className="bg-primary/10 text-primary font-medium text-xs">
-                {invitationCount} pending
+                {organization.invitationCount} pending
               </Badge>
             )}
           </div>
