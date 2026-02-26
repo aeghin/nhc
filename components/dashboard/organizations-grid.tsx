@@ -1,22 +1,10 @@
-import { OrganizationCard } from "./organization-card"
-// import {
-//   getCurrentUser,
-//   getOrganizations,
-//   getInvitations,
-//   getEventsByOrganization,
-// } from "@/lib/services/data";
-
+import { OrganizationCard } from "./organization-card";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { getUserOrganizations } from "@/lib/services/organization";
 
 
 export async function OrganizationsGrid() {
-  // const [user, organizations, invitations] = await Promise.all([
-  //   getCurrentUser(),
-  //   getOrganizations(),
-  //   getInvitations(),
-  // ])
 
   const { userId } = await auth();
   
@@ -65,7 +53,7 @@ export async function OrganizationsGrid() {
         </p>
       </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {organizations?.map((org) => (
+        {organizations.map((org) => (
           <OrganizationCard
             key={org.id}
             organization={org}

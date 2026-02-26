@@ -53,9 +53,11 @@ export const getUserOrganizations = async (userId: string) => {
     },
   },
 });
+
+if (!user) return [];
   
     
-    const organizations = user?.memberships.map((m) => ({
+   const organizations = user?.memberships.map((m) => ({
       id: m.organization.id,
       name: m.organization.name,
       description: m.organization.description,

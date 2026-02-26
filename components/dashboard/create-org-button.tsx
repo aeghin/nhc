@@ -10,7 +10,7 @@ export function CreateOrg() {
 
   return (
     <>
-      <Button className="cursor-pointer" onClick={() => setIsModalOpen(true)}>
+      <Button className="cursor-pointer w-full sm:w-auto shadow-lg shadow-primary/20 transition-all hover:scale-105 hover:shadow-primary/30" onClick={() => setIsModalOpen(true)}>
         <Plus className="mr-2 h-4 w-4" />
         Create Organization
       </Button>

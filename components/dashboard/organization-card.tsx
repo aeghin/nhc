@@ -34,7 +34,7 @@ export function OrganizationCard({ organization, upcomingEvents }: OrganizationC
 
 
   return (
-    <Link href={`/dashboard/organizations/${organization.id}`}>
+    <Link href={`/dashboard/organizations/${organization.id}`} className="min-w-0">
       <Card
         className={cn(
           "group relative cursor-pointer overflow-hidden border-border/40 bg-linear-to-br from-card to-card/80",
@@ -47,7 +47,7 @@ export function OrganizationCard({ organization, upcomingEvents }: OrganizationC
 
         <CardContent className="relative p-5">
           <div className="flex items-start justify-between gap-4">
-            <div className="flex-1 space-y-4">
+            <div className="flex-1 min-w-0 space-y-4">
               
               <div className="flex items-center gap-3">
                 <div

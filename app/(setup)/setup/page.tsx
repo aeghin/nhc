@@ -21,7 +21,6 @@ export default function SetupPage() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      {/* Header */}
       <header className="border-b bg-card">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
           <Link href="/" className="flex items-center gap-2">
@@ -34,10 +33,9 @@ export default function SetupPage() {
         </div>
       </header>
 
-      {/* Main Content */}
+     
       <main className="flex flex-1 items-center justify-center px-6 py-12">
         <div className="w-full max-w-2xl">
-          {/* Welcome Section */}
           <div className="mb-10 text-center">
             <h1 className="mb-3 text-3xl font-bold tracking-tight">Welcome to NHW</h1>
             <p className="text-lg text-muted-foreground">
@@ -45,9 +43,7 @@ export default function SetupPage() {
             </p>
           </div>
 
-          {/* Options Grid */}
           <div className="grid gap-6 sm:grid-cols-2">
-            {/* Create Organization Card */}
             <Card
               className="group relative cursor-pointer overflow-hidden border-2 transition-all hover:border-primary hover:shadow-lg"
               onClick={() => setCreateModalOpen(true)}
@@ -67,7 +63,6 @@ export default function SetupPage() {
               </CardContent>
             </Card>
 
-            {/* Join Organization Card */}
             <Card
               className="group relative cursor-pointer overflow-hidden border-2 transition-all hover:border-primary hover:shadow-lg"
               onClick={() => setJoinModalOpen(true)}
@@ -86,7 +81,6 @@ export default function SetupPage() {
             </Card>
           </div>
 
-          {/* Help Text */}
           <p className="mt-8 text-center text-sm text-muted-foreground">
             Need help getting started?{" "}
             <Link href="#" className="font-medium text-primary hover:underline">
@@ -96,7 +90,6 @@ export default function SetupPage() {
         </div>
       </main>
 
-      {/* Modals */}
       <CreateOrganizationModal open={createModalOpen} onOpenChange={setCreateModalOpen} onSuccess={() => router.push('/dashboard')}/>
       <JoinOrganizationModal open={joinModalOpen} onOpenChange={setJoinModalOpen} />
     </div>
