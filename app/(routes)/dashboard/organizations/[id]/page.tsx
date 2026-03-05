@@ -52,12 +52,13 @@ import { getOrganizationById } from "@/lib/services/organization";
 
 import { OrgRole } from "@/generated/prisma/enums";
 import { InviteMemberButton } from "@/components/dashboard/invite-person-button";
+import { getRoleConfig } from "@/lib/config/roles";
 
 export default async function OrganizationPage({ params }: { params: Promise<{ id: string }> }) {
 
   const { id } = await params;
 
-  const { data, success} = z.uuid().safeParse(id);
+  const { data, success } = z.uuid().safeParse(id);
 
   if (!success) notFound();
 
@@ -86,17 +87,6 @@ export default async function OrganizationPage({ params }: { params: Promise<{ i
   // const userRoles = userMembership?.roles || []
 
   const canManage = userRole === OrgRole.OWNER || userRole === OrgRole.ADMIN;
-
-  const getRoleConfig = (role: OrgRole) => {
-    switch (role) {
-      case OrgRole.OWNER:
-        return { icon: Crown, label: "Owner", className: "bg-amber-500/10 text-amber-600 border-amber-500/20" }
-      case OrgRole.ADMIN:
-        return { icon: Shield, label: "Admin", className: "bg-primary/10 text-primary border-primary/20" }
-      default:
-        return { icon: Users, label: "Member", className: "bg-muted text-muted-foreground border-border" }
-    }
-  };
 
   // const getPlanBadge = (plan: string) => {
   //   switch (plan) {

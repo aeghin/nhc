@@ -15,7 +15,6 @@ export async function POST(req: NextRequest) {
         const lastName = event.data.last_name!;
         const phoneNumber = event.data.phone_numbers[0].phone_number;
         
-
         await prisma.user.upsert({
             where: { clerkId: userId },
             update: {},
