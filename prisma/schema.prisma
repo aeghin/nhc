@@ -44,7 +44,8 @@ model User {
   sentInvitations Invitation[] 
   eventsCreated Event[]
   
-  assignedEvents EventAssignment[]
+  assignedEvents EventAssignment[] @relation("assignedUser")
+  createdAssignments EventAssignment[] @relation("assignedBy")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -58,7 +59,8 @@ model Organization {
   memberships Membership[]
   invitations Invitation[]
   serviceTypes ServiceType[]
-  eventAssignment EventAssignment[]
+  events Event[]
+  eventAssignments EventAssignment[]
   
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -93,7 +95,7 @@ model Invitation {
   expiresAt DateTime
 
   invitedById String
-  invitedBy User @relation(fields: [invitedById], references: [id], onDelete: Cascade)
+  invitedBy User @relation(fields: [invitedById], references: [id])
 
   organizationId String
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
@@ -110,15 +112,16 @@ model Invitation {
 
 model ServiceType {
   id String @id @default(uuid())
-  name String @unique
+  name String
+  color String
 
-  EventId String
-  Event Event @relation(fields: [EventId], references: [id], onDelete: Cascade) 
+  events Event[] 
 
   organizationId String
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
   
   @@unique([name, organizationId])
 }
@@ -133,22 +136,49 @@ model Event {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  createdById String
-  createdBy User @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  assignments EventAssignment[]
 
-  ServiceTypes ServiceType[]
+  createdById String
+  createdBy User @relation(fields: [createdById], references: [id])
+
+  serviceTypeId String
+  serviceType ServiceType @relation(fields: [serviceTypeId], references: [id])
+
+  organizationId String
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([createdById])
+  @@index([serviceTypeId])
+  @@index([organizationId])
+  @@index([date])
 
 }
 
 model EventAssignment {
   id String @id @default(uuid())
 
+  eventId String
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
   userId String
-  user User @relation(fields: [userId], references: [id])
+  user User @relation("assignedUser", fields: [userId], references: [id], onDelete: Cascade)
+
+  assignedById String
+  assignedBy User @relation("assignedBy", fields: [assignedById], references: [id])
 
   organizationId String
   organization Organization @relation(fields: [organizationId], references: [id])
 
   role VolunteerRole
+  status InvitationStatus @default(PENDING)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([eventId, userId])
+  @@index([organizationId])
+  @@index([eventId])
+  @@index([userId])
+  @@index([status])
 
 }
