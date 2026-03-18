@@ -1,16 +1,16 @@
 "use client"
 
 import { useState } from "react"
-import { Plus, Settings } from "lucide-react"
+import { Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { InvitePersonModal } from "@/components/setup/invite-person-modal";
 
-interface OrganizationActionButtonsProps {
-    organizationId: string
+interface InviteMemberButtonProps {
+    organizationId: string,
     organizationName: string
 }
 
-export function InviteMemberButton({ organizationId, organizationName }: OrganizationActionButtonsProps) {
+export function InviteMemberButton({ organizationId, organizationName }: InviteMemberButtonProps) {
 
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
 

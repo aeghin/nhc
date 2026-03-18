@@ -3,7 +3,7 @@ import 'server-only'
 import prisma from "../prisma";
 import { auth } from "@clerk/nextjs/server";
 
-export const getOrganizationById = async (id: string) => {
+export const getOrganizationDetailsById = async (id: string) => {
     
   const { userId } = await auth();
 
