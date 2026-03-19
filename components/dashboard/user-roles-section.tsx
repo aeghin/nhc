@@ -2,7 +2,7 @@ import { AnimatedSection } from "@/components/dashboard/animate-section";
 import { UserRolesCard } from "@/components/dashboard/user-roles-card";
 
 import prisma from "@/lib/prisma";
-import { userAgent } from "next/server";
+
 
 interface UserRolesSectionProps {
   organizationId: string;

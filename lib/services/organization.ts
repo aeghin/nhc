@@ -1,13 +1,9 @@
 import 'server-only'
 
 import prisma from "../prisma";
-import { auth } from "@clerk/nextjs/server";
 
-export const getOrganizationDetailsById = async (id: string) => {
+export const getOrganizationDetailsById = async (id: string, userId: string) => {
     
-  const { userId } = await auth();
-
-  if (!userId) throw new Error("Unauthorized");
 
   const organization = await prisma.organization.findUnique({
     where: {
@@ -79,4 +75,30 @@ export const orgCountByUserId = async (userId: string) => {
 
   return orgCount;
   
+};
+
+export const getOrgMemberCountById = async (organizationId: string) => {
+  const count = await prisma.membership.count({
+    where: {
+      organizationId
+    }
+  });
+
+  return count;
+};
+
+export const getUserVolunteerRolesByOrg = async (organizationId: string, userId: string) => {
+    const count = await prisma.membership.findFirst({
+      where: {
+        user: {
+          clerkId: userId
+        },
+        organizationId
+      },
+      select: {
+        volunteerRoles: true
+      }
+    });
+
+    return count?.volunteerRoles.length ?? 0;
 };

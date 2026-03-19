@@ -2,9 +2,9 @@ import { AnimatedSection } from "@/components/dashboard/animate-section";
 import { BackLink } from "@/components/dashboard/back-link-button";
 import { OrganizationHero } from "@/components/dashboard/organization-hero";
 import { UserRolesSection } from "@/components/dashboard/user-roles-section";
-// import { OrganizationStatsGrid } from "@/components/dashboard/organization-stats-grid";
+import { OrganizationStatsGrid } from "@/components/dashboard/org-stats-grid";
 // import { OrganizationTabsSection } from "@/components/dashboard/organization-tabs-section";
-// import { StatsGridSkeleton } from "@/components/dashboard/skeletons/stats-grid-skeleton";
+import { StatsGridSkeleton } from "@/components/dashboard/org-stats-skeleton";
 import { UserRolesSkeleton } from "@/components/dashboard/user-roles-skeleton";
 // import { TabsSkeleton } from "@/components/dashboard/skeletons/tabs-skeleton";
 
@@ -31,7 +31,7 @@ export default async function OrganizationPage({
 
   if (!userId) redirect('/sign-in');
 
-  const organization = await getOrganizationDetailsById(data);
+  const organization = await getOrganizationDetailsById(data, userId);
 
   if (!organization) notFound();
 
@@ -56,13 +56,14 @@ export default async function OrganizationPage({
           />
         </Suspense>
  
-        {/* <Suspense fallback={<StatsGridSkeleton />}>
+        <Suspense fallback={<StatsGridSkeleton />}>
           <OrganizationStatsGrid
-            organizationId={organizationId}
+            organizationId={organization.id}
+            userId={userId}
           />
         </Suspense>
  
-        <Suspense fallback={<TabsSkeleton />}>
+        {/* <Suspense fallback={<TabsSkeleton />}>
           <OrganizationTabsSection
             organizationId={organization.id}
             organizationName={organization.name}
