@@ -1,7 +1,7 @@
 import { AnimatedSection } from "@/components/dashboard/animate-section";
 import { UserRolesCard } from "@/components/dashboard/user-roles-card";
 
-import prisma from "@/lib/prisma";
+import { userRoles } from "@/lib/services/user";
 
 
 interface UserRolesSectionProps {
@@ -14,23 +14,8 @@ export const UserRolesSection = async ({
   userId,
 }: UserRolesSectionProps) => {
 
-  const roles = await prisma.membership.findFirst({
-    where: {
-      user: {
-        clerkId: userId,
-      },
-      organizationId,
-    },
-    select: {
-      volunteerRoles: true,
-      organization: {
-        select: {
-          name: true,
-        },
-      },
-    },
-  });
-
+const roles = await userRoles(userId, organizationId);
+  
   return (
     <AnimatedSection delay={0.15}>
       <UserRolesCard

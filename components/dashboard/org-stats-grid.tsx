@@ -7,7 +7,7 @@ import { getOrgMemberCountById, getUserVolunteerRolesByOrg } from "@/lib/service
 interface OrganizationStatsGridProps {
   organizationId: string
   userId: string
-}
+};
 
 export const OrganizationStatsGrid = async ({
   organizationId,
@@ -27,7 +27,7 @@ export const OrganizationStatsGrid = async ({
     // { title: "Upcoming Events", value: stats.upcomingEvents, icon: Calendar },
     // { title: "My Events", value: stats.userAcceptedEvents, icon: CheckCircle2 },
     { title: "My Roles", value: userRolesCount, icon: Music },
-  ]
+  ];
 
   return (
     <AnimatedSection delay={0.2} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">

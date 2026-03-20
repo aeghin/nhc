@@ -4,7 +4,9 @@ import prisma from "../prisma";
 import { cacheLife, cacheTag } from 'next/cache';
 
 export const getOrganizationDetailsById = async (id: string, userId: string) => {
-    
+    'use cache';
+
+    cacheLife('minutes');
 
   const organization = await prisma.organization.findUnique({
     where: {
@@ -74,6 +76,13 @@ if (!user) return [];
 };
 
 export const getOrgMemberCountById = async (organizationId: string) => {
+
+  'use cache';
+
+  cacheLife('hours');
+
+  cacheTag('org-members-count');
+
   const count = await prisma.membership.count({
     where: {
       organizationId
@@ -84,6 +93,12 @@ export const getOrgMemberCountById = async (organizationId: string) => {
 };
 
 export const getUserVolunteerRolesByOrg = async (organizationId: string, userId: string) => {
+    'use cache';
+
+    cacheLife('hours');
+    
+    cacheTag(`user-${userId}-roles`);
+
     const count = await prisma.membership.findFirst({
       where: {
         user: {
