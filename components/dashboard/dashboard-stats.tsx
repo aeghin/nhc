@@ -1,17 +1,15 @@
 import { Building2, Calendar, Music, Percent } from "lucide-react";
 import { StatsCard } from "@/components/dashboard/stats-card";
+import { getUserOrganizations } from "@/lib/services/organization";
 
-import { auth } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
-import { orgCountByUserId } from "@/lib/services/organization";
+interface DashboardStatsProps {
+  userId: string
+};
 
-export async function DashboardStats() {
-  
-  const { userId } = await auth();
+export async function DashboardStats({ userId }: DashboardStatsProps) {
 
-  if (!userId) return redirect("/sign-in");
-
-  const count = await orgCountByUserId(userId);
+  const orgs = await getUserOrganizations(userId);
+  const count = orgs.length;
 
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

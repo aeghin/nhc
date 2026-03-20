@@ -1,6 +1,7 @@
 import 'server-only'
 
 import prisma from "../prisma";
+import { cacheLife, cacheTag } from 'next/cache';
 
 export const getOrganizationDetailsById = async (id: string, userId: string) => {
     
@@ -32,6 +33,13 @@ export const getOrganizationDetailsById = async (id: string, userId: string) => 
 
 
 export const getUserOrganizations = async (userId: string) => {
+
+  'use cache';
+
+  cacheLife('hours');
+
+  cacheTag(`user-${userId}-orgs`)
+
   
   const user = await prisma.user.findUnique({
   where: { clerkId: userId },
@@ -63,18 +71,6 @@ if (!user) return [];
     }));
 
     return organizations;
-};
-
-export const orgCountByUserId = async (userId: string) => {
-    
-  const orgCount = await prisma.membership.count({
-  where: {
-    user: { clerkId: userId }
-  }
-  });
-
-  return orgCount;
-  
 };
 
 export const getOrgMemberCountById = async (organizationId: string) => {

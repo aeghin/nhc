@@ -1,14 +1,11 @@
 import { OrganizationCard } from "./organization-card";
-import { auth } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
 import { getUserOrganizations } from "@/lib/services/organization";
 
+interface OrganizationsGridProps {
+  userId: string
+};
 
-export async function OrganizationsGrid() {
-
-  const { userId } = await auth();
-  
-  if (!userId) redirect("/sign-in");
+export async function OrganizationsGrid({ userId }: OrganizationsGridProps) {
   
   const organizations = await getUserOrganizations(userId);
 
