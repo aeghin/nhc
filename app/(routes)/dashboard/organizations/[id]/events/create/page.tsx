@@ -78,7 +78,7 @@ export default async function CreateEventPage({
   
   const organizationName = user?.organization.name || '';
 
-  const canManage = user?.role === OrgRole.OWNER || OrgRole.ADMIN;
+  const canManage = user?.role === OrgRole.OWNER || user?.role === OrgRole.ADMIN;
 
   if (!canManage) {
     redirect(`/dashboard/organizations/${orgId}`)
