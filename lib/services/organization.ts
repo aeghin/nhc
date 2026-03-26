@@ -4,7 +4,7 @@ import prisma from "../prisma";
 import { cacheLife, cacheTag } from 'next/cache';
 
 export const getOrganizationDetailsById = async (id: string, userId: string) => {
-    "use cache: remote";
+    "use cache";
 
     cacheLife('minutes');
 
@@ -36,7 +36,7 @@ export const getOrganizationDetailsById = async (id: string, userId: string) => 
 
 export const getUserOrganizations = async (userId: string) => {
 
-  "use cache: remote";
+  "use cache";
 
   cacheLife('hours');
 
@@ -77,7 +77,7 @@ if (!user) return [];
 
 export const getOrgMemberCountById = async (organizationId: string) => {
 
-  "use cache: remote";
+  "use cache";
 
   cacheLife('hours');
 
@@ -93,7 +93,7 @@ export const getOrgMemberCountById = async (organizationId: string) => {
 };
 
 export const getUserVolunteerRolesByOrg = async (organizationId: string, userId: string) => {
-    "use cache: remote";
+    "use cache";
 
     cacheLife('hours');
     

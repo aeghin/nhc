@@ -4,13 +4,13 @@ import prisma from "@/lib/prisma";
 import { cacheLife, cacheTag } from "next/cache";
 
 export const getUserInfo = async (userId: string) => {
-    "use cache: remote";
+    "use cache";
     
     cacheLife('hours');
 
     cacheTag(`user-${userId}`);
 
-    console.log(`[CACHE MISS] getUserInfo called for ${userId} at ${new Date().toISOString()}`)
+    console.log("[CACHE MISS] getUserInfo called");
 
     const user = await prisma.user.findUnique({
     where: { clerkId: userId },
