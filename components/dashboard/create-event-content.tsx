@@ -1246,7 +1246,7 @@ export function CreateEventPageContent({
                                               <p className="text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1 mt-0.5">
                                                 <TriangleAlert className="h-3 w-3 shrink-0" />
                                                 {conflict.eventName} ·{" "}
-                                                {conflict.startTime} –{" "}
+                                                {conflict.startTime} -{" "}
                                                 {conflict.endTime}
                                               </p>
                                             )}
