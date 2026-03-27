@@ -1,7 +1,13 @@
 "use client";
 
 import type React from "react";
-import { useState, useMemo, useCallback, useTransition, useOptimistic } from "react";
+import {
+  useState,
+  useMemo,
+  useCallback,
+  useTransition,
+  useOptimistic,
+} from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "motion/react";
@@ -72,6 +78,7 @@ import {
 
 import { checkMemberAvailability } from "@/lib/actions/event";
 import { createServiceType } from "@/lib/actions/service-type";
+import { createEvent } from "@/lib/actions/event";
 
 const colorClasses: Record<
   string,
@@ -187,12 +194,11 @@ export function CreateEventPageContent({
   const router = useRouter();
 
   const [optimisticServiceTypes, addOptimisticServiceType] = useOptimistic(
-    serviceTypes, 
-    (current, newType: ServiceType) => [...current, newType]
+    serviceTypes,
+    (current, newType: ServiceType) => [...current, newType],
   );
-  
+
   const [step, setStep] = useState<1 | 2>(1);
-  const [isLoading, setIsLoading] = useState(false);
   const [isCheckingAvailability, setIsCheckingAvailability] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -201,12 +207,10 @@ export function CreateEventPageContent({
   const [newTypeName, setNewTypeName] = useState("");
   const [newTypeColor, setNewTypeColor] = useState("indigo");
 
-  
   const [roleAssignments, setRoleAssignments] = useState<
     Record<VolunteerRole, string[]>
   >({} as Record<VolunteerRole, string[]>);
 
-  
   const [memberConflicts, setMemberConflicts] = useState<
     Record<string, MemberConflict>
   >({});
@@ -276,7 +280,7 @@ export function CreateEventPageContent({
     name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
 
   const [isPending, startTransition] = useTransition();
-  
+  const [isCreating, startCreateTransition] = useTransition();
 
   const handleDateRangeChange = useCallback(
     (range: DateRange | undefined) => {
@@ -439,25 +443,26 @@ export function CreateEventPageContent({
   };
 
   const onSubmit = async (data: CreateEventFormData) => {
-    setIsLoading(true);
     setError(null);
 
-    try {
-      // TESTING
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      setIsSuccess(true);
-      setTimeout(() => {
-        handleClose();
-      }, 2000);
-    } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Something went wrong. Please try again.",
-      );
-    } finally {
-      setIsLoading(false);
-    }
+    startCreateTransition(async () => {
+      try {
+        const result = await createEvent(
+          { ...data, roleAssignments },
+          organizationId,
+        );
+
+        if (!result.success) {
+          setError(result.error);
+          return;
+        }
+
+        setIsSuccess(true);
+        setTimeout(() => handleClose(), 2000);
+      } catch {
+        setError("Something went wrong. Please try again.");
+      }
+    });
   };
 
   const handleFormSubmit = async (e: React.FormEvent) => {
@@ -1097,7 +1102,6 @@ export function CreateEventPageContent({
                       {isCheckingAvailability ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Checking availability...
                         </>
                       ) : (
                         <>
@@ -1278,8 +1282,8 @@ export function CreateEventPageContent({
                       <ArrowLeft className="mr-2 h-4 w-4" />
                       Back
                     </Button>
-                    <Button type="submit" disabled={isLoading}>
-                      {isLoading ? (
+                    <Button type="submit" disabled={isCreating}>
+                      {isCreating ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                           Creating...

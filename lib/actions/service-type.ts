@@ -3,6 +3,7 @@
 import prisma from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { ServiceType } from "@/generated/prisma/client";
+import { revalidatePath } from "next/cache";
 
 
 
@@ -38,6 +39,8 @@ export async function createServiceType(name: string, color: string, organizatio
                 organizationId
             }
         });
+
+        revalidatePath(`/dashboard/organizations/${organizationId}/events/create`);
 
         return { success: true, serviceType: serviceType };
 

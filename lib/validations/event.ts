@@ -21,3 +21,10 @@ export const createEventSchema = z.object({
 });
 
 export type CreateEventFormData = z.infer<typeof createEventSchema>
+
+
+export const createEventInputSchema = createEventSchema.extend({
+  roleAssignments: z.record(z.enum(VolunteerRole), z.array(z.string()).default([])),
+});
+
+export type CreateEventInput = z.infer<typeof createEventInputSchema>;

@@ -137,9 +137,7 @@ model Event {
   updatedAt DateTime @updatedAt
 
   assignments EventAssignment[]
-
-  startTime DateTime
-  endTime DateTime
+  dates EventDate[]
 
   createdById String
   createdBy User @relation(fields: [createdById], references: [id])
@@ -153,8 +151,6 @@ model Event {
   @@index([createdById])
   @@index([serviceTypeId])
   @@index([organizationId])
-  @@index([organizationId, startTime])
-
 }
 
 model EventAssignment {
@@ -184,4 +180,15 @@ model EventAssignment {
   @@index([userId])
   @@index([status])
 
+}
+
+model EventDate {
+  id  String @id @default(uuid())
+  startTime DateTime
+  endTime DateTime
+
+  eventId String 
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@index([eventId])
 }
