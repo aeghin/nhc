@@ -381,7 +381,7 @@ export function CreateEventPageContent({
         setConflictWarning({
           role,
           memberId,
-          memberName: `${member.user.firstName} ${member.user.lastName}`,
+          memberName: `${formatName(member.user.firstName)} ${formatName(member.user.lastName)}`,
           conflict: memberConflicts[memberId],
         });
       }
@@ -550,7 +550,7 @@ export function CreateEventPageContent({
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2 sm:gap-0">
-            <Button variant="outline" onClick={() => setConflictWarning(null)}>
+            <Button className="mr-2" variant="outline" onClick={() => setConflictWarning(null)}>
               Cancel
             </Button>
             <Button variant="default" onClick={handleConfirmConflictAssignment}>
@@ -568,7 +568,7 @@ export function CreateEventPageContent({
       >
         <div className="container max-w-5xl px-4 py-6">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" asChild className="shrink-0">
+            <Button onClick={handleClose}variant="ghost" size="icon" asChild className="shrink-0">
               <Link href={`/dashboard/organizations/${organizationId}`}>
                 <ArrowLeft className="h-5 w-5" />
               </Link>
@@ -1065,7 +1065,7 @@ export function CreateEventPageContent({
                                     {config.label}
                                   </p>
                                   <p className="text-xs text-muted-foreground">
-                                    {availableCount} available
+                                    {availableCount}
                                   </p>
                                 </div>
                                 <div
