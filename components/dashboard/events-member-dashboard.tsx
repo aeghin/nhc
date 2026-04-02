@@ -347,6 +347,7 @@ interface MemberEventsDashboardProps {
   userId: string;
   serviceTypes: ServiceType[];
   organizationId: string;
+  canManage: boolean;
 }
 
 // ─── Component ──────────────────────────────────────────────────
@@ -356,6 +357,7 @@ export function MemberEventsDashboard({
   userId,
   serviceTypes,
   organizationId,
+  canManage,
 }: MemberEventsDashboardProps) {
   // Derive initial tab from props — no useEffect needed
   const [activeTab, setActiveTab] = useState<TabType>(() =>

@@ -1,4 +1,5 @@
 import { MemberEventsDashboard } from "@/components/dashboard/events-member-dashboard";
+import prisma from "@/lib/prisma";
 
 // TODO: Replace with real service functions
 // import { getEventsByOrganization } from "@/lib/services/event";
@@ -7,21 +8,46 @@ import { MemberEventsDashboard } from "@/components/dashboard/events-member-dash
 interface EventsTabContentProps {
   organizationId: string;
   userId: string;
+  canManage: boolean;
 }
 
 export const EventsTabContent = async ({
   organizationId,
-  userId
+  userId,
+  canManage,
 }: EventsTabContentProps) => {
-  // TODO: Replace with real queries using "use cache" service functions
-  // const [events, serviceTypes] = await Promise.all([
-  //   getEventsByOrganization(organizationId),
-  //   getServiceTypesByOrganization(organizationId),
-  // ]);
-
-  // Mock data — replace with real fetches
+  
   const events: any[] = [];
-  const serviceTypes: any[] = [];
+
+
+  const serviceTypes = await prisma.serviceType.findMany({
+    where: {
+      organizationId
+    },
+    select: {
+      id: true,
+      name: true,
+      color: true
+    }
+  });
+
+  const getUserEvents = await prisma.event.findMany({
+    where: {
+      organizationId,
+    },
+    include: {
+      assignments: {
+        where: {
+          user: {
+            clerkId: userId
+          }
+        }
+      }
+    }
+  });
+
+  console.log(getUserEvents);
+
 
   return (
     <MemberEventsDashboard
@@ -29,6 +55,7 @@ export const EventsTabContent = async ({
       serviceTypes={serviceTypes}
       organizationId={organizationId}
       userId={userId}
+      canManage={canManage}
     />
   );
 };

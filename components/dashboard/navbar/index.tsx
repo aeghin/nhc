@@ -1,4 +1,3 @@
-
 import Link from "next/link";
 import { Command, Shield } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -30,9 +29,18 @@ export function Navbar() {
         <div className="flex items-center gap-2">
           {/* <NotificationsMenu notifications={notifications} /> */}
 
-          <UserButton />
+          <UserButton
+            appearance={{
+              elements: {
+                avatarBox: {
+                  width: "36px",
+                  height: "36px",
+                },
+              },
+            }}
+          />
         </div>
       </div>
     </header>
-  )
+  );
 }

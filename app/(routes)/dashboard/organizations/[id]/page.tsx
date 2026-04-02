@@ -19,10 +19,13 @@ import { OrgRole } from "@/generated/prisma/enums";
 
 export default async function OrganizationPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ tab?: string }>
 }) {
   const { id } = await params;
+  const { tab = "event" } = await searchParams;
 
   const { data, success } = z.uuid().safeParse(id);
   
@@ -75,6 +78,7 @@ export default async function OrganizationPage({
               organizationName={organization.name}
               canManage={canManage}
               userId={userId}
+              activeTab={tab}
             />
           </Suspense>
         </AnimatedSection>
