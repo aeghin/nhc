@@ -50,6 +50,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
 import {
   CalendarPlus,
   Loader2,
@@ -163,6 +166,7 @@ export type Member = {
     email: string;
     firstName: string;
     lastName: string;
+    userImageUrl: string | null;
   };
 };
 
@@ -550,7 +554,11 @@ export function CreateEventPageContent({
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2 sm:gap-0">
-            <Button className="mr-2" variant="outline" onClick={() => setConflictWarning(null)}>
+            <Button
+              className="mr-2"
+              variant="outline"
+              onClick={() => setConflictWarning(null)}
+            >
               Cancel
             </Button>
             <Button variant="default" onClick={handleConfirmConflictAssignment}>
@@ -568,7 +576,13 @@ export function CreateEventPageContent({
       >
         <div className="container max-w-5xl px-4 py-6">
           <div className="flex items-center gap-4">
-            <Button onClick={handleClose}variant="ghost" size="icon" asChild className="shrink-0">
+            <Button
+              onClick={handleClose}
+              variant="ghost"
+              size="icon"
+              asChild
+              className="shrink-0"
+            >
               <Link href={`/dashboard/organizations/${organizationId}`}>
                 <ArrowLeft className="h-5 w-5" />
               </Link>
@@ -1235,9 +1249,15 @@ export function CreateEventPageContent({
                                           }
                                         />
                                         <div className="flex items-center gap-3 flex-1 min-w-0">
-                                          <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-medium text-primary shrink-0">
-                                            {member.user.firstName.charAt(0)}
-                                          </div>
+                                          <Avatar className="h-8 w-8 shrink-0">
+                                            <AvatarImage
+                                              src={member.user.userImageUrl ?? undefined}
+                                              alt={`${member.user.firstName} ${member.user.lastName}`}
+                                            />
+                                            <AvatarFallback className="bg-primary/10 text-sm font-medium text-primary">
+                                              {member.user.firstName.charAt(0)}
+                                            </AvatarFallback>
+                                          </Avatar>
                                           <div className="min-w-0">
                                             <p className="font-medium truncate">
                                               {member.user.firstName}{" "}

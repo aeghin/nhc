@@ -60,6 +60,7 @@ export default async function CreateEventPage({
                 firstName: true,
                 lastName: true,
                 email: true,
+                userImageUrl: true,
             }
         },
     }

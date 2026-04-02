@@ -46,7 +46,7 @@ export const EventsTabContent = async ({
     }
   });
 
-  console.log(getUserEvents);
+  console.log(serviceTypes);
 
 
   return (
