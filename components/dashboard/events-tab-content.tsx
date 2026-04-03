@@ -1,9 +1,6 @@
 import { MemberEventsDashboard } from "@/components/dashboard/events-member-dashboard";
-import prisma from "@/lib/prisma";
-
-// TODO: Replace with real service functions
-// import { getEventsByOrganization } from "@/lib/services/event";
-// import { getServiceTypesByOrganization } from "@/lib/services/service-type";
+import { getOrgServiceTypes } from "@/lib/services/service-types";
+import { getUserEvents } from "@/lib/services/events";
 
 interface EventsTabContentProps {
   organizationId: string;
@@ -17,37 +14,10 @@ export const EventsTabContent = async ({
   canManage,
 }: EventsTabContentProps) => {
   
-  const events: any[] = [];
-
-
-  const serviceTypes = await prisma.serviceType.findMany({
-    where: {
-      organizationId
-    },
-    select: {
-      id: true,
-      name: true,
-      color: true
-    }
-  });
-
-  const getUserEvents = await prisma.event.findMany({
-    where: {
-      organizationId,
-    },
-    include: {
-      assignments: {
-        where: {
-          user: {
-            clerkId: userId
-          }
-        }
-      }
-    }
-  });
-
-  console.log(serviceTypes);
-
+  const [serviceTypes, events] = await Promise.all([
+    getOrgServiceTypes(organizationId),
+    getUserEvents(organizationId, userId)
+  ]);
 
   return (
     <MemberEventsDashboard

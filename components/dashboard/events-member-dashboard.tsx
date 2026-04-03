@@ -14,21 +14,19 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-
-// ─── Types ──────────────────────────────────────────────────────
-// TODO: Move to shared types file or use Prisma-generated types
+import { InvitationStatus } from "@/generated/prisma/enums";
 
 interface EventDate {
   id: string;
-  startTime: string;
-  endTime: string;
+  startTime: Date | string;
+  endTime: Date | string;
 }
 
 interface EventAssignment {
   id: string;
   userId: string;
   role: string;
-  status: "PENDING" | "ACCEPTED" | "DECLINED" | "CANCELED";
+  status: InvitationStatus
 }
 
 interface ServiceType {
@@ -45,7 +43,6 @@ interface Event {
   dates: EventDate[];
   assignments: EventAssignment[];
   serviceTypeId: string;
-  serviceType: ServiceType;
 }
 
 // ─── Role config ────────────────────────────────────────────────
@@ -359,7 +356,7 @@ export function MemberEventsDashboard({
   organizationId,
   canManage,
 }: MemberEventsDashboardProps) {
-  // Derive initial tab from props — no useEffect needed
+  
   const [activeTab, setActiveTab] = useState<TabType>(() =>
     events.some((e) =>
       e.assignments.some((a) => a.userId === userId && a.status === "PENDING")

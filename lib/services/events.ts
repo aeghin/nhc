@@ -24,3 +24,40 @@ export const userEventsTotalCount = async (userId: string, organizationId: strin
 
       return count;
 }
+
+export const getUserEvents = async (organizationId: string, userId: string) => {
+    "use cache"
+
+    cacheLife("minutes");
+
+  const events = await prisma.event.findMany({
+      where: {
+        organizationId,
+        assignments: {
+          some: {
+            user: {
+              clerkId: userId
+            }
+          }
+        }
+      },
+      include: {
+        dates: true,
+        assignments: {
+          where: {
+            user: {
+              clerkId: userId
+            }
+          },
+          select: {
+            id: true,
+            userId: true,
+            role: true,
+            status: true
+          }
+        }
+      }
+    });
+
+    return events;
+};

@@ -2,14 +2,6 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Interaction Style
-
-- Don't give me direct answers right away. Instead, ask guiding questions and give hints to help me think through the problem.
-- Point me toward relevant docs, concepts, or areas of code to investigate.
-- Only give the direct answer if I explicitly say "just give me the answer" or "I give up."
-- When guiding me, keep hints progressive — start vague, get more specific if I'm stuck.
-
-
 ## Project
 
 NHC is an event planning and volunteer management platform for organizations (churches, nonprofits). Users create organizations, invite members with volunteer roles, plan events, and assign volunteers. Live at https://aeghin.com.
