@@ -6,7 +6,7 @@ import {
   OrgRole,
   VolunteerRole,
 } from "@/generated/prisma/enums";
-import { auth } from "@clerk/nextjs/server";
+
 import {
   CreateEventInput,
   createEventInputSchema,
@@ -16,6 +16,8 @@ import EventAssignmentEmail from "@/components/email/event-email-template";
 
 import { Resend } from "resend";
 import { revalidatePath } from "next/cache";
+
+import { currentUser } from "@/lib/services/user";
 
 const resend = new Resend(process.env.RESEND_EMAIL_API_KEY);
 
@@ -40,13 +42,16 @@ export const checkMemberAvailability = async ({
   organizationId,
   dates,
 }: CheckMemberAvailabilityInput): Promise<Record<string, MemberConflict>> => {
-  const { userId } = await auth();
+  
+  const user = await currentUser();
 
-  if (!userId) throw new Error("Unauthorized");
+  if (!user) throw new Error("Unauthorized");
+
+  const { id } = user;
 
   const membership = await prisma.membership.findFirst({
     where: {
-      user: { clerkId: userId },
+      userId: id,
       organizationId,
     },
     select: { role: true },
@@ -132,9 +137,12 @@ export async function createEvent(
   organizationId: string,
 ): Promise<ActionResponse> {
   try {
-    const { userId } = await auth();
+    
+    const users = await currentUser();
 
-    if (!userId) return { success: false, error: "Unauthorized" };
+    if (!users) return { success: false, error: "Unauthorized" };
+
+    const { id } = users;
 
     const parsed = createEventInputSchema.safeParse(input);
 
@@ -143,59 +151,44 @@ export async function createEvent(
     const {
       serviceTypeId,
       name,
-      dateRange,
       dayTimes,
       location,
       description,
-      rolesNeeded,
       roleAssignments,
     } = parsed.data;
 
-    const user = await prisma.membership.findFirst({
-      where: {
-        user: {
-          clerkId: userId,
-        },
-        organizationId,
-      },
-      include: {
-        organization: {
-          select: {
-            name: true,
-          },
-        },
-      },
-    });
+    const [membership, serviceType] = await Promise.all([
+      prisma.membership.findFirst({
+        where: { userId: id, organizationId },
+        include: { organization: { select: { name: true } } },
+      }),
+      prisma.serviceType.findFirst({
+        where: { id: serviceTypeId, organizationId },
+      }),
+    ]);
 
-    if (!user) return { success: false, error: "Unable to find user" };
+    if (!membership) return { success: false, error: "Unable to find user" };
 
-    if (user.role !== OrgRole.OWNER && user.role !== OrgRole.ADMIN) {
+    if (membership.role !== OrgRole.OWNER && membership.role !== OrgRole.ADMIN) {
       return {
         success: false,
         error: "Unauthorized, please reach out to your Admin",
       };
     }
 
-    const organizationName = user.organization.name;
-
-    const serviceType = await prisma.serviceType.findFirst({
-      where: {
-        id: serviceTypeId,
-        organizationId,
-      },
-    });
-
     if (!serviceType) return { success: false, error: "Invalid Service Type" };
+
+    const organizationName = membership.organization.name;
 
     const assignedUserIds = Object.values(roleAssignments).flat();
 
-    const event = await prisma.$transaction(async (tx) => {
+     await prisma.$transaction(async (tx) => {
       const event = await tx.event.create({
         data: {
           name,
           description: description || "",
           location,
-          createdById: user.userId,
+          createdById: id,
           serviceTypeId,
           organizationId,
         },
@@ -216,14 +209,12 @@ export async function createEvent(
               eventId: event.id,
               userId: uid,
               role: role as VolunteerRole,
-              assignedById: user.userId,
+              assignedById: id,
               organizationId,
             })),
           ),
         });
       }
-
-      return event;
     });
 
     if (assignedUserIds.length > 0) {

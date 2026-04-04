@@ -12,9 +12,7 @@ export const userEventsTotalCount = async (userId: string, organizationId: strin
 
     const count = await prisma.eventAssignment.count({
         where: {
-          user: {
-            clerkId: userId
-          },
+          userId,
           organizationId,
           status: {
             in: [InvitationStatus.ACCEPTED, InvitationStatus.PENDING]
@@ -35,9 +33,7 @@ export const getUserEvents = async (organizationId: string, userId: string) => {
         organizationId,
         assignments: {
           some: {
-            user: {
-              clerkId: userId
-            }
+            userId
           }
         }
       },
@@ -45,9 +41,7 @@ export const getUserEvents = async (organizationId: string, userId: string) => {
         dates: true,
         assignments: {
           where: {
-            user: {
-              clerkId: userId
-            }
+            userId
           },
           select: {
             id: true,
