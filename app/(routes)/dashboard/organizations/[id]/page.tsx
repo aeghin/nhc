@@ -12,9 +12,9 @@ import { notFound } from "next/navigation";
 import { z } from "zod/v4";
 import { Suspense } from "react";
 import { getOrganizationDetailsById } from "@/lib/services/organization";
+import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { OrgRole } from "@/generated/prisma/enums";
-import { currentUser } from "@/lib/services/user";
 
 
 export default async function OrganizationPage({
@@ -27,17 +27,15 @@ export default async function OrganizationPage({
   const { id } = await params;
   const { tab = "event" } = await searchParams;
 
-  const { data: orgId, success } = z.uuid().safeParse(id);
+  const { data, success } = z.uuid().safeParse(id);
   
   if (!success) notFound();
 
-  const user = await currentUser();
+  const { userId } = await auth();
 
-  if (!user) redirect('/sign-in');
+  if (!userId) redirect('/sign-in');
 
-  const { id: userId } = user;
-
-  const organization = await getOrganizationDetailsById(orgId, userId);
+  const organization = await getOrganizationDetailsById(data, userId);
 
   if (!organization) notFound();
 

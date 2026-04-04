@@ -15,7 +15,9 @@ export const getOrganizationDetailsById = async (id: string, userId: string) => 
     include: {
       memberships: {
         where: {
-          userId
+          user: {
+            clerkId: userId,
+          },
         },
         select: {
           role: true,
@@ -42,7 +44,7 @@ export const getUserOrganizations = async (userId: string) => {
 
   
   const user = await prisma.user.findUnique({
-  where: { id: userId },
+  where: { clerkId: userId },
   include: {
     memberships: {
       include: {
@@ -99,7 +101,9 @@ export const getUserVolunteerRolesByOrg = async (organizationId: string, userId:
 
     const count = await prisma.membership.findFirst({
       where: {
-        userId,
+        user: {
+          clerkId: userId
+        },
         organizationId
       },
       select: {

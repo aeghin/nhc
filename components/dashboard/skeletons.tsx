@@ -1,5 +1,19 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
+export function DashboardHeaderSkeleton() {
+  return (
+    <div className="relative overflow-hidden rounded-2xl border border-border/40 bg-linear-to-br from-card via-card to-muted/30 p-6 sm:p-8">
+      <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
+        <div className="space-y-2">
+          <Skeleton className="h-8 w-64" />
+          <Skeleton className="h-5 w-48" />
+        </div>
+        <Skeleton className="h-12 w-full sm:w-[320px] rounded-xl" />
+      </div>
+    </div>
+  )
+}
+
 export function DashboardStatsSkeleton() {
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
