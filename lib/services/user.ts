@@ -30,18 +30,18 @@ export const userRoles = async (userId: string, organizationId: string) => {
   return roles;
 };
 
-export const currentUser = async () => {
+ export const currentUser = async () => {                                                                      
+    const { userId } = await auth();                                                                              
+    if (!userId) redirect("/sign-in");
+    return getUserByClerkId(userId);                                                                              
+  };                                                                                                            
 
-  const { userId } = await auth();
-
-  if (!userId) redirect("/sign-in");
-
-  const user = await prisma.user.findUnique({
-    where: {
-      clerkId: userId
-    }
-  });
-
-  return user;
+  const getUserByClerkId = async (clerkId: string) => {
+    "use cache";
+    cacheLife("hours");
+    cacheTag(`user-${clerkId}`);                                                                                  
   
-};
+    return prisma.user.findUnique({                                                                               
+      where: { clerkId },                                                                                       
+    });
+  };
