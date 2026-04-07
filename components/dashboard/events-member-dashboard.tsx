@@ -27,6 +27,9 @@ interface EventAssignment {
   userId: string;
   role: string;
   status: InvitationStatus
+  assignedBy: {
+    firstName: string
+  }
 }
 
 interface ServiceType {
@@ -341,7 +344,6 @@ type TabType = "pending" | "schedule";
 
 interface MemberEventsDashboardProps {
   events: Event[];
-  userId: string;
   serviceTypes: ServiceType[];
   organizationId: string;
   canManage: boolean;
@@ -351,7 +353,6 @@ interface MemberEventsDashboardProps {
 
 export function MemberEventsDashboard({
   events,
-  userId,
   serviceTypes,
   organizationId,
   canManage,
@@ -359,7 +360,7 @@ export function MemberEventsDashboard({
   
   const [activeTab, setActiveTab] = useState<TabType>(() =>
     events.some((e) =>
-      e.assignments.some((a) => a.userId === userId && a.status === "PENDING")
+      e.assignments.some((a) => a.status === InvitationStatus.PENDING)
     )
       ? "pending"
       : "schedule"
@@ -390,15 +391,15 @@ export function MemberEventsDashboard({
 
   const pendingEvents = useMemo(() => {
     return events.filter((e) =>
-      e.assignments.some((a) => a.userId === userId && a.status === "PENDING")
+      e.assignments.some((a) => a.status === InvitationStatus.PENDING)
     );
-  }, [events, userId]);
+  }, [events]);
 
   const acceptedEvents = useMemo(() => {
     return events.filter((e) =>
-      e.assignments.some((a) => a.userId === userId && a.status === "ACCEPTED")
+      e.assignments.some((a) => a.status === InvitationStatus.ACCEPTED)
     );
-  }, [events, userId]);
+  }, [events]);
 
   const filteredPendingEvents = useMemo(() => {
     return pendingEvents.filter((event) => {
@@ -460,8 +461,7 @@ export function MemberEventsDashboard({
   // ── Helpers ─────────────────────────────────────────────────
 
   const getUserRole = (event: Event): string | null => {
-    const assignment = event.assignments.find((a) => a.userId === userId);
-    return assignment?.role ?? null;
+    return event.assignments[0]?.role ?? null;
   };
 
   const pendingCount = pendingEvents.length;
@@ -673,6 +673,7 @@ export function MemberEventsDashboard({
                   const isPast = isEventPast(event.dates, today);
                   const role = getUserRole(event);
                   const colors = getColorClasses(service?.color || "indigo");
+                  const assignedBy = event.assignments[0]?.assignedBy.firstName;
 
                   return (
                     <motion.div
@@ -721,7 +722,7 @@ export function MemberEventsDashboard({
                         </div>
 
                         <p className="text-xs text-muted-foreground">
-                          Assigned by Admin
+                          {assignedBy}
                         </p>
                       </Link>
 

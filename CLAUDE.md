@@ -2,6 +2,11 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+# Conventions
+
+Research the codebase before editing or suggesting. Never change code you haven't read. 
+Trace relevant code.
+
 ## Project
 
 NHC is an event planning and volunteer management platform for organizations (churches, nonprofits). Users create organizations, invite members with volunteer roles, plan events, and assign volunteers. Live at https://aeghin.com.

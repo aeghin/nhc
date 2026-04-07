@@ -47,7 +47,12 @@ export const getUserEvents = async (organizationId: string, userId: string) => {
             id: true,
             userId: true,
             role: true,
-            status: true
+            status: true,
+            assignedBy: { 
+              select: {
+                firstName: true,
+              }
+            }
           }
         }
       }
