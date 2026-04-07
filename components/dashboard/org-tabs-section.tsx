@@ -76,7 +76,7 @@ export const OrganizationTabsSection = async ({
           </Suspense>
         )}
  
-        {effectiveTab === "invitations" && canManage && (
+        {/* {effectiveTab === "invitations" && canManage && (
           <Suspense fallback={<InvitationsTabSkeleton />}>
             <InvitationsTabContent
               organizationId={organizationId}
