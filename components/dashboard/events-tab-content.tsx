@@ -24,7 +24,6 @@ export const EventsTabContent = async ({
       events={events}
       serviceTypes={serviceTypes}
       organizationId={organizationId}
-      userId={userId}
       canManage={canManage}
     />
   );
