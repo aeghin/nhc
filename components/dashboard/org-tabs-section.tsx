@@ -3,12 +3,12 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Calendar, Users, Mail, Settings } from "lucide-react";
 import prisma from "@/lib/prisma";
 import { EventsTabContent } from "@/components/dashboard/events-tab-content";
-// import { MembersTabContent } from "@/components/dashboard/members-tab-content";
+import { MembersTabWrapper } from "@/components/dashboard/members-tab-wrapper";
 // import { InvitationsTabContent } from "@/components/dashboard/invitations-tab-content";
 // import { SettingsTabContent } from "@/components/dashboard/settings-tab-content";
 import { OrgTabNav } from "./org-tab-nav";
 import { EventsTabSkeleton } from "@/components/dashboard/events-tab-skeleton";
-// import { MembersTabSkeleton } from "@/components/dashboard/skeletons/members-tab-skeleton";
+import { MembersTabSkeleton } from "@/components/dashboard/members-tab-skeleton";
 // import { InvitationsTabSkeleton } from "@/components/dashboard/skeletons/invitations-tab-skeleton";
 
 import { getOrgMemberCountById } from "@/lib/services/organization";
@@ -67,9 +67,9 @@ export const OrganizationTabsSection = async ({
           </Suspense>
         )}
  
-        {/* {effectiveTab === "members" && (
+        {effectiveTab === "members" && (
           <Suspense fallback={<MembersTabSkeleton />}>
-            <MembersTabContent
+            <MembersTabWrapper
               organizationId={organizationId}
               canManage={canManage}
             />

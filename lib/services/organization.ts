@@ -109,3 +109,46 @@ export const getUserVolunteerRolesByOrg = async (organizationId: string, userId:
 
     return count?.volunteerRoles.length ?? 0;
 };
+
+export const getOrgMembers = async (organizationId: string) => {
+  "use cache";
+
+  cacheLife('hours');
+  
+  cacheTag(`org-${organizationId}-members`);
+
+  const members = await prisma.membership.findMany({
+    where: {
+      organizationId
+    },
+    include: {
+      user: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          email: true,
+          userImageUrl: true
+        }
+      }
+    },
+    orderBy: [
+      { role: 'asc' },
+      { createdAt: 'asc' }
+    ]
+  });
+
+  return members.map(m => ({
+    id: m.id,
+    role: m.role,
+    volunteerRoles: m.volunteerRoles,
+    joinedAt: m.createdAt,
+    user: {
+      id: m.user.id,
+      firstName: m.user.firstName,
+      lastName: m.user.lastName,
+      email: m.user.email,
+      imageUrl: m.user.userImageUrl
+    }
+  }));
+};
