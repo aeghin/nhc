@@ -11,12 +11,15 @@ import {
   AvatarFallback,
 } from "@/components/ui/avatar";
 
+type OrgRole = "OWNER" | "ADMIN" | "MEMBER";
+type VolunteerRole = "GUITARIST" | "PIANIST" | "AUX_KEYS" | "DRUMMER" | "LEAD_VOCALIST" | "BGVS" | "BASSIST" | "SOUND_TECH" | "USHER" | "GREETER";
+
 // Mock data - replace with your real data
 const mockMembers = [
   {
     id: "1",
     role: "OWNER" as const,
-    volunteerRoles: ["LEAD_VOCALIST", "PIANIST"] as const[],
+    volunteerRoles: ["LEAD_VOCALIST", "PIANIST"] as VolunteerRole[],
     joinedAt: new Date("2023-01-15"),
     user: {
       id: "u1",
@@ -29,7 +32,7 @@ const mockMembers = [
   {
     id: "2",
     role: "ADMIN" as const,
-    volunteerRoles: ["GUITARIST", "SOUND_TECH"] as const[],
+    volunteerRoles: ["GUITARIST", "SOUND_TECH"] as VolunteerRole[],
     joinedAt: new Date("2023-03-22"),
     user: {
       id: "u2",
@@ -42,7 +45,7 @@ const mockMembers = [
   {
     id: "3",
     role: "MEMBER" as const,
-    volunteerRoles: ["DRUMMER"] as const[],
+    volunteerRoles: ["DRUMMER"] as VolunteerRole[],
     joinedAt: new Date("2023-06-10"),
     user: {
       id: "u3",
@@ -55,7 +58,7 @@ const mockMembers = [
   {
     id: "4",
     role: "MEMBER" as const,
-    volunteerRoles: ["BGVS", "USHER"] as const[],
+    volunteerRoles: ["BGVS", "USHER"] as VolunteerRole[],
     joinedAt: new Date("2023-08-05"),
     user: {
       id: "u4",
@@ -68,7 +71,7 @@ const mockMembers = [
   {
     id: "5",
     role: "MEMBER" as const,
-    volunteerRoles: ["GREETER"] as const[],
+    volunteerRoles: ["GREETER"] as VolunteerRole[],
     joinedAt: new Date("2024-01-12"),
     user: {
       id: "u5",
@@ -81,7 +84,7 @@ const mockMembers = [
   {
     id: "6",
     role: "ADMIN" as const,
-    volunteerRoles: ["BASSIST", "AUX_KEYS"] as const[],
+    volunteerRoles: ["BASSIST", "AUX_KEYS"] as VolunteerRole[],
     joinedAt: new Date("2023-04-18"),
     user: {
       id: "u6",
@@ -92,9 +95,6 @@ const mockMembers = [
     },
   },
 ];
-
-type OrgRole = "OWNER" | "ADMIN" | "MEMBER";
-type VolunteerRole = "GUITARIST" | "PIANIST" | "AUX_KEYS" | "DRUMMER" | "LEAD_VOCALIST" | "BGVS" | "BASSIST" | "SOUND_TECH" | "USHER" | "GREETER";
 
 const roleConfig = {
   OWNER: {
