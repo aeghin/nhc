@@ -248,3 +248,42 @@ export async function createEvent(
     return { success: false, error: "Unable to create event" };
   }
 }
+
+
+export const acceptEventInvitation = async (organizationId: string, eventId: string): Promise<ActionResponse> => {
+
+  try {
+
+    const user = await currentUser();
+
+    if (!user) return { success: false, error: "Unauthorized" };
+
+    const event = await prisma.eventAssignment.findUnique({
+      where: {
+        eventId_userId: { eventId: eventId, userId: user.id },
+        organizationId,
+        status: InvitationStatus.PENDING
+      }
+    });
+
+    if (!event) return { success: false, error: "Unable to find this event" };
+
+    await prisma.eventAssignment.update({
+      where: {
+        id: event.id,
+        organizationId,
+      },
+      data: {
+        status: InvitationStatus.ACCEPTED
+      }
+    });
+
+    return { success: true }
+
+  } catch (error) {
+
+    return { success: false, error: "Failed to accept invite"}
+
+  }
+
+}
