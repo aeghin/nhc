@@ -15,7 +15,7 @@ import {
 import EventAssignmentEmail from "@/components/email/event-email-template";
 
 import { Resend } from "resend";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 
 import { currentUser } from "@/lib/services/user";
 
@@ -262,7 +262,7 @@ export const acceptEventInvitation = async (organizationId: string, eventId: str
       where: {
         eventId_userId: { eventId: eventId, userId: user.id },
         organizationId,
-        status: InvitationStatus.PENDING
+        status: InvitationStatus.PENDING,
       }
     });
 
@@ -277,6 +277,8 @@ export const acceptEventInvitation = async (organizationId: string, eventId: str
         status: InvitationStatus.ACCEPTED
       }
     });
+
+    updateTag(`user-${user.id}-events-${organizationId}`);
 
     return { success: true }
 

@@ -2,13 +2,14 @@ import "server-only";
 
 import prisma from "@/lib/prisma";
 import { InvitationStatus } from "@/generated/prisma/enums";
-import { cacheLife } from "next/cache";
+import { cacheLife, cacheTag } from "next/cache";
 
 
 export const userEventsTotalCount = async (userId: string, organizationId: string) => {
     "use cache"
 
     cacheLife("minutes");
+    cacheTag(`user-${userId}-events-${organizationId}`);
 
     const count = await prisma.eventAssignment.count({
         where: {
@@ -27,6 +28,7 @@ export const getUserEvents = async (organizationId: string, userId: string) => {
     "use cache"
 
     cacheLife("minutes");
+    cacheTag(`user-${userId}-events-${organizationId}`);
 
   const events = await prisma.event.findMany({
       where: {
