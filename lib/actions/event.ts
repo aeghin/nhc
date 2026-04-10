@@ -280,12 +280,52 @@ export const acceptEventInvitation = async (organizationId: string, eventId: str
 
     updateTag(`user-${user.id}-events-${organizationId}`);
 
-    return { success: true }
+    return { success: true };
 
   } catch (error) {
 
-    return { success: false, error: "Failed to accept invite"}
+    return { success: false, error: "Failed to accept invite" };
 
   }
 
 }
+
+export const declineEventInvitation = async (organizationId: string, eventId: string): Promise<ActionResponse> => {
+
+  try {
+
+    const user = await currentUser();
+
+    if (!user) return { success: false, error: "Unauthorized" };
+
+    const event = await prisma.eventAssignment.findUnique({
+      where: {
+        eventId_userId: { eventId: eventId, userId: user.id },
+        organizationId,
+        status: InvitationStatus.PENDING,
+      }
+    });
+
+    if (!event) return { success: false, error: "Unable to find this event" };
+
+    await prisma.eventAssignment.update({
+      where: {
+        id: event.id,
+        organizationId,
+      },
+      data: {
+        status: InvitationStatus.DECLINED
+      }
+    });
+
+    updateTag(`user-${user.id}-events-${organizationId}`);
+
+    return { success: true };
+
+  } catch (error) {
+
+    return { success: false, error: "Unable to decline Invite" };
+
+  };
+};
+

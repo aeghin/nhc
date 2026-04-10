@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useTransition } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   Calendar,
@@ -15,6 +15,12 @@ import {
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { InvitationStatus } from "@/generated/prisma/enums";
+import { toast } from "sonner";
+import {
+  acceptEventInvitation,
+  declineEventInvitation,
+} from "@/lib/actions/event";
+import { Spinner } from "@/components/ui/spinner";
 
 interface EventDate {
   id: string;
@@ -26,10 +32,10 @@ interface EventAssignment {
   id: string;
   userId: string;
   role: string;
-  status: InvitationStatus
+  status: InvitationStatus;
   assignedBy: {
-    firstName: string
-  }
+    firstName: string;
+  };
 }
 
 interface ServiceType {
@@ -146,15 +152,13 @@ function createToday(): Date {
 /** Earliest startTime across all EventDates */
 function getEarliestDate(dates: EventDate[]): Date {
   return new Date(
-    Math.min(...dates.map((d) => new Date(d.startTime).getTime()))
+    Math.min(...dates.map((d) => new Date(d.startTime).getTime())),
   );
 }
 
 /** Latest endTime across all EventDates */
 function getLatestDate(dates: EventDate[]): Date {
-  return new Date(
-    Math.max(...dates.map((d) => new Date(d.endTime).getTime()))
-  );
+  return new Date(Math.max(...dates.map((d) => new Date(d.endTime).getTime())));
 }
 
 /** Whether the event spans more than one calendar day */
@@ -203,7 +207,7 @@ function formatDateRange(dates: EventDate[]): string {
 function formatTimeRange(dates: EventDate[]): string {
   if (dates.length === 0) return "";
   const sorted = [...dates].sort(
-    (a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime()
+    (a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime(),
   );
   return `${formatTime(new Date(sorted[0].startTime))} – ${formatTime(new Date(sorted[0].endTime))}`;
 }
@@ -220,7 +224,7 @@ function isEventInTimeScope(
   dates: EventDate[],
   scope: TimeScope,
   currentMonth: Date,
-  today: Date
+  today: Date,
 ): boolean {
   if (dates.length === 0) return false;
 
@@ -238,7 +242,7 @@ function isEventInTimeScope(
       const monthStart = new Date(
         currentMonth.getFullYear(),
         currentMonth.getMonth(),
-        1
+        1,
       );
       const monthEnd = new Date(
         currentMonth.getFullYear(),
@@ -246,7 +250,7 @@ function isEventInTimeScope(
         0,
         23,
         59,
-        59
+        59,
       );
       return dates.some((d) => {
         const start = new Date(d.startTime);
@@ -261,7 +265,7 @@ function isEventInTimeScope(
       const monthStart = new Date(
         currentMonth.getFullYear(),
         currentMonth.getMonth(),
-        1
+        1,
       );
       const monthEnd = new Date(
         currentMonth.getFullYear(),
@@ -269,7 +273,7 @@ function isEventInTimeScope(
         0,
         23,
         59,
-        59
+        59,
       );
       return (
         dates.every((d) => new Date(d.endTime) < today) &&
@@ -296,7 +300,7 @@ function getAnchorDateInScope(
   dates: EventDate[],
   scope: TimeScope,
   currentMonth: Date,
-  today: Date
+  today: Date,
 ): Date {
   const datesInScope = dates.filter((d) => {
     const start = new Date(d.startTime);
@@ -312,7 +316,7 @@ function getAnchorDateInScope(
         const monthStart = new Date(
           currentMonth.getFullYear(),
           currentMonth.getMonth(),
-          1
+          1,
         );
         const monthEnd = new Date(
           currentMonth.getFullYear(),
@@ -320,7 +324,7 @@ function getAnchorDateInScope(
           0,
           23,
           59,
-          59
+          59,
         );
         return start <= monthEnd && end >= monthStart;
       }
@@ -357,17 +361,16 @@ export function MemberEventsDashboard({
   organizationId,
   canManage,
 }: MemberEventsDashboardProps) {
-  
   const [activeTab, setActiveTab] = useState<TabType>(() =>
     events.some((e) =>
-      e.assignments.some((a) => a.status === InvitationStatus.PENDING)
+      e.assignments.some((a) => a.status === InvitationStatus.PENDING),
     )
       ? "pending"
-      : "schedule"
+      : "schedule",
   );
   const [timeScope, setTimeScope] = useState<TimeScope>("week");
   const [selectedServiceType, setSelectedServiceType] = useState<string | null>(
-    null
+    null,
   );
   const [currentMonth, setCurrentMonth] = useState(() => new Date());
   const [isMounted, setIsMounted] = useState(false);
@@ -377,7 +380,7 @@ export function MemberEventsDashboard({
   }, []);
 
   // Compute today once per render, pass to all helpers
-  const today = createToday();
+  const today = useMemo(() => createToday(), []);
 
   // ── Memoized lookups ────────────────────────────────────────
 
@@ -391,13 +394,13 @@ export function MemberEventsDashboard({
 
   const pendingEvents = useMemo(() => {
     return events.filter((e) =>
-      e.assignments.some((a) => a.status === InvitationStatus.PENDING)
+      e.assignments.some((a) => a.status === InvitationStatus.PENDING),
     );
   }, [events]);
 
   const acceptedEvents = useMemo(() => {
     return events.filter((e) =>
-      e.assignments.some((a) => a.status === InvitationStatus.ACCEPTED)
+      e.assignments.some((a) => a.status === InvitationStatus.ACCEPTED),
     );
   }, [events]);
 
@@ -407,7 +410,7 @@ export function MemberEventsDashboard({
         event.dates,
         timeScope,
         currentMonth,
-        today
+        today,
       );
       const matchesService =
         !selectedServiceType || event.serviceTypeId === selectedServiceType;
@@ -422,7 +425,7 @@ export function MemberEventsDashboard({
           event.dates,
           timeScope,
           currentMonth,
-          today
+          today,
         );
         const matchesService =
           !selectedServiceType || event.serviceTypeId === selectedServiceType;
@@ -431,7 +434,7 @@ export function MemberEventsDashboard({
       .sort(
         (a, b) =>
           getEarliestDate(a.dates).getTime() -
-          getEarliestDate(b.dates).getTime()
+          getEarliestDate(b.dates).getTime(),
       );
   }, [acceptedEvents, timeScope, currentMonth, selectedServiceType, today]);
 
@@ -443,7 +446,7 @@ export function MemberEventsDashboard({
         event.dates,
         timeScope,
         currentMonth,
-        today
+        today,
       );
       const key = anchorDate.toDateString();
 
@@ -454,21 +457,17 @@ export function MemberEventsDashboard({
     });
 
     return Object.entries(groups).sort(
-      ([a], [b]) => new Date(a).getTime() - new Date(b).getTime()
+      ([a], [b]) => new Date(a).getTime() - new Date(b).getTime(),
     );
   }, [filteredAcceptedEvents, timeScope, currentMonth, today]);
 
   // ── Helpers ─────────────────────────────────────────────────
 
-  const getUserRole = (event: Event): string | null => {
-    return event.assignments[0]?.role ?? null;
-  };
-
   const pendingCount = pendingEvents.length;
   const scheduleCount = acceptedEvents.length;
 
   const nextUpcomingDate = groupedAcceptedEvents.find(
-    ([dateStr]) => new Date(dateStr) >= today
+    ([dateStr]) => new Date(dateStr) >= today,
   )?.[0];
 
   // ── JSX ─────────────────────────────────────────────────────
@@ -552,7 +551,7 @@ export function MemberEventsDashboard({
                 {scope === "upcoming" && "Upcoming"}
                 {scope === "past" && "Past"}
               </button>
-            )
+            ),
           )}
         </div>
 
@@ -623,7 +622,7 @@ export function MemberEventsDashboard({
               whileTap={{ scale: 0.97 }}
               onClick={() =>
                 setSelectedServiceType(
-                  service.id === selectedServiceType ? null : service.id
+                  service.id === selectedServiceType ? null : service.id,
                 )
               }
               className={`flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all cursor-pointer ${
@@ -668,99 +667,17 @@ export function MemberEventsDashboard({
               </motion.div>
             ) : (
               <div className="space-y-3">
-                {filteredPendingEvents.map((event, index) => {
-                  const service = getServiceType(event.serviceTypeId);
-                  const isPast = isEventPast(event.dates, today);
-                  const role = getUserRole(event);
-                  const colors = getColorClasses(service?.color || "indigo");
-                  const assignedBy = event.assignments[0]?.assignedBy.firstName;
-
-                  return (
-                    <motion.div
-                      key={event.id}
-                      initial={isMounted ? { opacity: 0, y: 20 } : false}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: isMounted ? index * 0.05 : 0 }}
-                      whileHover={{ scale: 1.01 }}
-                      className={`group overflow-hidden rounded-lg border border-border border-l-[3px] bg-card transition-shadow duration-200 hover:shadow-md ${colors.border} ${
-                        isPast ? "opacity-60" : ""
-                      }`}
-                    >
-                      <Link
-                        href={`/dashboard/organizations/${organizationId}/events/${event.id}`}
-                        className="block p-4"
-                      >
-                        <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
-                          <span
-                            className={`rounded px-2 py-0.5 text-xs font-medium ${colors.badge} ${colors.badgeText}`}
-                          >
-                            {service?.name || "Event"}
-                          </span>
-                          <span className="rounded-md bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground">
-                            {role && roleEmojis[role]}{" "}
-                            {role && roleNames[role]}
-                          </span>
-                        </div>
-
-                        <h3 className="mb-2 text-base font-semibold text-foreground">
-                          {event.name}
-                        </h3>
-
-                        <div className="mb-2 flex flex-col gap-1 text-sm text-muted-foreground sm:flex-row sm:flex-wrap sm:gap-x-4 sm:gap-y-1">
-                          <span className="flex items-center gap-1.5">
-                            <Calendar className="h-3.5 w-3.5 shrink-0" />
-                            {formatDateRange(event.dates)}
-                          </span>
-                          <span className="flex items-center gap-1.5">
-                            <Clock className="h-3.5 w-3.5 shrink-0" />
-                            {formatTimeRange(event.dates)}
-                          </span>
-                          <span className="flex items-center gap-1.5">
-                            <MapPin className="h-3.5 w-3.5 shrink-0" />
-                            <span className="truncate">{event.location}</span>
-                          </span>
-                        </div>
-
-                        <p className="text-xs text-muted-foreground">
-                          {assignedBy}
-                        </p>
-                      </Link>
-
-                      {!isPast && (
-                        <>
-                          <div className="border-t border-border" />
-                          <div className="flex gap-2 p-3 sm:gap-3">
-                            <motion.div
-                              whileTap={{ scale: 0.97 }}
-                              className="flex-1"
-                            >
-                              <Button
-                                className="h-10 w-full bg-emerald-600 text-white hover:bg-emerald-700 cursor-pointer sm:h-11"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                <Check className="mr-1.5 h-4 w-4 sm:mr-2" />
-                                <span>Accept</span>
-                              </Button>
-                            </motion.div>
-                            <motion.div
-                              whileTap={{ scale: 0.97 }}
-                              className="flex-1"
-                            >
-                              <Button
-                                variant="outline"
-                                className="h-10 w-full border-destructive text-destructive hover:bg-destructive/10 cursor-pointer sm:h-11"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                <X className="mr-1.5 h-4 w-4 sm:mr-2" />
-                                <span>Decline</span>
-                              </Button>
-                            </motion.div>
-                          </div>
-                        </>
-                      )}
-                    </motion.div>
-                  );
-                })}
+                {filteredPendingEvents.map((event, index) => (
+                  <PendingEventCard
+                    key={event.id}
+                    event={event}
+                    organizationId={organizationId}
+                    index={index}
+                    isMounted={isMounted}
+                    today={today}
+                    getServiceType={getServiceType}
+                  />
+                ))}
               </div>
             )}
           </motion.div>
@@ -797,7 +714,7 @@ export function MemberEventsDashboard({
                   ([dateStr, dateEvents], groupIndex) => {
                     const groupDate = new Date(dateStr);
                     const allPast = dateEvents.every((e) =>
-                      isEventPast(e.dates, today)
+                      isEventPast(e.dates, today),
                     );
                     const isNextUpcoming = dateStr === nextUpcomingDate;
 
@@ -830,12 +747,10 @@ export function MemberEventsDashboard({
 
                         <div className="space-y-2">
                           {dateEvents.map((event, eventIndex) => {
-                            const service = getServiceType(
-                              event.serviceTypeId
-                            );
-                            const role = getUserRole(event);
+                            const service = getServiceType(event.serviceTypeId);
+                            const role = event.assignments[0]?.role ?? null;
                             const colors = getColorClasses(
-                              service?.color || "indigo"
+                              service?.color || "indigo",
                             );
                             const multiDay = isMultiDay(event.dates);
 
@@ -846,15 +761,12 @@ export function MemberEventsDashboard({
                               >
                                 <motion.div
                                   initial={
-                                    isMounted
-                                      ? { opacity: 0, x: -10 }
-                                      : false
+                                    isMounted ? { opacity: 0, x: -10 } : false
                                   }
                                   animate={{ opacity: 1, x: 0 }}
                                   transition={{
                                     delay: isMounted
-                                      ? groupIndex * 0.05 +
-                                        eventIndex * 0.03
+                                      ? groupIndex * 0.05 + eventIndex * 0.03
                                       : 0,
                                   }}
                                   whileHover={{ scale: 1.01 }}
@@ -912,7 +824,7 @@ export function MemberEventsDashboard({
                         </div>
                       </motion.div>
                     );
-                  }
+                  },
                 )}
               </div>
             )}
@@ -920,5 +832,139 @@ export function MemberEventsDashboard({
         )}
       </AnimatePresence>
     </div>
+  );
+}
+
+// ─── Pending Event Card ────────────────────────────────────────
+
+function PendingEventCard({
+  event,
+  organizationId,
+  index,
+  isMounted,
+  today,
+  getServiceType,
+}: {
+  event: Event;
+  organizationId: string;
+  index: number;
+  isMounted: boolean;
+  today: Date;
+  getServiceType: (id: string) => ServiceType | undefined;
+}) {
+  const [isAccepting, startAccept] = useTransition();
+  const [isDeclining, startDecline] = useTransition();
+
+  const service = getServiceType(event.serviceTypeId);
+  const isPast = isEventPast(event.dates, today);
+  const role = event.assignments[0]?.role ?? null;
+  const colors = getColorClasses(service?.color || "indigo");
+  const assignedBy = event.assignments[0]?.assignedBy.firstName;
+  const isBusy = isAccepting || isDeclining;
+
+  function handleAccept() {
+    startAccept(async () => {
+      const result = await acceptEventInvitation(organizationId, event.id);
+      result.success
+        ? toast("Event Successfully Accepted")
+        : toast(`${result.error}`);
+    });
+  }
+
+  function handleDecline() {
+    startDecline(async () => {
+      const result = await declineEventInvitation(organizationId, event.id);
+      result.success ? toast("Event Declined") : toast(`${result.error}`);
+    });
+  }
+
+  return (
+    <motion.div
+      initial={isMounted ? { opacity: 0, y: 20 } : false}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: isMounted ? index * 0.05 : 0 }}
+      whileHover={{ scale: 1.01 }}
+      className={`group overflow-hidden rounded-lg border border-border border-l-[3px] bg-card transition-shadow duration-200 hover:shadow-md ${colors.border} ${
+        isPast ? "opacity-60" : ""
+      }`}
+    >
+      <Link
+        href={`/dashboard/organizations/${organizationId}/events/${event.id}`}
+        className="block p-4"
+      >
+        <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
+          <span
+            className={`rounded px-2 py-0.5 text-xs font-medium ${colors.badge} ${colors.badgeText}`}
+          >
+            {service?.name || "Event"}
+          </span>
+          <span className="rounded-md bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground">
+            {role && roleEmojis[role]} {role && roleNames[role]}
+          </span>
+        </div>
+
+        <h3 className="mb-2 text-base font-semibold text-foreground">
+          {event.name}
+        </h3>
+
+        <div className="mb-2 flex flex-col gap-1 text-sm text-muted-foreground sm:flex-row sm:flex-wrap sm:gap-x-4 sm:gap-y-1">
+          <span className="flex items-center gap-1.5">
+            <Calendar className="h-3.5 w-3.5 shrink-0" />
+            {formatDateRange(event.dates)}
+          </span>
+          <span className="flex items-center gap-1.5">
+            <Clock className="h-3.5 w-3.5 shrink-0" />
+            {formatTimeRange(event.dates)}
+          </span>
+          <span className="flex items-center gap-1.5">
+            <MapPin className="h-3.5 w-3.5 shrink-0" />
+            <span className="truncate">{event.location}</span>
+          </span>
+        </div>
+
+        <p className="text-xs text-muted-foreground">{assignedBy}</p>
+      </Link>
+
+      {!isPast && (
+        <>
+          <div className="border-t border-border" />
+          <div className="flex gap-2 p-3 sm:gap-3">
+            <motion.div whileTap={{ scale: 0.97 }} className="flex-1">
+              <Button
+                className="h-10 w-full bg-emerald-600 text-white hover:bg-emerald-700 cursor-pointer sm:h-11"
+                onClick={handleAccept}
+                disabled={isBusy}
+              >
+                {isAccepting ? (
+                  <Spinner />
+                ) : (
+                  <>
+                    <Check className="mr-1.5 h-4 w-4 sm:mr-2" />
+                    <span>Accept</span>
+                  </>
+                )}
+              </Button>
+            </motion.div>
+            <motion.div whileTap={{ scale: 0.97 }} className="flex-1">
+              <Button
+                variant="outline"
+                className="h-10 w-full border-destructive text-destructive hover:bg-destructive/10 cursor-pointer sm:h-11"
+                onClick={handleDecline}
+                disabled={isBusy}
+              >
+                {isDeclining ? (
+                  <Spinner />
+                ) : (
+                  <>
+                    <X className="mr-1.5 h-4 w-4 sm:mr-2" />
+                    <span>Decline</span>
+                  </>
+                )}
+              </Button>
+            </motion.div>
+          </div>
+        </>
+      )}
+    </motion.div>
   );
 }
