@@ -15,9 +15,13 @@ export const userEventsTotalCount = async (userId: string, organizationId: strin
         where: {
           userId,
           organizationId,
-          status: {
-            in: [InvitationStatus.ACCEPTED, InvitationStatus.PENDING]
-          }
+          OR: [
+            { status: InvitationStatus.ACCEPTED },
+            { 
+              status: InvitationStatus.PENDING,
+              expiresAt: { gt: new Date() }
+            }
+          ]
         },
       });
 
@@ -35,7 +39,13 @@ export const getUserEvents = async (organizationId: string, userId: string) => {
         organizationId,
         assignments: {
           some: {
-            userId
+            userId,
+            OR: [
+              { status: InvitationStatus.ACCEPTED },
+              { status: InvitationStatus.PENDING,
+                expiresAt: { gt: new Date() }
+              }
+            ]
           }
         }
       },
@@ -43,7 +53,13 @@ export const getUserEvents = async (organizationId: string, userId: string) => {
         dates: true,
         assignments: {
           where: {
-            userId
+            userId,
+            OR: [
+              { status: InvitationStatus.ACCEPTED },
+              { status: InvitationStatus.PENDING,
+                expiresAt: { gt: new Date() }
+              }
+            ]
           },
           select: {
             id: true,

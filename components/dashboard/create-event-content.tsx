@@ -238,6 +238,7 @@ export function CreateEventPageContent({
       dayTimes: {},
       location: "",
       rolesNeeded: [],
+      expiresAt: 3,
     },
   });
 
@@ -257,6 +258,7 @@ export function CreateEventPageContent({
   const watchedDayTimes = watch("dayTimes");
   const watchedLocation = watch("location");
   const watchedRolesNeeded = watch("rolesNeeded");
+  const watchedExpiresAt = watch("expiresAt");
 
   const selectedServiceType = optimisticServiceTypes.find(
     (t) => t.id === watchedServiceTypeId,
@@ -1192,6 +1194,36 @@ export function CreateEventPageContent({
                           );
                         })}
                       </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Invitation Expiry */}
+                  <Card className="shrink-0 mt-4">
+                    <CardContent className="flex items-center justify-between p-4">
+                      <div className="flex items-center gap-2">
+                        <Clock className="h-4 w-4 text-muted-foreground" />
+                        <div>
+                          <p className="text-sm font-medium">Response Deadline</p>
+                          <p className="text-xs text-muted-foreground">
+                            How long members have to accept or decline
+                          </p>
+                        </div>
+                      </div>
+                      <Select
+                        value={String(watchedExpiresAt)}
+                        onValueChange={(val) =>
+                          setValue("expiresAt", Number(val), { shouldValidate: true })
+                        }
+                      >
+                        <SelectTrigger className="w-32">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="3">3 days</SelectItem>
+                          <SelectItem value="5">5 days</SelectItem>
+                          <SelectItem value="7">7 days</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </CardContent>
                   </Card>
 

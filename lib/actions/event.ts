@@ -155,6 +155,7 @@ export async function createEvent(
       location,
       description,
       roleAssignments,
+      expiresAt
     } = parsed.data;
 
     const [membership, serviceType] = await Promise.all([
@@ -211,6 +212,7 @@ export async function createEvent(
               role: role as VolunteerRole,
               assignedById: id,
               organizationId,
+              expiresAt: new Date(Date.now() + expiresAt * 24 * 60 * 60 * 1000)
             })),
           ),
         });

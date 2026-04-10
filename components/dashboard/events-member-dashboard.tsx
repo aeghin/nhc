@@ -674,7 +674,6 @@ export function MemberEventsDashboard({
                     organizationId={organizationId}
                     index={index}
                     isMounted={isMounted}
-                    today={today}
                     getServiceType={getServiceType}
                   />
                 ))}
@@ -842,21 +841,18 @@ function PendingEventCard({
   organizationId,
   index,
   isMounted,
-  today,
   getServiceType,
 }: {
   event: Event;
   organizationId: string;
   index: number;
   isMounted: boolean;
-  today: Date;
   getServiceType: (id: string) => ServiceType | undefined;
 }) {
   const [isAccepting, startAccept] = useTransition();
   const [isDeclining, startDecline] = useTransition();
 
   const service = getServiceType(event.serviceTypeId);
-  const isPast = isEventPast(event.dates, today);
   const role = event.assignments[0]?.role ?? null;
   const colors = getColorClasses(service?.color || "indigo");
   const assignedBy = event.assignments[0]?.assignedBy.firstName;
@@ -866,15 +862,15 @@ function PendingEventCard({
     startAccept(async () => {
       const result = await acceptEventInvitation(organizationId, event.id);
       result.success
-        ? toast("Event Successfully Accepted")
-        : toast(`${result.error}`);
+        ? toast.success("Event Successfully Accepted", { position: "bottom-center" })
+        : toast.error(`${result.error}`, { position: "bottom-center" })
     });
   }
 
   function handleDecline() {
     startDecline(async () => {
       const result = await declineEventInvitation(organizationId, event.id);
-      result.success ? toast("Event Declined") : toast(`${result.error}`);
+      result.success ? toast.success("Event Declined", { position: "bottom-center" }) : toast.error(`${result.error}`, { position: "bottom-center" });
     });
   }
 
@@ -884,9 +880,7 @@ function PendingEventCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: isMounted ? index * 0.05 : 0 }}
       whileHover={{ scale: 1.01 }}
-      className={`group overflow-hidden rounded-lg border border-border border-l-[3px] bg-card transition-shadow duration-200 hover:shadow-md ${colors.border} ${
-        isPast ? "opacity-60" : ""
-      }`}
+      className={`group overflow-hidden rounded-lg border border-border border-l-[3px] bg-card transition-shadow duration-200 hover:shadow-md ${colors.border}`}
     >
       <Link
         href={`/dashboard/organizations/${organizationId}/events/${event.id}`}
@@ -922,49 +916,45 @@ function PendingEventCard({
           </span>
         </div>
 
-        <p className="text-xs text-muted-foreground">{assignedBy}</p>
+        <p className="text-xs text-muted-foreground">Assigned By: {assignedBy}</p>
       </Link>
 
-      {!isPast && (
-        <>
-          <div className="border-t border-border" />
-          <div className="flex gap-2 p-3 sm:gap-3">
-            <motion.div whileTap={{ scale: 0.97 }} className="flex-1">
-              <Button
-                className="h-10 w-full bg-emerald-600 text-white hover:bg-emerald-700 cursor-pointer sm:h-11"
-                onClick={handleAccept}
-                disabled={isBusy}
-              >
-                {isAccepting ? (
-                  <Spinner />
-                ) : (
-                  <>
-                    <Check className="mr-1.5 h-4 w-4 sm:mr-2" />
-                    <span>Accept</span>
-                  </>
-                )}
-              </Button>
-            </motion.div>
-            <motion.div whileTap={{ scale: 0.97 }} className="flex-1">
-              <Button
-                variant="outline"
-                className="h-10 w-full border-destructive text-destructive hover:bg-destructive/10 cursor-pointer sm:h-11"
-                onClick={handleDecline}
-                disabled={isBusy}
-              >
-                {isDeclining ? (
-                  <Spinner />
-                ) : (
-                  <>
-                    <X className="mr-1.5 h-4 w-4 sm:mr-2" />
-                    <span>Decline</span>
-                  </>
-                )}
-              </Button>
-            </motion.div>
-          </div>
-        </>
-      )}
+      <div className="border-t border-border" />
+      <div className="flex gap-2 p-3 sm:gap-3">
+        <motion.div whileTap={{ scale: 0.97 }} className="flex-1">
+          <Button
+            className="h-10 w-full bg-emerald-600 text-white hover:bg-emerald-700 cursor-pointer sm:h-11"
+            onClick={handleAccept}
+            disabled={isBusy}
+          >
+            {isAccepting ? (
+              <Spinner />
+            ) : (
+              <>
+                <Check className="mr-1.5 h-4 w-4 sm:mr-2" />
+                <span>Accept</span>
+              </>
+            )}
+          </Button>
+        </motion.div>
+        <motion.div whileTap={{ scale: 0.97 }} className="flex-1">
+          <Button
+            variant="outline"
+            className="h-10 w-full border-destructive text-destructive hover:bg-destructive/10 cursor-pointer sm:h-11"
+            onClick={handleDecline}
+            disabled={isBusy}
+          >
+            {isDeclining ? (
+              <Spinner />
+            ) : (
+              <>
+                <X className="mr-1.5 h-4 w-4 sm:mr-2" />
+                <span>Decline</span>
+              </>
+            )}
+          </Button>
+        </motion.div>
+      </div>
     </motion.div>
   );
 }
