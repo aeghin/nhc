@@ -36,6 +36,7 @@ interface EventAssignment {
   assignedBy: {
     firstName: string;
   };
+  expiresAt: Date;
 }
 
 interface ServiceType {
@@ -343,7 +344,7 @@ function getAnchorDateInScope(
 
 // ─── Component types ────────────────────────────────────────────
 
-type TimeScope = "week" | "month" | "upcoming" | "past";
+type TimeScope = "month" | "week" | "upcoming" | "past";
 type TabType = "pending" | "schedule";
 
 interface MemberEventsDashboardProps {
@@ -368,7 +369,7 @@ export function MemberEventsDashboard({
       ? "pending"
       : "schedule",
   );
-  const [timeScope, setTimeScope] = useState<TimeScope>("week");
+  const [timeScope, setTimeScope] = useState<TimeScope>("month");
   const [selectedServiceType, setSelectedServiceType] = useState<string | null>(
     null,
   );
@@ -394,9 +395,9 @@ export function MemberEventsDashboard({
 
   const pendingEvents = useMemo(() => {
     return events.filter((e) =>
-      e.assignments.some((a) => a.status === InvitationStatus.PENDING),
+      e.assignments.some((a) => a.status === InvitationStatus.PENDING && a.expiresAt > today),
     );
-  }, [events]);
+  }, [events, today]);
 
   const acceptedEvents = useMemo(() => {
     return events.filter((e) =>
@@ -535,7 +536,7 @@ export function MemberEventsDashboard({
         className="flex flex-wrap items-center gap-2"
       >
         <div className="flex rounded-lg border border-border bg-background p-1">
-          {(["week", "month", "upcoming", "past"] as TimeScope[]).map(
+          {(["month", "week", "upcoming", "past"] as TimeScope[]).map(
             (scope) => (
               <button
                 key={scope}

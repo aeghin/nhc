@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "zod/v4";
 import { VolunteerRole } from "@/generated/prisma/enums";
 
 export const orgInvitationSchema = z.object({

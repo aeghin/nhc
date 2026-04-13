@@ -1,5 +1,5 @@
-import { z } from "zod/v4"
-import { VolunteerRole } from "@/generated/prisma/enums"
+import { z } from "zod/v4";
+import { VolunteerRole } from "@/generated/prisma/enums";
 
 export const createEventSchema = z.object({
   serviceTypeId: z.string().min(1, "Service type is required"),

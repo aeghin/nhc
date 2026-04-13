@@ -19,6 +19,8 @@ import { revalidatePath, updateTag } from "next/cache";
 
 import { currentUser } from "@/lib/services/user";
 
+import { after } from "next/server";
+
 const resend = new Resend(process.env.RESEND_EMAIL_API_KEY);
 
 type CheckMemberAvailabilityInput = {
@@ -80,8 +82,18 @@ export const checkMemberAvailability = async ({
   const conflictingAssignments = await prisma.eventAssignment.findMany({
     where: {
       organizationId,
-      status: { in: [InvitationStatus.ACCEPTED, InvitationStatus.PENDING] },
-      OR: overlapConditions,
+      AND: [
+        {
+          OR: [
+            { status: InvitationStatus.ACCEPTED },
+            {
+              status: InvitationStatus.PENDING,
+              expiresAt: { gt: new Date() },
+            },
+          ],
+        },
+        { OR: overlapConditions },
+      ],
     },
     select: {
       userId: true,
@@ -225,7 +237,7 @@ export async function createEvent(
         select: { id: true, email: true, firstName: true },
       });
 
-      await Promise.allSettled(
+      after(async () => {await Promise.allSettled(
         assignedUsers.map((user) =>
           resend.emails.send({
             from: "NHC <noreply@aeghin.com>",
@@ -240,7 +252,8 @@ export async function createEvent(
           }),
         ),
       );
-    };
+  });
+};
 
     revalidatePath(`/dashboard/organizations/${organizationId}`);
 

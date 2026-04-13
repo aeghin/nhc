@@ -193,7 +193,7 @@ export function CreateEventPageContent({
   organizationId,
   organizationName,
   members,
-  serviceTypes,
+  serviceTypes
 }: CreateEventPageContentProps) {
   const router = useRouter();
 
@@ -342,7 +342,7 @@ export function CreateEventPageContent({
       const result = await createServiceType(
         newTypeName,
         newTypeColor,
-        organizationId,
+        organizationId
       );
 
       if (result.success) {
