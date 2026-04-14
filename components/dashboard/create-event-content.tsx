@@ -50,6 +50,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
 import {
   CalendarPlus,
   Loader2,
@@ -163,6 +166,7 @@ export type Member = {
     email: string;
     firstName: string;
     lastName: string;
+    userImageUrl: string | null;
   };
 };
 
@@ -189,7 +193,7 @@ export function CreateEventPageContent({
   organizationId,
   organizationName,
   members,
-  serviceTypes,
+  serviceTypes
 }: CreateEventPageContentProps) {
   const router = useRouter();
 
@@ -234,6 +238,7 @@ export function CreateEventPageContent({
       dayTimes: {},
       location: "",
       rolesNeeded: [],
+      expiresAt: 3,
     },
   });
 
@@ -253,6 +258,7 @@ export function CreateEventPageContent({
   const watchedDayTimes = watch("dayTimes");
   const watchedLocation = watch("location");
   const watchedRolesNeeded = watch("rolesNeeded");
+  const watchedExpiresAt = watch("expiresAt");
 
   const selectedServiceType = optimisticServiceTypes.find(
     (t) => t.id === watchedServiceTypeId,
@@ -336,7 +342,7 @@ export function CreateEventPageContent({
       const result = await createServiceType(
         newTypeName,
         newTypeColor,
-        organizationId,
+        organizationId
       );
 
       if (result.success) {
@@ -550,7 +556,11 @@ export function CreateEventPageContent({
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2 sm:gap-0">
-            <Button className="mr-2" variant="outline" onClick={() => setConflictWarning(null)}>
+            <Button
+              className="mr-2"
+              variant="outline"
+              onClick={() => setConflictWarning(null)}
+            >
               Cancel
             </Button>
             <Button variant="default" onClick={handleConfirmConflictAssignment}>
@@ -568,7 +578,13 @@ export function CreateEventPageContent({
       >
         <div className="container max-w-5xl px-4 py-6">
           <div className="flex items-center gap-4">
-            <Button onClick={handleClose}variant="ghost" size="icon" asChild className="shrink-0">
+            <Button
+              onClick={handleClose}
+              variant="ghost"
+              size="icon"
+              asChild
+              className="shrink-0"
+            >
               <Link href={`/dashboard/organizations/${organizationId}`}>
                 <ArrowLeft className="h-5 w-5" />
               </Link>
@@ -1181,6 +1197,36 @@ export function CreateEventPageContent({
                     </CardContent>
                   </Card>
 
+                  {/* Invitation Expiry */}
+                  <Card className="shrink-0 mt-4">
+                    <CardContent className="flex items-center justify-between p-4">
+                      <div className="flex items-center gap-2">
+                        <Clock className="h-4 w-4 text-muted-foreground" />
+                        <div>
+                          <p className="text-sm font-medium">Response Deadline</p>
+                          <p className="text-xs text-muted-foreground">
+                            How long members have to accept or decline
+                          </p>
+                        </div>
+                      </div>
+                      <Select
+                        value={String(watchedExpiresAt)}
+                        onValueChange={(val) =>
+                          setValue("expiresAt", Number(val), { shouldValidate: true })
+                        }
+                      >
+                        <SelectTrigger className="w-32">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="3">3 days</SelectItem>
+                          <SelectItem value="5">5 days</SelectItem>
+                          <SelectItem value="7">7 days</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </CardContent>
+                  </Card>
+
                   {/* Role Assignments */}
                   <div className="flex-1 grid gap-4 lg:grid-cols-2 mt-4 overflow-y-auto min-h-0 content-start">
                     {watchedRolesNeeded.map((role) => {
@@ -1235,9 +1281,15 @@ export function CreateEventPageContent({
                                           }
                                         />
                                         <div className="flex items-center gap-3 flex-1 min-w-0">
-                                          <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-medium text-primary shrink-0">
-                                            {member.user.firstName.charAt(0)}
-                                          </div>
+                                          <Avatar className="h-8 w-8 shrink-0">
+                                            <AvatarImage
+                                              src={member.user.userImageUrl ?? undefined}
+                                              alt={`${member.user.firstName} ${member.user.lastName}`}
+                                            />
+                                            <AvatarFallback className="bg-primary/10 text-sm font-medium text-primary">
+                                              {member.user.firstName.charAt(0)}
+                                            </AvatarFallback>
+                                          </Avatar>
                                           <div className="min-w-0">
                                             <p className="font-medium truncate">
                                               {member.user.firstName}{" "}

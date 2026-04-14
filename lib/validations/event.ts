@@ -1,5 +1,5 @@
-import { z } from "zod/v4"
-import { VolunteerRole } from "@/generated/prisma/enums"
+import { z } from "zod/v4";
+import { VolunteerRole } from "@/generated/prisma/enums";
 
 export const createEventSchema = z.object({
   serviceTypeId: z.string().min(1, "Service type is required"),
@@ -18,6 +18,7 @@ export const createEventSchema = z.object({
   ),
   location: z.string().trim().min(1, "Location is required").max(20, "Location must be 20 characters or less"),
   rolesNeeded: z.array(z.enum(VolunteerRole)).min(1, "Select at least one role"),
+  expiresAt: z.number().refine((v) => [3, 5, 7].includes(v)),
 });
 
 export type CreateEventFormData = z.infer<typeof createEventSchema>

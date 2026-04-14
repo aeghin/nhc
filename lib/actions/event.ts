@@ -6,7 +6,7 @@ import {
   OrgRole,
   VolunteerRole,
 } from "@/generated/prisma/enums";
-import { auth } from "@clerk/nextjs/server";
+
 import {
   CreateEventInput,
   createEventInputSchema,
@@ -15,7 +15,11 @@ import {
 import EventAssignmentEmail from "@/components/email/event-email-template";
 
 import { Resend } from "resend";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
+
+import { currentUser } from "@/lib/services/user";
+
+import { after } from "next/server";
 
 const resend = new Resend(process.env.RESEND_EMAIL_API_KEY);
 
@@ -40,13 +44,16 @@ export const checkMemberAvailability = async ({
   organizationId,
   dates,
 }: CheckMemberAvailabilityInput): Promise<Record<string, MemberConflict>> => {
-  const { userId } = await auth();
+  
+  const user = await currentUser();
 
-  if (!userId) throw new Error("Unauthorized");
+  if (!user) throw new Error("Unauthorized");
+
+  const { id } = user;
 
   const membership = await prisma.membership.findFirst({
     where: {
-      user: { clerkId: userId },
+      userId: id,
       organizationId,
     },
     select: { role: true },
@@ -75,8 +82,18 @@ export const checkMemberAvailability = async ({
   const conflictingAssignments = await prisma.eventAssignment.findMany({
     where: {
       organizationId,
-      status: { in: [InvitationStatus.ACCEPTED, InvitationStatus.PENDING] },
-      OR: overlapConditions,
+      AND: [
+        {
+          OR: [
+            { status: InvitationStatus.ACCEPTED },
+            {
+              status: InvitationStatus.PENDING,
+              expiresAt: { gt: new Date() },
+            },
+          ],
+        },
+        { OR: overlapConditions },
+      ],
     },
     select: {
       userId: true,
@@ -132,9 +149,12 @@ export async function createEvent(
   organizationId: string,
 ): Promise<ActionResponse> {
   try {
-    const { userId } = await auth();
+    
+    const users = await currentUser();
 
-    if (!userId) return { success: false, error: "Unauthorized" };
+    if (!users) return { success: false, error: "Unauthorized" };
+
+    const { id } = users;
 
     const parsed = createEventInputSchema.safeParse(input);
 
@@ -143,59 +163,45 @@ export async function createEvent(
     const {
       serviceTypeId,
       name,
-      dateRange,
       dayTimes,
       location,
       description,
-      rolesNeeded,
       roleAssignments,
+      expiresAt
     } = parsed.data;
 
-    const user = await prisma.membership.findFirst({
-      where: {
-        user: {
-          clerkId: userId,
-        },
-        organizationId,
-      },
-      include: {
-        organization: {
-          select: {
-            name: true,
-          },
-        },
-      },
-    });
+    const [membership, serviceType] = await Promise.all([
+      prisma.membership.findFirst({
+        where: { userId: id, organizationId },
+        include: { organization: { select: { name: true } } },
+      }),
+      prisma.serviceType.findFirst({
+        where: { id: serviceTypeId, organizationId },
+      }),
+    ]);
 
-    if (!user) return { success: false, error: "Unable to find user" };
+    if (!membership) return { success: false, error: "Unable to find user" };
 
-    if (user.role !== OrgRole.OWNER && user.role !== OrgRole.ADMIN) {
+    if (membership.role !== OrgRole.OWNER && membership.role !== OrgRole.ADMIN) {
       return {
         success: false,
         error: "Unauthorized, please reach out to your Admin",
       };
     }
 
-    const organizationName = user.organization.name;
-
-    const serviceType = await prisma.serviceType.findFirst({
-      where: {
-        id: serviceTypeId,
-        organizationId,
-      },
-    });
-
     if (!serviceType) return { success: false, error: "Invalid Service Type" };
+
+    const organizationName = membership.organization.name;
 
     const assignedUserIds = Object.values(roleAssignments).flat();
 
-    const event = await prisma.$transaction(async (tx) => {
+     await prisma.$transaction(async (tx) => {
       const event = await tx.event.create({
         data: {
           name,
           description: description || "",
           location,
-          createdById: user.userId,
+          createdById: id,
           serviceTypeId,
           organizationId,
         },
@@ -216,14 +222,13 @@ export async function createEvent(
               eventId: event.id,
               userId: uid,
               role: role as VolunteerRole,
-              assignedById: user.userId,
+              assignedById: id,
               organizationId,
+              expiresAt: new Date(Date.now() + expiresAt * 24 * 60 * 60 * 1000)
             })),
           ),
         });
       }
-
-      return event;
     });
 
     if (assignedUserIds.length > 0) {
@@ -232,7 +237,7 @@ export async function createEvent(
         select: { id: true, email: true, firstName: true },
       });
 
-      await Promise.allSettled(
+      after(async () => {await Promise.allSettled(
         assignedUsers.map((user) =>
           resend.emails.send({
             from: "NHC <noreply@aeghin.com>",
@@ -247,7 +252,8 @@ export async function createEvent(
           }),
         ),
       );
-    };
+  });
+};
 
     revalidatePath(`/dashboard/organizations/${organizationId}`);
 
@@ -257,3 +263,84 @@ export async function createEvent(
     return { success: false, error: "Unable to create event" };
   }
 }
+
+
+export const acceptEventInvitation = async (organizationId: string, eventId: string): Promise<ActionResponse> => {
+
+  try {
+
+    const user = await currentUser();
+
+    if (!user) return { success: false, error: "Unauthorized" };
+
+    const event = await prisma.eventAssignment.findUnique({
+      where: {
+        eventId_userId: { eventId: eventId, userId: user.id },
+        organizationId,
+        status: InvitationStatus.PENDING,
+      }
+    });
+
+    if (!event) return { success: false, error: "Unable to find this event" };
+
+    await prisma.eventAssignment.update({
+      where: {
+        id: event.id,
+        organizationId,
+      },
+      data: {
+        status: InvitationStatus.ACCEPTED
+      }
+    });
+
+    updateTag(`user-${user.id}-events-${organizationId}`);
+
+    return { success: true };
+
+  } catch (error) {
+
+    return { success: false, error: "Failed to accept invite" };
+
+  }
+
+}
+
+export const declineEventInvitation = async (organizationId: string, eventId: string): Promise<ActionResponse> => {
+
+  try {
+
+    const user = await currentUser();
+
+    if (!user) return { success: false, error: "Unauthorized" };
+
+    const event = await prisma.eventAssignment.findUnique({
+      where: {
+        eventId_userId: { eventId: eventId, userId: user.id },
+        organizationId,
+        status: InvitationStatus.PENDING,
+      }
+    });
+
+    if (!event) return { success: false, error: "Unable to find this event" };
+
+    await prisma.eventAssignment.update({
+      where: {
+        id: event.id,
+        organizationId,
+      },
+      data: {
+        status: InvitationStatus.DECLINED
+      }
+    });
+
+    updateTag(`user-${user.id}-events-${organizationId}`);
+
+    return { success: true };
+
+  } catch (error) {
+
+    return { success: false, error: "Unable to decline Invite" };
+
+  };
+};
+

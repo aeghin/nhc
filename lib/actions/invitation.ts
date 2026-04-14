@@ -9,6 +9,8 @@ import { Resend } from "resend";
 import InvitationEmail from "@/components/email/email-template";
 import { verifyInvitationByToken } from "../services/invitation";
 
+import { after } from "next/server";
+
 // import twilio from 'twilio';
 
 // const twilioClient = twilio(
@@ -81,7 +83,7 @@ export async function inviteMember(data: OrgInvitationInput): Promise<ActionResp
             }
         });
 
-        await resend.emails.send({
+        after(async () => {await resend.emails.send({
             from: `${membership.organization.name} <no-reply@aeghin.com>`,
             to: email,
             subject: `You've been invited to join ${membership.organization.name}`,
@@ -91,7 +93,8 @@ export async function inviteMember(data: OrgInvitationInput): Promise<ActionResp
                 volunteerRoles: volunteerRoles,
                 inviteLink: `${process.env.NEXT_PUBLIC_APP_URL}/invite/${invitation.token}`
             })
-        });
+        })
+    });
 
         // await twilioClient.messages.create({
         //      body: `${user.firstName} has invited you to join ${membership.organization.name}! Accept here: ${process.env.NEXT_PUBLIC_APP_URL}/invite/${invitation.token}`,

@@ -14,12 +14,10 @@ const tabs = [
 interface OrgTabNavProps {
   activeTab: string;
   canManage: boolean;
-  // counts?: {
-  //   events?: number;
-  //   members?: number;
-  //   invitations?: number;
-  // };
-  counts: number;
+  counts?: {
+    events?: number;
+    members?: number;
+  };
 }
 
 export const OrgTabNav = ({ activeTab, canManage, counts }: OrgTabNavProps) => {
@@ -40,8 +38,7 @@ export const OrgTabNav = ({ activeTab, canManage, counts }: OrgTabNavProps) => {
       {visibleTabs.map((tab) => {
         const Icon = tab.icon;
         const isActive = activeTab === tab.value;
-        // const count = counts?.[tab.value as keyof typeof counts];
-        const count = counts;
+        const count = counts?.[tab.value as keyof typeof counts];
 
         return (
           <button

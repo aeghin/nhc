@@ -1,22 +1,19 @@
 
 import { CreateOrg } from "./create-org-button";
 import { Greeting } from "./header-time-message";
-import { getUserInfo } from "@/lib/services/user";
 
 interface DashboardHeaderProps {
-  userId: string
+  firstName: string;
 };
 
- export async function DashboardHeader({ userId }: DashboardHeaderProps) {
-
-  const user = await getUserInfo(userId);
+ export function DashboardHeader({ firstName }: DashboardHeaderProps) {
   
   return (
     <div className="relative overflow-hidden rounded-2xl border border-border/40 bg-linear-to-br from-primary/5 via-card to-primary/10 p-6 sm:p-8">
       <div className="relative z-10 flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-2">
           <div className="flex items-center gap-3">
-            <Greeting name={user}/>
+            <Greeting name={firstName}/>
           </div>
           <p className="text-sm text-muted-foreground">
             Your organizations and schedule

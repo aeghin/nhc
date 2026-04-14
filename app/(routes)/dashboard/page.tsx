@@ -3,33 +3,33 @@ import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { DashboardStats } from "@/components/dashboard/dashboard-stats";
 import { OrganizationsGrid } from "@/components/dashboard/organizations-grid";
 import {
-  DashboardHeaderSkeleton,
   DashboardStatsSkeleton,
   OrganizationsGridSkeleton,
 } from "@/components/dashboard/skeletons";
-import { redirect } from "next/navigation";
-import { auth } from "@clerk/nextjs/server";
 
+import { currentUser } from "@/lib/services/user";
+import { redirect } from "next/navigation";
 
 export default async function DashboardPage() {
 
-  const { userId } = await auth();
+  const user = await currentUser();
 
-  if (!userId) redirect("/sign-in");
+  if (!user) redirect("/sign-in");
+
+  const { id, firstName } = user;
 
   return (
       <main className="mx-auto max-w-screen-2xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
         <div className="space-y-8">
-          <Suspense fallback={<DashboardHeaderSkeleton />}>
-            <DashboardHeader userId={userId} />
-          </Suspense>
-
+          
+          <DashboardHeader firstName={firstName} />
+        
           <Suspense fallback={<DashboardStatsSkeleton />}>
-            <DashboardStats userId={userId} />
+            <DashboardStats userId={id} />
           </Suspense>
 
           <Suspense fallback={<OrganizationsGridSkeleton />}>
-            <OrganizationsGrid userId={userId} />
+            <OrganizationsGrid userId={id} />
           </Suspense>
 
         </div>
