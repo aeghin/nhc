@@ -4,15 +4,12 @@ import { currentUser } from "@/lib/services/user";
 import prisma from "@/lib/prisma";
 import { OrgRole } from "@/generated/prisma/enums";
 import { revalidatePath } from "next/cache";
+import { userRoleSchema, UserRoleInput } from "../validations/roles";
 
+type ActionResponse = { success: true, role: OrgRole } | 
+{ success: false, error: string }
 
-type ActionResponse = {
-    success: boolean,
-    role?: OrgRole,
-    error?: string,
-}
-
-export const updateUserRole = async (role: OrgRole, organizationId: string, userId: string): Promise<ActionResponse> => {
+export const updateUserRole = async (data: UserRoleInput): Promise<ActionResponse> => {
     
     try {
 
@@ -20,10 +17,16 @@ export const updateUserRole = async (role: OrgRole, organizationId: string, user
 
         if (!user) return { success: false, error: "Unable to locate user" };
 
+        const { role, organizationId, userId } = userRoleSchema.parse(data);
+
+        if (user.id === userId) return { success: false, error: "Unable to change your own role. Please reach out to the owner." };
+
+        if (role === OrgRole.OWNER) return { success: false, error: "Ownership cannot be assigned here. Use the transfer-ownership flow." };
+
         const userMembership = await prisma.membership.findUnique({ 
             where: {
                 userId_organizationId: {
-                    userId: user?.id, 
+                    userId: user.id, 
                     organizationId
                 }
             },
@@ -32,9 +35,25 @@ export const updateUserRole = async (role: OrgRole, organizationId: string, user
             },
         });
 
-        if (!userMembership) return { success: false, error: "Unable to find membership" };
-
+        if (!userMembership ) return { success: false, error: "Unable to find membership" };
+        
         if (userMembership.role === OrgRole.MEMBER) return { success: false, error: "Unauthorized" };
+
+        const assignee = await prisma.membership.findUnique({
+            where: {
+                userId_organizationId: {
+                    userId,
+                    organizationId
+                }
+            },
+            select: {
+                role: true,
+            }
+        });
+
+        if (!assignee) return { success: false, error: "Unable to find membership for member" };
+
+        if (userMembership.role === OrgRole.ADMIN && assignee.role !== OrgRole.MEMBER) return { success: false, error: "Insufficient permissions. Reach out to owner." };
 
         const newRole = await prisma.membership.update({
             where: {
@@ -45,14 +64,18 @@ export const updateUserRole = async (role: OrgRole, organizationId: string, user
             },
             data: {
                 role,
+            },
+            select: {
+                role: true
             }
         });
 
-        revalidatePath(`/dashboard/organizations/${organizationId}?=members`)
+        revalidatePath(`/dashboard/organizations/${organizationId}`);
 
         return { success: true, role: newRole.role };
 
     } catch (error) {
+        console.error(error);
         return { success: false, error: "Something went wrong" };
     }
 

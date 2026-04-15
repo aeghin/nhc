@@ -7,3 +7,4 @@ export const userRoleSchema = z.object({
     role: z.enum(OrgRole),
 });
 
+export type UserRoleInput = z.infer<typeof userRoleSchema>;
