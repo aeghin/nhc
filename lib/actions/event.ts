@@ -195,6 +195,19 @@ export async function createEvent(
 
     const assignedUserIds = Object.values(roleAssignments).flat();
 
+    if (assignedUserIds.length > 0) {
+      const validMemberships = await prisma.membership.count({
+        where: {
+          organizationId,
+          userId: { in: assignedUserIds },
+        },
+      });
+
+      if (validMemberships !== new Set(assignedUserIds).size) {
+        return { success: false, error: "One or more assigned users are not members of this organization" };
+      }
+    }
+
      await prisma.$transaction(async (tx) => {
       const event = await tx.event.create({
         data: {
@@ -278,6 +291,7 @@ export const acceptEventInvitation = async (organizationId: string, eventId: str
         eventId_userId: { eventId: eventId, userId: user.id },
         organizationId,
         status: InvitationStatus.PENDING,
+        expiresAt: { gt: new Date() }
       }
     });
 

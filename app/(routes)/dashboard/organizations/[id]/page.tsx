@@ -25,7 +25,7 @@ export default async function OrganizationPage({
   searchParams: Promise<{ tab?: string }>
 }) {
   const { id } = await params;
-  const { tab = "event" } = await searchParams;
+  const { tab = "events" } = await searchParams;
 
   const { data: orgId, success } = z.uuid().safeParse(id);
   
