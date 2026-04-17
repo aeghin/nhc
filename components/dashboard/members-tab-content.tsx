@@ -18,6 +18,8 @@ export const MembersTabContent = async ({
       organizationId,
     },
     select: {
+      volunteerRoles: true,
+      role: true,
       user: {
         select: {
           id: true,
@@ -26,12 +28,7 @@ export const MembersTabContent = async ({
           email: true,
           phoneNumber: true,
           userImageUrl: true,
-          createdAt: true,
-          memberships: {
-            select: {
-              role: true
-            }
-          }
+          createdAt: true
         }
       },
     }
