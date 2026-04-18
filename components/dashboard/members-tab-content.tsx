@@ -18,6 +18,7 @@ export const MembersTabContent = async ({
       organizationId,
     },
     select: {
+      organizationId: true,
       volunteerRoles: true,
       role: true,
       user: {
@@ -33,8 +34,6 @@ export const MembersTabContent = async ({
       },
     }
   });
-
-  console.log(members);
   
   return (
     <Card className="overflow-hidden rounded-xl border-border/40 bg-linear-to-br from-card to-card/80 shadow-sm">
