@@ -1,6 +1,6 @@
 "use client"
 
-import { MoreHorizontal, Shield, Crown, User, Mail, UserCog, Trash2, Phone } from "lucide-react";
+import { MoreHorizontal, Shield, Crown, User, Mail, UserCog, Trash2, Phone, ChevronRight } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +11,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger
+} from "@/components/ui/hover-card";
 
 import { OrgRole, VolunteerRole } from "@/generated/prisma/enums";
 import { getRoleConfig, volunteerRoleConfig } from "@/lib/config/roles";
@@ -37,16 +43,16 @@ interface MembersListProps {
 }
 
 export function MembersList({ members, canManage = false }: MembersListProps) {
-  
+
 
   const formatName = (name: string) =>
     name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
 
-const formatPhone = (phone: string) => {                                                                        
-    const digits = phone.replace(/\D/g, "").replace(/^1/, "");                                                    
+  const formatPhone = (phone: string) => {
+    const digits = phone.replace(/\D/g, "").replace(/^1/, "");
     if (digits.length !== 10) return phone;
-    return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`;                                      
-  };    
+    return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`;
+  };
 
   return (
     <div className="divide-y divide-border/40">
@@ -62,7 +68,7 @@ const formatPhone = (phone: string) => {
           >
             <div className="flex items-center gap-4">
               <Avatar className="h-11 w-11 transition-transform group-hover:scale-105">
-                <AvatarImage src={member.user.userImageUrl ?? undefined}/>
+                <AvatarImage src={member.user.userImageUrl ?? undefined} />
                 <AvatarFallback className="bg-linear-to-br text-xsm font-semibold text-foreground">
                   {member.user.firstName.charAt(0)}
                 </AvatarFallback>
@@ -74,27 +80,41 @@ const formatPhone = (phone: string) => {
                     <RoleIcon className="mr-1 h-3 w-3" />
                     {roleConfig.label}
                   </Badge>
-                  {volunteerRoles.map(({ label, icon }) => (
-                    <Badge
-                      key={label}
-                      variant="secondary"
-                      className="gap-1 bg-muted/50 text-[10px] font-normal"
-                    >
-                      <span aria-hidden>{icon}</span>
-                      {label}
-                    </Badge>
-                  ))}
+                  {volunteerRoles.length > 0 && (
+                    <HoverCard openDelay={100} closeDelay={200}>
+                      <HoverCardTrigger asChild>
+                        <button className="cursor-pointer text-gray-500 transition-transform hover:scale-125 -ml-1">
+                          <ChevronRight className="h-4.5 w-4.5" />
+                        </button>
+                      </HoverCardTrigger>
+                      <HoverCardContent side="right" className="w-auto max-w-72 p-3">
+                        <p className="text-center mb-2 text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">Volunteer Role(s)</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {volunteerRoles.map(({ label, icon }) => (
+                            <Badge
+                              key={label}
+                              variant="secondary"
+                              className="gap-1 bg-muted/50 text-[10px] font-normal"
+                            >
+                              <span aria-hidden>{icon}</span>
+                              {label}
+                            </Badge>
+                          ))}
+                        </div>
+                      </HoverCardContent>
+                    </HoverCard>
+                  )}
                 </div>
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <span className="inline-flex items-center gap-1.5">
-                 <Mail className="h-3 w-3" />                                                                              
-                 {member.user.email}
-                 </span>                                                                                                     
-                 <span className="text-border">•</span>
-                 <span className="inline-flex items-center gap-1.5 tabular-nums">                                            
-                 <Phone className="h-3 w-3" />
-                 {formatPhone(member.user.phoneNumber)}                                                                    
-                 </span>    
+                    <Mail className="h-3 w-3" />
+                    {member.user.email}
+                  </span>
+                  <span className="text-border">•</span>
+                  <span className="inline-flex items-center gap-1.5 tabular-nums">
+                    <Phone className="h-3 w-3" />
+                    {formatPhone(member.user.phoneNumber)}
+                  </span>
                 </div>
               </div>
             </div>
