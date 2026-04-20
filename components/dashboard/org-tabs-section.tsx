@@ -69,6 +69,7 @@ export const OrganizationTabsSection = async ({
             <MembersTabContent
               organizationId={organizationId}
               canManage={canManage}
+              userId={userId}
             />
           </Suspense>
         )}

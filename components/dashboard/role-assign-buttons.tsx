@@ -13,9 +13,14 @@ import {
 
 import { Button } from "@/components/ui/button";
 
-import { MoreVertical, Shield, Users, Trash2 } from "lucide-react";
+import { MoreVertical, Shield, Users, Trash2, CheckCircle2, XCircle } from "lucide-react";
 
 import { OrgRole } from "@/generated/prisma/enums";
+
+import { useTransition} from "react";
+
+import { updateUserRole } from "@/lib/actions/roles";
+import { toast } from "sonner";
 
 interface RoleAssignButtonsProps {
     userId: string;
@@ -24,6 +29,38 @@ interface RoleAssignButtonsProps {
 }
 
 export const RoleAssignButtons = ({ currentRole, userId, organizationId }: RoleAssignButtonsProps) => {
+
+
+    const [isPending, startTransition] = useTransition();
+
+    const handleRoleChange = (role: string) => {
+        const newRole = role as OrgRole;
+
+        startTransition(async () => {
+            toast.promise(
+                updateUserRole({ userId, organizationId, role: newRole }).then((result) => {
+                    if (!result.success) throw new Error(result.error);
+                    return result;
+                }),
+                {   
+                    position: "bottom-center",
+                    classNames: {
+                        toast: "justify-center"
+                    },
+                    loading: "Updating Role...",
+                    success: {
+                        message: "Role Updated!",
+                        duration: 5000,
+                    },
+                    error: (err) => ({
+                        message: err instanceof Error ? err.message : "Something went wrong, try again!",
+                        duration: 5000,
+                    }),
+                }
+            );
+        });
+    };
+
 
     return (
         <DropdownMenu>
@@ -40,22 +77,23 @@ export const RoleAssignButtons = ({ currentRole, userId, organizationId }: RoleA
                 <DropdownMenuLabel className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                     Change Role
                 </DropdownMenuLabel>
-                <DropdownMenuRadioGroup value={currentRole}>
-                    <DropdownMenuRadioItem value={OrgRole.ADMIN} className="cursor-pointer">
-                        <Shield className="mr-2 h-4 w-4" />
+                <DropdownMenuRadioGroup value={currentRole} onValueChange={handleRoleChange}>
+                    <DropdownMenuRadioItem disabled={isPending} value={OrgRole.ADMIN} className="cursor-pointer">
+                         <Shield className="mr-2 h-4 w-4" />
                         Admin
                     </DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value={OrgRole.MEMBER} className="cursor-pointer">
-                        <Users className="mr-2 h-4 w-4" />
+                    <DropdownMenuRadioItem disabled={isPending} value={OrgRole.MEMBER} className="cursor-pointer">
+                       <Users className="mr-2 h-4 w-4" />
                         Member
                     </DropdownMenuRadioItem>
                 </DropdownMenuRadioGroup>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="cursor-pointer text-destructive focus:text-destructive">
+                <DropdownMenuItem disabled={isPending} className="cursor-pointer text-destructive focus:text-destructive">
                     <Trash2 className="mr-2 h-4 w-4" />
                     Remove Member
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
     )
+
 }

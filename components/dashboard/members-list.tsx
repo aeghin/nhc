@@ -34,9 +34,10 @@ interface Members {
 interface MembersListProps {
   members: Members[]
   canManage?: boolean
+  currentUserId: string
 }
 
-export function MembersList({ members, canManage = false }: MembersListProps) {
+export function MembersList({ members, canManage = false, currentUserId }: MembersListProps) {
 
 
   const formatName = (name: string) =>
@@ -69,7 +70,7 @@ export function MembersList({ members, canManage = false }: MembersListProps) {
               </Avatar>
               <div className="space-y-1">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="font-medium">{`${formatName(member.user.firstName)} ${formatName(member.user.lastName)}`}</span>
+                  <span className="font-medium">{member.user.id === currentUserId ? "You" : `${formatName(member.user.firstName)} ${formatName(member.user.lastName)}`}</span>
                   <Badge variant="outline" className={cn("text-[10px] font-medium", roleConfig.className)}>
                     <RoleIcon className="mr-1 h-3 w-3" />
                     {roleConfig.label}
@@ -114,7 +115,7 @@ export function MembersList({ members, canManage = false }: MembersListProps) {
             </div>
 
             <div className="flex items-center gap-3">
-              <span className="text-xs text-muted-foreground">
+              <span className="w-36 whitespace-nowrap text-xs tabular-nums text-muted-foreground">
                 Joined{" "}
                 {new Date(member.user.createdAt).toLocaleDateString("en-US", {
                   month: "short",
@@ -122,7 +123,11 @@ export function MembersList({ members, canManage = false }: MembersListProps) {
                   year: "numeric",
                 })}
               </span>
-              {canManage && <RoleAssignButtons currentRole={member.role} userId={member.user.id} organizationId={member.organizationId} />}
+              {member.role !== OrgRole.OWNER && canManage ? (
+                <RoleAssignButtons currentRole={member.role} userId={member.user.id} organizationId={member.organizationId} />
+              ) : (
+                <div className="h-8 w-8" aria-hidden />
+              )}
             </div>
           </div>
         )

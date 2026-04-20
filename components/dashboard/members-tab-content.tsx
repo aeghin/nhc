@@ -7,10 +7,12 @@ import prisma from "@/lib/prisma";
 interface MembersTabContentProps {
   organizationId: string;
   canManage: boolean;
+  userId: string;
 }
 export const MembersTabContent = async ({
   organizationId,
   canManage,
+  userId
 }: MembersTabContentProps) => {
 
   const members = await prisma.membership.findMany({
@@ -34,6 +36,12 @@ export const MembersTabContent = async ({
       },
     }
   });
+
+  const sorted = [
+    ...members.filter((mem) => mem.user.id === userId),
+    ...members.filter((mem) => mem.user.id !== userId)
+  ];
+
   
   return (
     <Card className="overflow-hidden rounded-xl border-border/40 bg-linear-to-br from-card to-card/80 shadow-sm">
@@ -63,13 +71,13 @@ export const MembersTabContent = async ({
         )}
       </CardHeader>
       <CardContent className="p-0">
-        {members.length === 0 ? (
+        {sorted.length === 0 ? (
           <div className="flex h-50 flex-col items-center justify-center gap-2 text-muted-foreground">
             <Users className="h-10 w-10 opacity-20" />
             <p className="text-sm">No members found</p>
           </div>
         ) : (
-          <MembersList members={members} canManage={canManage} />
+          <MembersList members={sorted} canManage={canManage} currentUserId={userId}/>
         )}
       </CardContent>
     </Card>
