@@ -25,10 +25,11 @@ interface ConfirmMemberDeleteModalProps {
     onOpenChange: (open: boolean) => void
     userId: string
     organizationId: string
+    memberName: string
 };
 
 
-export const ConfirmMemberDeleteModal = ({open, onOpenChange, userId, organizationId }: ConfirmMemberDeleteModalProps) => {
+export const ConfirmMemberDeleteModal = ({open, onOpenChange, userId, organizationId, memberName }: ConfirmMemberDeleteModalProps) => {
 
   const [isPending, startTransition] = useTransition(); 
 
@@ -54,7 +55,9 @@ export const ConfirmMemberDeleteModal = ({open, onOpenChange, userId, organizati
             </div>
             <DialogTitle className="text-center text-xl">Remove Member</DialogTitle>
             <DialogDescription className="text-center mb-2">
-              Are you sure you would like to remove this member?
+              Are you sure you would like to remove{" "}
+             <span className="font-semibold bg-linear-to-r from-rose-500 to-red-600 bg-clip-text text-transparent">{memberName}</span>
+              {" "}from this organization?
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

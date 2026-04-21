@@ -13,7 +13,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 
-import { MoreVertical, Shield, Users, Trash2 } from "lucide-react";
+import { MoreVertical, Shield, Users, Trash2, Settings2 } from "lucide-react";
 
 import { OrgRole } from "@/generated/prisma/enums";
 
@@ -28,9 +28,10 @@ interface RoleAssignButtonsProps {
     userId: string;
     organizationId: string;
     currentRole: OrgRole;
+    memberName: string;
 }
 
-export const RoleAssignButtons = ({ currentRole, userId, organizationId }: RoleAssignButtonsProps) => {
+export const RoleAssignButtons = ({ currentRole, userId, organizationId, memberName}: RoleAssignButtonsProps) => {
 
 
     const [isPending, startTransition] = useTransition();
@@ -64,6 +65,10 @@ export const RoleAssignButtons = ({ currentRole, userId, organizationId }: RoleA
         });
     };
 
+    const handleClick = () => {
+        console.log("clicked")
+    };
+
 
     return (
     <>
@@ -92,13 +97,24 @@ export const RoleAssignButtons = ({ currentRole, userId, organizationId }: RoleA
                     </DropdownMenuRadioItem>
                 </DropdownMenuRadioGroup>
                 <DropdownMenuSeparator />
+                <DropdownMenuLabel className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    Volunteer Role(s)
+                </DropdownMenuLabel>
+                <DropdownMenuItem disabled={isPending} className="cursor-pointer">
+                       <Settings2 className="mr-2 h-4 w-4" />
+                        Manage Roles
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    Danger Zone
+                </DropdownMenuLabel>
                 <DropdownMenuItem onClick={() => setRemoveMemberConfirm(true)} disabled={isPending} className="cursor-pointer text-destructive focus:text-destructive">
                     <Trash2 className="mr-2 h-4 w-4" />
                     Remove Member
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
-        <ConfirmMemberDeleteModal open={removeMemberConfirm} onOpenChange={setRemoveMemberConfirm} userId={userId} organizationId={organizationId} />
+        <ConfirmMemberDeleteModal open={removeMemberConfirm} onOpenChange={setRemoveMemberConfirm} userId={userId} organizationId={organizationId} memberName={memberName} />
     </>
     )
     
