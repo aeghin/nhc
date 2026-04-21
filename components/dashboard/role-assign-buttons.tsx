@@ -13,14 +13,16 @@ import {
 
 import { Button } from "@/components/ui/button";
 
-import { MoreVertical, Shield, Users, Trash2, CheckCircle2, XCircle } from "lucide-react";
+import { MoreVertical, Shield, Users, Trash2 } from "lucide-react";
 
 import { OrgRole } from "@/generated/prisma/enums";
 
-import { useTransition} from "react";
+import { useTransition, useState } from "react";
 
 import { updateUserRole } from "@/lib/actions/roles";
 import { toast } from "sonner";
+import { ConfirmMemberDeleteModal } from "@/components/dashboard/confirm-member-delete-modal";
+
 
 interface RoleAssignButtonsProps {
     userId: string;
@@ -32,6 +34,7 @@ export const RoleAssignButtons = ({ currentRole, userId, organizationId }: RoleA
 
 
     const [isPending, startTransition] = useTransition();
+    const [removeMemberConfirm, setRemoveMemberConfirm] = useState(false);
 
     const handleRoleChange = (role: string) => {
         const newRole = role as OrgRole;
@@ -63,6 +66,7 @@ export const RoleAssignButtons = ({ currentRole, userId, organizationId }: RoleA
 
 
     return (
+    <>
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <Button
@@ -88,12 +92,14 @@ export const RoleAssignButtons = ({ currentRole, userId, organizationId }: RoleA
                     </DropdownMenuRadioItem>
                 </DropdownMenuRadioGroup>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem disabled={isPending} className="cursor-pointer text-destructive focus:text-destructive">
+                <DropdownMenuItem onClick={() => setRemoveMemberConfirm(true)} disabled={isPending} className="cursor-pointer text-destructive focus:text-destructive">
                     <Trash2 className="mr-2 h-4 w-4" />
                     Remove Member
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
+        <ConfirmMemberDeleteModal open={removeMemberConfirm} onOpenChange={setRemoveMemberConfirm} userId={userId} organizationId={organizationId} />
+    </>
     )
-
+    
 }

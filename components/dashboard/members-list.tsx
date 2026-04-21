@@ -115,7 +115,7 @@ export function MembersList({ members, canManage = false, currentUserId }: Membe
             </div>
 
             <div className="flex items-center gap-3">
-              <span className="w-36 whitespace-nowrap text-xs tabular-nums text-muted-foreground">
+              <span className="whitespace-nowrap text-xs tabular-nums text-muted-foreground">
                 Joined{" "}
                 {new Date(member.user.createdAt).toLocaleDateString("en-US", {
                   month: "short",
