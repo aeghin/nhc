@@ -124,7 +124,7 @@ export function MembersList({ members, canManage = false, currentUserId }: Membe
                 })}
               </span>
               {member.role !== OrgRole.OWNER && canManage ? (
-                <RoleAssignButtons currentRole={member.role} userId={member.user.id} organizationId={member.organizationId} memberName={member.user.firstName}/>
+                <RoleAssignButtons currentRole={member.role} userId={member.user.id} organizationId={member.organizationId} memberName={member.user.firstName} currentVolunteerRoles={member.volunteerRoles}/>
               ) : (
                 <div className="h-8 w-8" aria-hidden />
               )}

@@ -2,7 +2,7 @@
 
 import { currentUser } from "@/lib/services/user";
 import prisma from "@/lib/prisma";
-import { OrgRole } from "@/generated/prisma/enums";
+import { OrgRole, VolunteerRole } from "@/generated/prisma/enums";
 import { revalidatePath, updateTag } from "next/cache";
 import { userRoleSchema, UserRoleInput } from "../validations/roles";
 
@@ -143,4 +143,26 @@ export const removeMember = async (userId: string, organizationId: string): Prom
         console.error(err)
         return { success: false, error: "Unable to process request" };
     }
+}
+
+
+export const updateVolunteerRoles = async (userId: string, organizationId: string, role: VolunteerRole): Promise<ActionResponse> => {
+    
+
+    try {
+
+    if (!userId || !organizationId || !role) return { success: false, error: "No data received" };
+
+    const user = await currentUser(); 
+    
+    if (!user) return { success: false, error: "Unauthorized" };
+
+
+
+    return { success: true }    
+
+    } catch {
+        return { success: false, error: "Something went wrong, pleasee try again."}
+    }
+
 }

@@ -2,12 +2,16 @@
 
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
@@ -15,9 +19,10 @@ import { Button } from "@/components/ui/button";
 
 import { MoreVertical, Shield, Users, Trash2, Settings2 } from "lucide-react";
 
-import { OrgRole } from "@/generated/prisma/enums";
+import { OrgRole, VolunteerRole } from "@/generated/prisma/enums";
+import { volunteerRoleConfig } from "@/lib/config/roles";
 
-import { useTransition, useState } from "react";
+import { useOptimistic, useState, useTransition } from "react";
 
 import { updateUserRole } from "@/lib/actions/roles";
 import { toast } from "sonner";
@@ -29,13 +34,22 @@ interface RoleAssignButtonsProps {
     organizationId: string;
     currentRole: OrgRole;
     memberName: string;
+    currentVolunteerRoles: VolunteerRole[];
 }
 
-export const RoleAssignButtons = ({ currentRole, userId, organizationId, memberName}: RoleAssignButtonsProps) => {
+export const RoleAssignButtons = ({ currentRole, userId, organizationId, memberName, currentVolunteerRoles }: RoleAssignButtonsProps) => {
 
 
     const [isPending, startTransition] = useTransition();
     const [removeMemberConfirm, setRemoveMemberConfirm] = useState(false);
+
+    const [optimisticRoles, toggleOptimistic] = useOptimistic<VolunteerRole[], VolunteerRole>(
+        currentVolunteerRoles,
+        (current, role) =>
+            current.includes(role)
+                ? current.filter((r) => r !== role)
+                : [...current, role]
+    );
 
     const handleRoleChange = (role: string) => {
         const newRole = role as OrgRole;
@@ -46,7 +60,7 @@ export const RoleAssignButtons = ({ currentRole, userId, organizationId, memberN
                     if (!result.success) throw new Error(result.error);
                     return result;
                 }),
-                {   
+                {
                     position: "bottom-center",
                     classNames: {
                         toast: "justify-center"
@@ -65,10 +79,12 @@ export const RoleAssignButtons = ({ currentRole, userId, organizationId, memberN
         });
     };
 
-    const handleClick = () => {
-        console.log("clicked")
+    const handleVolunteerRoleToggle = (role: VolunteerRole) => {
+        startTransition(async () => {
+            toggleOptimistic(role);
+           
+        });
     };
-
 
     return (
     <>
@@ -82,7 +98,7 @@ export const RoleAssignButtons = ({ currentRole, userId, organizationId, memberN
                     <MoreVertical className="h-4 w-4" />
                 </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuContent align="end" className="w-52">
                 <DropdownMenuLabel className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                     Change Role
                 </DropdownMenuLabel>
@@ -100,10 +116,30 @@ export const RoleAssignButtons = ({ currentRole, userId, organizationId, memberN
                 <DropdownMenuLabel className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                     Volunteer Role(s)
                 </DropdownMenuLabel>
-                <DropdownMenuItem disabled={isPending} className="cursor-pointer">
-                       <Settings2 className="mr-2 h-4 w-4" />
+                <DropdownMenuSub>
+                    <DropdownMenuSubTrigger disabled={isPending} className="cursor-pointer">
+                        <Settings2 className="mr-2 h-4 w-4" />
                         Manage Roles
-                </DropdownMenuItem>
+                    </DropdownMenuSubTrigger>
+                    <DropdownMenuSubContent className="w-52">
+                        {Object.values(VolunteerRole).map((role) => {
+                            const config = volunteerRoleConfig[role];
+                            return (
+                                <DropdownMenuCheckboxItem
+                                    key={role}
+                                    checked={optimisticRoles.includes(role)}
+                                    onCheckedChange={() => handleVolunteerRoleToggle(role)}
+                                    onSelect={(e) => e.preventDefault()}
+                                    disabled={isPending}
+                                    className="cursor-pointer"
+                                >
+                                    <span className="mr-1 text-base leading-none" aria-hidden>{config.icon}</span>
+                                    {config.label}
+                                </DropdownMenuCheckboxItem>
+                            );
+                        })}
+                    </DropdownMenuSubContent>
+                </DropdownMenuSub>
                 <DropdownMenuSeparator />
                 <DropdownMenuLabel className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                     Danger Zone
@@ -117,5 +153,5 @@ export const RoleAssignButtons = ({ currentRole, userId, organizationId, memberN
         <ConfirmMemberDeleteModal open={removeMemberConfirm} onOpenChange={setRemoveMemberConfirm} userId={userId} organizationId={organizationId} memberName={memberName} />
     </>
     )
-    
+
 }
