@@ -147,7 +147,6 @@ export const removeMember = async (userId: string, organizationId: string): Prom
 
 
 export const updateVolunteerRoles = async (userId: string, organizationId: string, role: VolunteerRole): Promise<ActionResponse> => {
-    
 
     try {
 
@@ -157,7 +156,42 @@ export const updateVolunteerRoles = async (userId: string, organizationId: strin
     
     if (!user) return { success: false, error: "Unauthorized" };
 
+    const member = await prisma.membership.findUnique({
+        where: {
+            userId_organizationId: {
+                userId: user.id,
+                organizationId
+            }
+        },
+        select: {
+            role: true
+        }
+    });
 
+    if (!member) return { success: false, error: "Unable to find membership." };
+
+    if (member.role === OrgRole.MEMBER) return { success: false, error: "Unauthorized. Reach out to an administrator"}
+
+    const asignee = await prisma.membership.findUnique({
+        where: {
+            userId_organizationId: {
+                userId,
+                organizationId
+            }
+        },
+        select: {
+            role: true
+        }
+    });
+
+    if (!asignee) return { success: false, error: "Unable to find membership for this user" };
+
+    if (asignee.role === OrgRole.OWNER) {
+        
+    }
+    
+
+    
 
     return { success: true }    
 
