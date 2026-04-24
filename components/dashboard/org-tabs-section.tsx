@@ -1,12 +1,12 @@
 import { Suspense } from "react";
 import { EventsTabContent } from "@/components/dashboard/events-tab-content";
 import { MembersTabContent } from "@/components/dashboard/members-tab-content";
-// import { InvitationsTabContent } from "@/components/dashboard/invitations-tab-content";
+import { InvitationsTabContent } from "@/components/dashboard/invitations-tab-content";
 // import { SettingsTabContent } from "@/components/dashboard/settings-tab-content";
 import { OrgTabNav } from "./org-tab-nav";
 import { EventsTabSkeleton } from "@/components/dashboard/events-tab-skeleton";
 import { MembersTabSkeleton } from "@/components/dashboard/members-tab-skeleton";
-// import { InvitationsTabSkeleton } from "@/components/dashboard/skeletons/invitations-tab-skeleton";
+import { InvitationsTabSkeleton } from "@/components/dashboard//invitations-tab-skeleton";
 
 import { getOrgMemberCountById } from "@/lib/services/organization";
 import { userEventsTotalCount } from "@/lib/services/events";
@@ -73,7 +73,7 @@ export const OrganizationTabsSection = async ({
           </Suspense>
         )}
  
-        {/* {effectiveTab === "invitations" && canManage && (
+        {effectiveTab === "invitations" && canManage && (
           <Suspense fallback={<InvitationsTabSkeleton />}>
             <InvitationsTabContent
               organizationId={organizationId}
@@ -83,7 +83,7 @@ export const OrganizationTabsSection = async ({
           </Suspense>
         )}
  
-        {effectiveTab === "settings" && canManage && (
+        {/* {effectiveTab === "settings" && canManage && (
           <SettingsTabContent
             organizationId={organizationId}
             organizationName={organizationName}
