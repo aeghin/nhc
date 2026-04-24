@@ -69,7 +69,8 @@ export const updateUserRole = async (data: UserRoleInput): Promise<ActionRespons
                 role: true
             }
         });
-
+        
+        updateTag(`user-${userId}-roles`);
         revalidatePath(`/dashboard/organizations/${organizationId}`);
 
         return { success: true, role: newRole.role };
@@ -172,7 +173,7 @@ export const updateVolunteerRoles = async (userId: string, organizationId: strin
 
     if (member.role === OrgRole.MEMBER) return { success: false, error: "Unauthorized. Reach out to an administrator"}
 
-    const asignee = await prisma.membership.findUnique({
+    const assignee = await prisma.membership.findUnique({
         where: {
             userId_organizationId: {
                 userId,
@@ -180,23 +181,35 @@ export const updateVolunteerRoles = async (userId: string, organizationId: strin
             }
         },
         select: {
-            role: true
+            role: true,
+            volunteerRoles: true
         }
     });
 
-    if (!asignee) return { success: false, error: "Unable to find membership for this user" };
+    if (!assignee) return { success: false, error: "Unable to find membership for this user" };
 
-    if (asignee.role === OrgRole.OWNER) {
-        
-    }
-    
+    if (member.role === OrgRole.ADMIN && assignee.role === OrgRole.OWNER) return { success: false, error: "Insufficient Permissions. Unable to change owner volunteer roles." };
 
-    
+    await prisma.membership.update({
+        where: {
+            userId_organizationId: {
+                userId,
+                organizationId
+            }
+        },
+        data: {
+            volunteerRoles: assignee.volunteerRoles.includes(role)
+                ? assignee.volunteerRoles.filter((r) => r !== role)
+                : [...assignee.volunteerRoles, role]
+        }
+    });
+    updateTag(`user-${userId}-roles`);
+    revalidatePath(`/dashboard/organizations/${organizationId}`);
 
-    return { success: true }    
+    return { success: true };
 
     } catch {
-        return { success: false, error: "Something went wrong, pleasee try again."}
+        return { success: false, error: "Something went wrong, please try again."}
     }
 
 }

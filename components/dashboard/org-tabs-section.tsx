@@ -68,7 +68,6 @@ export const OrganizationTabsSection = async ({
           <Suspense fallback={<MembersTabSkeleton />}>
             <MembersTabContent
               organizationId={organizationId}
-              canManage={canManage}
               userId={userId}
             />
           </Suspense>

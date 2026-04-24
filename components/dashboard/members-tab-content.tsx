@@ -3,15 +3,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MembersList } from "@/components/dashboard/members-list";
 import prisma from "@/lib/prisma";
+import { notFound } from "next/navigation";
 
 interface MembersTabContentProps {
   organizationId: string;
-  canManage: boolean;
   userId: string;
 }
 export const MembersTabContent = async ({
   organizationId,
-  canManage,
   userId
 }: MembersTabContentProps) => {
 
@@ -42,6 +41,10 @@ export const MembersTabContent = async ({
     ...members.filter((mem) => mem.user.id !== userId)
   ];
 
+  const viewerRole = members.find(mem => mem.user.id === userId)?.role;
+
+  if (!viewerRole) notFound();
+
   
   return (
     <Card className="overflow-hidden rounded-xl border-border/40 bg-linear-to-br from-card to-card/80 shadow-sm">
@@ -59,16 +62,6 @@ export const MembersTabContent = async ({
             </p>
           </div>
         </div>
-        {canManage && (
-          <Button
-            size="sm"
-            variant="outline"
-            className="cursor-pointer bg-background/50 transition-all hover:bg-background"
-          >
-            <UserCog className="mr-2 h-4 w-4" />
-            Manage Roles
-          </Button>
-        )}
       </CardHeader>
       <CardContent className="p-0">
         {sorted.length === 0 ? (
@@ -77,7 +70,7 @@ export const MembersTabContent = async ({
             <p className="text-sm">No members found</p>
           </div>
         ) : (
-          <MembersList members={sorted} canManage={canManage} currentUserId={userId}/>
+          <MembersList members={sorted} currentUserId={userId} viewerRole={viewerRole}/>
         )}
       </CardContent>
     </Card>

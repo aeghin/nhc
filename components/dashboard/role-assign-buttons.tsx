@@ -27,6 +27,7 @@ import { useOptimistic, useState, useTransition } from "react";
 import { updateUserRole } from "@/lib/actions/roles";
 import { toast } from "sonner";
 import { ConfirmMemberDeleteModal } from "@/components/dashboard/confirm-member-delete-modal";
+import { updateVolunteerRoles } from "@/lib/actions/roles";
 
 
 interface RoleAssignButtonsProps {
@@ -35,9 +36,11 @@ interface RoleAssignButtonsProps {
     currentRole: OrgRole;
     memberName: string;
     currentVolunteerRoles: VolunteerRole[];
+    canManageMember: boolean;
+    canManageVolunteerRoles: boolean;
 }
 
-export const RoleAssignButtons = ({ currentRole, userId, organizationId, memberName, currentVolunteerRoles }: RoleAssignButtonsProps) => {
+export const RoleAssignButtons = ({ currentRole, userId, organizationId, memberName, currentVolunteerRoles, canManageMember, canManageVolunteerRoles }: RoleAssignButtonsProps) => {
 
 
     const [isPending, startTransition] = useTransition();
@@ -81,8 +84,15 @@ export const RoleAssignButtons = ({ currentRole, userId, organizationId, memberN
 
     const handleVolunteerRoleToggle = (role: VolunteerRole) => {
         startTransition(async () => {
+
             toggleOptimistic(role);
-           
+
+            const result = await updateVolunteerRoles(userId, organizationId, role)
+            if (!result.success) {
+                toast.error(result.error);
+            } else {
+                toast.success("Successfully updated volunteer role");
+            };
         });
     };
 
@@ -99,55 +109,67 @@ export const RoleAssignButtons = ({ currentRole, userId, organizationId, memberN
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-52">
-                <DropdownMenuLabel className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    Change Role
-                </DropdownMenuLabel>
-                <DropdownMenuRadioGroup value={currentRole} onValueChange={handleRoleChange}>
-                    <DropdownMenuRadioItem disabled={isPending} value={OrgRole.ADMIN} className="cursor-pointer">
-                         <Shield className="mr-2 h-4 w-4" />
-                        Admin
-                    </DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem disabled={isPending} value={OrgRole.MEMBER} className="cursor-pointer">
-                       <Users className="mr-2 h-4 w-4" />
-                        Member
-                    </DropdownMenuRadioItem>
-                </DropdownMenuRadioGroup>
-                <DropdownMenuSeparator />
-                <DropdownMenuLabel className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    Volunteer Role(s)
-                </DropdownMenuLabel>
-                <DropdownMenuSub>
-                    <DropdownMenuSubTrigger disabled={isPending} className="cursor-pointer">
-                        <Settings2 className="mr-2 h-4 w-4" />
-                        Manage Roles
-                    </DropdownMenuSubTrigger>
-                    <DropdownMenuSubContent className="w-52">
-                        {Object.values(VolunteerRole).map((role) => {
-                            const config = volunteerRoleConfig[role];
-                            return (
-                                <DropdownMenuCheckboxItem
-                                    key={role}
-                                    checked={optimisticRoles.includes(role)}
-                                    onCheckedChange={() => handleVolunteerRoleToggle(role)}
-                                    onSelect={(e) => e.preventDefault()}
-                                    disabled={isPending}
-                                    className="cursor-pointer"
-                                >
-                                    <span className="mr-1 text-base leading-none" aria-hidden>{config.icon}</span>
-                                    {config.label}
-                                </DropdownMenuCheckboxItem>
-                            );
-                        })}
-                    </DropdownMenuSubContent>
-                </DropdownMenuSub>
-                <DropdownMenuSeparator />
-                <DropdownMenuLabel className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    Danger Zone
-                </DropdownMenuLabel>
-                <DropdownMenuItem onClick={() => setRemoveMemberConfirm(true)} disabled={isPending} className="cursor-pointer text-destructive focus:text-destructive">
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    Remove Member
-                </DropdownMenuItem>
+                {canManageMember && (
+                    <>
+                        <DropdownMenuLabel className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                            Change Role
+                        </DropdownMenuLabel>
+                        <DropdownMenuRadioGroup value={currentRole} onValueChange={handleRoleChange}>
+                            <DropdownMenuRadioItem disabled={isPending} value={OrgRole.ADMIN} className="cursor-pointer">
+                                 <Shield className="mr-2 h-4 w-4" />
+                                Admin
+                            </DropdownMenuRadioItem>
+                            <DropdownMenuRadioItem disabled={isPending} value={OrgRole.MEMBER} className="cursor-pointer">
+                               <Users className="mr-2 h-4 w-4" />
+                                Member
+                            </DropdownMenuRadioItem>
+                        </DropdownMenuRadioGroup>
+                    </>
+                )}
+                {canManageMember && <DropdownMenuSeparator />}
+                {canManageVolunteerRoles && (
+                    <>
+                        <DropdownMenuLabel className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                            Volunteer Role(s)
+                        </DropdownMenuLabel>
+                        <DropdownMenuSub>
+                            <DropdownMenuSubTrigger disabled={isPending} className="cursor-pointer">
+                                <Settings2 className="mr-2 h-4 w-4" />
+                                Manage Roles
+                            </DropdownMenuSubTrigger>
+                            <DropdownMenuSubContent className="w-52">
+                                {Object.values(VolunteerRole).map((role) => {
+                                    const config = volunteerRoleConfig[role];
+                                    return (
+                                        <DropdownMenuCheckboxItem
+                                            key={role}
+                                            checked={optimisticRoles.includes(role)}
+                                            onCheckedChange={() => handleVolunteerRoleToggle(role)}
+                                            onSelect={(e) => e.preventDefault()}
+                                            disabled={isPending}
+                                            className="cursor-pointer"
+                                        >
+                                            <span className="mr-1 text-base leading-none" aria-hidden>{config.icon}</span>
+                                            {config.label}
+                                        </DropdownMenuCheckboxItem>
+                                    );
+                                })}
+                            </DropdownMenuSubContent>
+                        </DropdownMenuSub>
+                    </>
+                )}
+                {canManageMember && <DropdownMenuSeparator />}
+                {canManageMember && (
+                    <>
+                        <DropdownMenuLabel className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                            Danger Zone
+                        </DropdownMenuLabel>
+                        <DropdownMenuItem onClick={() => setRemoveMemberConfirm(true)} disabled={isPending} className="cursor-pointer text-destructive focus:text-destructive">
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Remove Member
+                        </DropdownMenuItem>
+                    </>
+                )}
             </DropdownMenuContent>
         </DropdownMenu>
         <ConfirmMemberDeleteModal open={removeMemberConfirm} onOpenChange={setRemoveMemberConfirm} userId={userId} organizationId={organizationId} memberName={memberName} />

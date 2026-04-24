@@ -33,11 +33,11 @@ interface Members {
 
 interface MembersListProps {
   members: Members[]
-  canManage?: boolean
   currentUserId: string
+  viewerRole: OrgRole
 }
 
-export function MembersList({ members, canManage = false, currentUserId }: MembersListProps) {
+export function MembersList({ members, currentUserId, viewerRole }: MembersListProps) {
 
 
   const formatName = (name: string) =>
@@ -55,6 +55,18 @@ export function MembersList({ members, canManage = false, currentUserId }: Membe
         const roleConfig = getRoleConfig(member.role)
         const RoleIcon = roleConfig.icon
         const volunteerRoles = member.volunteerRoles.map((role) => volunteerRoleConfig[role])
+
+        const isSelf = member.user.id === currentUserId;
+
+        const canManageMember =
+          viewerRole !== OrgRole.MEMBER &&
+          !isSelf &&
+          member.role !== OrgRole.OWNER &&
+          (viewerRole === OrgRole.OWNER || member.role === OrgRole.MEMBER);
+
+        const canManageVolunteerRoles =
+          viewerRole !== OrgRole.MEMBER &&
+          !(viewerRole === OrgRole.ADMIN && member.role === OrgRole.OWNER);
 
         return (
           <div
@@ -123,8 +135,16 @@ export function MembersList({ members, canManage = false, currentUserId }: Membe
                   year: "numeric",
                 })}
               </span>
-              {member.role !== OrgRole.OWNER && canManage ? (
-                <RoleAssignButtons currentRole={member.role} userId={member.user.id} organizationId={member.organizationId} memberName={member.user.firstName} currentVolunteerRoles={member.volunteerRoles}/>
+              {canManageMember || canManageVolunteerRoles ? (
+                <RoleAssignButtons
+                  currentRole={member.role}
+                  userId={member.user.id}
+                  organizationId={member.organizationId}
+                  memberName={member.user.firstName}
+                  currentVolunteerRoles={member.volunteerRoles}
+                  canManageMember={canManageMember}
+                  canManageVolunteerRoles={canManageVolunteerRoles}
+                />
               ) : (
                 <div className="h-8 w-8" aria-hidden />
               )}
