@@ -91,7 +91,7 @@ export function MembersList({ members, currentUserId, viewerRole }: MembersListP
                     <HoverCard openDelay={100} closeDelay={200}>
                       <HoverCardTrigger asChild>
                         <button className="cursor-pointer text-gray-500 transition-transform hover:scale-125 -ml-1">
-                          <ChevronRight className="h-4.5 w-4.5" />
+                          <ChevronRight className="h-3.5 w-3.5" />
                         </button>
                       </HoverCardTrigger>
                       <HoverCardContent side="right" className="w-auto max-w-72 p-3">

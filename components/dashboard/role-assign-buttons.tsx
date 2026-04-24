@@ -89,9 +89,9 @@ export const RoleAssignButtons = ({ currentRole, userId, organizationId, memberN
 
             const result = await updateVolunteerRoles(userId, organizationId, role)
             if (!result.success) {
-                toast.error(result.error);
+                toast.error(result.error, { position: "top-center" });
             } else {
-                toast.success("Successfully updated volunteer role");
+                toast.success("Successfully updated volunteer role", { position: "top-center" });
             };
         });
     };
