@@ -250,6 +250,10 @@ export async function createEvent(
         select: { id: true, email: true, firstName: true },
       });
 
+      for (const uid of new Set(assignedUserIds)) {
+        updateTag(`user-${uid}-events-${organizationId}`)
+      };
+
       after(async () => {await Promise.allSettled(
         assignedUsers.map((user) =>
           resend.emails.send({

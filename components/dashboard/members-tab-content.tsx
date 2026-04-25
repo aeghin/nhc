@@ -2,7 +2,7 @@ import { Users, UserCog } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MembersList } from "@/components/dashboard/members-list";
-import prisma from "@/lib/prisma";
+import { organizationMembersList } from "@/lib/services/organization";
 import { notFound } from "next/navigation";
 
 interface MembersTabContentProps {
@@ -14,27 +14,7 @@ export const MembersTabContent = async ({
   userId
 }: MembersTabContentProps) => {
 
-  const members = await prisma.membership.findMany({
-    where: {
-      organizationId,
-    },
-    select: {
-      organizationId: true,
-      volunteerRoles: true,
-      role: true,
-      user: {
-        select: {
-          id: true,
-          firstName: true,
-          lastName: true,
-          email: true,
-          phoneNumber: true,
-          userImageUrl: true,
-          createdAt: true
-        }
-      },
-    }
-  });
+  const members = await organizationMembersList(organizationId);
 
   const sorted = [
     ...members.filter((mem) => mem.user.id === userId),

@@ -1,6 +1,7 @@
 import "server-only"
 
 import prisma from "../prisma";
+import { cacheLife, cacheTag } from "next/cache";
 
 export const verifyInvitationByToken = async (token: string) => {
 
@@ -17,5 +18,30 @@ export const verifyInvitationByToken = async (token: string) => {
   if (!invitation) return null
 
   return invitation;
+
+};
+
+export const organizationInvitations = async (organizationId: string) => {
+  "use cache"
+
+  cacheLife("minutes");
+
+  cacheTag(`invitations-${organizationId}-list`);
+  
+ const invitations = await prisma.invitation.findMany({
+    where: {
+      organizationId
+    },
+    include: {
+      invitedBy: {
+        select: {
+          firstName: true, 
+          lastName: true
+        }
+      }
+    }
+  });
+
+  return invitations;
 
 };

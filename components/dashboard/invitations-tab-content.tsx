@@ -20,13 +20,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { AnimatedInvitationRow } from "@/components/dashboard/animated-invitation-row";
 import { cn } from "@/lib/utils";
-import prisma from "@/lib/prisma";
+import { organizationInvitations } from "@/lib/services/invitation";
 import { InvitationStatus } from "@/generated/prisma/enums";
 
-// TODO: Replace with real service function
-// import { getInvitationsByOrganization } from "@/lib/services/invitation";
-
-// TODO: Move to lib/config/invitation.ts
 const getStatusConfig = (status: InvitationStatus) => {
   switch (status) {
     case InvitationStatus.ACCEPTED:
@@ -61,22 +57,14 @@ const getStatusConfig = (status: InvitationStatus) => {
 
 interface InvitationsTabContentProps {
   organizationId: string;
-  organizationName: string;
-  canManage: boolean;
 }
 
 export const InvitationsTabContent = async ({
   organizationId,
-  organizationName,
-  canManage,
 }: InvitationsTabContentProps) => {
   
 
-  const invitations = await prisma.invitation.findMany({
-    where: {
-      organizationId
-    }
-  })
+  const invitations = await organizationInvitations(organizationId);
 
   const pendingCount = invitations.filter(
     (inv) => inv.status === InvitationStatus.PENDING
@@ -141,8 +129,10 @@ export const InvitationsTabContent = async ({
                           {
                             month: "short",
                             day: "numeric",
+                            year: "numeric"
                           }
                         )}
+                        {` By ${invitation.invitedBy.firstName} ${invitation.invitedBy.lastName}`}
                       </p>
                     </div>
                   </div>
@@ -154,6 +144,7 @@ export const InvitationsTabContent = async ({
                         {
                           month: "short",
                           day: "numeric",
+                          year: "numeric"
                         }
                       )}
                     </span>

@@ -10,6 +10,7 @@ import InvitationEmail from "@/components/email/email-template";
 import { verifyInvitationByToken } from "../services/invitation";
 
 import { after } from "next/server";
+import { updateTag } from "next/cache";
 
 // import twilio from 'twilio';
 
@@ -82,6 +83,8 @@ export async function inviteMember(data: OrgInvitationInput): Promise<ActionResp
                 organizationId: orgId,
             }
         });
+
+        updateTag(`invitations-${orgId}-list`);
 
         after(async () => {await resend.emails.send({
             from: `${membership.organization.name} <no-reply@aeghin.com>`,
@@ -158,6 +161,8 @@ export async function acceptOrgInvite(token: string): Promise<ActionResponse> {
             return inv
         
          });
+
+         updateTag(`invitations-${acceptedInvitation.organizationId}-list`);
 
          return { success: true, orgId: acceptedInvitation.organizationId }
 
