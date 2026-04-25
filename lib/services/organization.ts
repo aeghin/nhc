@@ -8,6 +8,9 @@ export const getOrganizationDetailsById = async (id: string, userId: string) => 
 
     cacheLife('minutes');
 
+    cacheTag(`org-${id}-details`);
+    cacheTag(`user-${userId}-org-${id}-role`);
+
   const organization = await prisma.organization.findUnique({
     where: {
       id,
@@ -79,7 +82,7 @@ export const getOrgMemberCountById = async (organizationId: string) => {
 
   cacheLife('hours');
 
-  cacheTag('org-members-count');
+  cacheTag(`org-${organizationId}-member-count`);
 
   const count = await prisma.membership.count({
     where: {

@@ -70,7 +70,9 @@ export const updateUserRole = async (data: UserRoleInput): Promise<ActionRespons
             }
         });
         
-        updateTag(`user-${userId}-roles`);
+        updateTag(`org-${organizationId}-members-list`);
+        updateTag(`user-${userId}-org-${organizationId}-role`)
+        updateTag(`user-${userId}-orgs`);
         revalidatePath(`/dashboard/organizations/${organizationId}`);
 
         return { success: true, role: newRole.role };
@@ -134,6 +136,9 @@ export const removeMember = async (userId: string, organizationId: string): Prom
         updateTag(`user-${userId}-roles`);
         updateTag(`user-${userId}-orgs`);
         updateTag(`user-${userId}-events-${organizationId}`);
+        updateTag(`org-${organizationId}-members-list`);
+        updateTag(`org-${organizationId}-member-count`);
+        updateTag(`user-${userId}-org-${organizationId}-role`);
 
         revalidatePath(`/dashboard/organizations/${organizationId}`);
 
@@ -204,6 +209,7 @@ export const updateVolunteerRoles = async (userId: string, organizationId: strin
         }
     });
     updateTag(`user-${userId}-roles`);
+    updateTag(`org-${organizationId}-members-list`);
     revalidatePath(`/dashboard/organizations/${organizationId}`);
 
     return { success: true };

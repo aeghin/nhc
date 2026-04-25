@@ -163,6 +163,9 @@ export async function acceptOrgInvite(token: string): Promise<ActionResponse> {
          });
 
          updateTag(`invitations-${acceptedInvitation.organizationId}-list`);
+         updateTag(`user-${user.id}-orgs`);
+         updateTag(`org-${acceptedInvitation.organizationId}-member-count`);
+         updateTag(`org-${acceptedInvitation.organizationId}-members-list`);
 
          return { success: true, orgId: acceptedInvitation.organizationId }
 
@@ -206,6 +209,8 @@ export async function declineOrgInvite(token: string): Promise<ActionResponse> {
             status: InvitationStatus.DECLINED
         }
     });
+
+    updateTag(`invitations-${invitation.organizationId}-list`);
 
     return { success: true };
 

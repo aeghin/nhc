@@ -3,7 +3,7 @@
 import { auth } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
 import { organizationSchema, OrganizationInput } from "@/lib/validations/organization";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { OrgRole } from "@/generated/prisma/enums";
 
 type ActionResponse =
@@ -62,6 +62,7 @@ export async function createOrganization(data: OrganizationInput): Promise<Actio
             return org;
         });
 
+        updateTag(`user-${user.id}-orgs`);
         revalidatePath('/dashboard');
         
         return { success: true, orgId: organization.id }
