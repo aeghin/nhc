@@ -2,7 +2,6 @@ import Link from "next/link";
 import { ArrowUpRight, Calendar, Crown, Shield, User, Users } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-// import type { Organization } from "@/lib/types"
 import { cn } from "@/lib/utils";
 import { OrgRole } from "@/generated/prisma/enums";
 
@@ -85,13 +84,13 @@ export function OrganizationCard({ organization, upcomingEvents }: OrganizationC
               <span className="font-medium">{organization.memberCount}</span>
               <span>members</span>
             </div>
-            {typeof upcomingEvents === "number" && upcomingEvents > 0 && (
+            {/* {typeof upcomingEvents === "number" && upcomingEvents > 0 && (
               <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
                 <Calendar className="h-3.5 w-3.5" />
                 <span className="font-medium">{upcomingEvents}</span>
                 <span>upcoming</span>
               </div>
-            )}
+            )} */}
             {organization.invitationCount > 0 && isAdmin && (
               <Badge variant="secondary" className="bg-primary/10 text-primary font-medium text-xs">
                 {organization.invitationCount} pending

@@ -1,6 +1,7 @@
 import { OrganizationCard } from "./organization-card";
 import { getUserOrganizations } from "@/lib/services/organization";
 
+
 interface OrganizationsGridProps {
   userId: string
 };
@@ -8,36 +9,7 @@ interface OrganizationsGridProps {
 export async function OrganizationsGrid({ userId }: OrganizationsGridProps) {
   
   const organizations = await getUserOrganizations(userId);
-
-  // Fetch event counts per org in parallel
-  // const orgEventArrays = await Promise.all(
-  //   visibleOrganizations.map(async (org) => {
-  //     const events = await getEventsByOrganization(org.id)
-  //     return {
-  //       orgId: org.id,
-  //       upcomingCount: events.filter((e) => e.status === "upcoming").length,
-  //     }
-  //   })
-  // )
-
-  // const orgEventCounts: Record<string, number> = {}
-  // orgEventArrays.forEach(({ orgId, upcomingCount }) => {
-  //   orgEventCounts[orgId] = upcomingCount
-  // })
-
-  // Pending invitation counts per org
-  // const invitationCountByOrg = invitations.reduce(
-  //   (acc, inv) => {
-  //     if (inv.status === "pending") {
-  //       acc[inv.organizationId] = (acc[inv.organizationId] || 0) + 1
-  //     }
-  //     return acc
-  //   },
-  //   {} as Record<string, number>
-  // )
-
   
-  const upcomingEvents = 1;
 
   return (
     <div className="space-y-5">
@@ -54,7 +26,6 @@ export async function OrganizationsGrid({ userId }: OrganizationsGridProps) {
           <OrganizationCard
             key={org.id}
             organization={org}
-            upcomingEvents={upcomingEvents}
           />
         ))}
       </div>

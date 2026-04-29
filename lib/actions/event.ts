@@ -63,9 +63,9 @@ export const checkMemberAvailability = async ({
     throw new Error("Unauthorized");
   }
 
-  const overlapConditions = dates.map(({ date, startTime, endTime }) => {
-    const newStart = new Date(`${date}T${startTime}:00`);
-    const newEnd = new Date(`${date}T${endTime}:00`);
+  const overlapConditions = dates.map(({ startTime, endTime }) => {
+    const newStart = new Date(startTime);
+    const newEnd = new Date(endTime);
 
     return {
       event: {
@@ -116,9 +116,9 @@ export const checkMemberAvailability = async ({
   for (const assignment of conflictingAssignments) {
     if (!conflicts[assignment.userId]) {
       const overlappingDate = assignment.event.dates.find((eventDate) => {
-        return dates.some(({ date, startTime, endTime }) => {
-          const newStart = new Date(`${date}T${startTime}:00`);
-          const newEnd = new Date(`${date}T${endTime}:00`);
+        return dates.some(({ startTime, endTime }) => {
+          const newStart = new Date(startTime);
+          const newEnd = new Date(endTime);
           return eventDate.startTime < newEnd && eventDate.endTime > newStart;
         });
       });
@@ -127,16 +127,8 @@ export const checkMemberAvailability = async ({
 
       conflicts[assignment.userId] = {
         eventName: assignment.event.name,
-        startTime: displayDate.startTime.toLocaleTimeString("en-US", {
-          hour: "numeric",
-          minute: "2-digit",
-          hour12: true,
-        }),
-        endTime: displayDate.endTime.toLocaleTimeString("en-US", {
-          hour: "numeric",
-          minute: "2-digit",
-          hour12: true,
-        }),
+        startTime: displayDate.startTime.toISOString(),
+        endTime: displayDate.endTime.toISOString(),
       };
     }
   }
@@ -221,10 +213,10 @@ export async function createEvent(
       });
 
       await tx.eventDate.createMany({
-        data: Object.entries(dayTimes).map(([date, times]) => ({
+        data: Object.entries(dayTimes).map(([, times]) => ({
           eventId: event.id,
-          startTime: new Date(`${date}T${times.startTime}:00`),
-          endTime: new Date(`${date}T${times.endTime}:00`),
+          startTime: new Date(times.startTime),
+          endTime: new Date(times.endTime),
         })),
       });
 

@@ -182,6 +182,14 @@ export type MemberConflict = {
   endTime: string;
 };
 
+function formatConflictTime(iso: string): string {
+  return new Date(iso).toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+}
+
 interface CreateEventPageContentProps {
   organizationId: string;
   organizationName: string;
@@ -432,11 +440,15 @@ export function CreateEventPageContent({
     try {
       const conflicts = await checkMemberAvailability({
         organizationId,
-        dates: selectedDates.map((d) => ({
-          date: format(d, "yyyy-MM-dd"),
-          startTime: watchedDayTimes[format(d, "yyyy-MM-dd")]?.startTime,
-          endTime: watchedDayTimes[format(d, "yyyy-MM-dd")]?.endTime,
-        })),
+        dates: selectedDates.map((d) => {
+          const key = format(d, "yyyy-MM-dd");
+          const times = watchedDayTimes[key];
+          return {
+            date: key,
+            startTime: new Date(`${key}T${times.startTime}:00`).toISOString(),
+            endTime: new Date(`${key}T${times.endTime}:00`).toISOString(),
+          };
+        }),
       });
       setMemberConflicts(conflicts);
 
@@ -451,10 +463,20 @@ export function CreateEventPageContent({
   const onSubmit = async (data: CreateEventFormData) => {
     setError(null);
 
+    const dayTimesISO = Object.fromEntries(
+      Object.entries(data.dayTimes).map(([key, times]) => [
+        key,
+        {
+          startTime: new Date(`${key}T${times.startTime}:00`).toISOString(),
+          endTime: new Date(`${key}T${times.endTime}:00`).toISOString(),
+        },
+      ]),
+    );
+
     startCreateTransition(async () => {
       try {
         const result = await createEvent(
-          { ...data, roleAssignments },
+          { ...data, dayTimes: dayTimesISO, roleAssignments },
           organizationId,
         );
 
@@ -548,8 +570,8 @@ export function CreateEventPageContent({
                   <span className="font-medium text-foreground">
                     {conflictWarning.conflict.eventName}
                   </span>{" "}
-                  from {conflictWarning.conflict.startTime} –{" "}
-                  {conflictWarning.conflict.endTime} on this day. Assigning them
+                  from {formatConflictTime(conflictWarning.conflict.startTime)} –{" "}
+                  {formatConflictTime(conflictWarning.conflict.endTime)} on this day. Assigning them
                   may cause a time overlap.
                 </>
               )}
@@ -1302,8 +1324,8 @@ export function CreateEventPageContent({
                                               <p className="text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1 mt-0.5">
                                                 <TriangleAlert className="h-3 w-3 shrink-0" />
                                                 {conflict.eventName} ·{" "}
-                                                {conflict.startTime} -{" "}
-                                                {conflict.endTime}
+                                                {formatConflictTime(conflict.startTime)} -{" "}
+                                                {formatConflictTime(conflict.endTime)}
                                               </p>
                                             )}
                                           </div>

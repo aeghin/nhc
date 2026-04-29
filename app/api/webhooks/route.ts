@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
       where: { clerkId: id },
     });
 
-    if (!existingUser) return;
+    if (!existingUser) return new Response("Unable to find user", { status: 404 });
 
     const primaryEmail = email_addresses.find(
       (e) => e.id === event.data.primary_email_address_id,

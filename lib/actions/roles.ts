@@ -95,7 +95,7 @@ export const removeMember = async (userId: string, organizationId: string): Prom
 
         if (user.id === userId) return { success: false, error: "You cannot remove yourself. Transfer ownership or use the leave-organization flow." };
 
-        const member = await prisma.membership.findUnique({
+        const assignee = await prisma.membership.findUnique({
             where: {
                 userId_organizationId: {
                     userId,
@@ -104,9 +104,9 @@ export const removeMember = async (userId: string, organizationId: string): Prom
             }
         });
 
-        if (!member) return { success: false, error: "Unable to find membership" };
+        if (!assignee) return { success: false, error: "Unable to find membership" };
 
-        const assignee = await prisma.membership.findUnique({
+        const userMembership = await prisma.membership.findUnique({
             where: {
                 userId_organizationId: {
                     userId: user.id,
@@ -116,13 +116,13 @@ export const removeMember = async (userId: string, organizationId: string): Prom
             select: {
                 role: true
             },
-        }); 
+        });
 
-        if (!assignee) return { success: false, error: "Unable to find membership" };
+        if (!userMembership) return { success: false, error: "Unable to find membership" };
 
-        if (assignee.role === OrgRole.MEMBER || member.role === OrgRole.OWNER) return { success: false, error: "Insufficient permission, reach out to owner." };
+        if (userMembership.role === OrgRole.MEMBER || assignee.role === OrgRole.OWNER) return { success: false, error: "Insufficient permission, reach out to owner." };
 
-        if (assignee.role === OrgRole.ADMIN && member.role !== OrgRole.MEMBER) return { success: false, error: "Admins can only remove members." };
+        if (userMembership.role === OrgRole.ADMIN && assignee.role !== OrgRole.MEMBER) return { success: false, error: "Admins can only remove members." };
 
         await prisma.membership.delete({
             where: {
