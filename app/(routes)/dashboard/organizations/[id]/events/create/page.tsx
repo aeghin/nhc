@@ -1,10 +1,4 @@
 import { redirect } from "next/navigation";
-// import {
-//   getOrganizationById,
-//   getMembersByOrganization,
-//   getServiceTypesByOrganization,
-//   getCurrentUser,
-// } from "@/lib/services/data";
 import { CreateEventPageContent } from "@/components/dashboard/create-event-content";
 import prisma from "@/lib/prisma";
 import { OrgRole } from "@/generated/prisma/enums";
@@ -23,18 +17,6 @@ export default async function CreateEventPage({
   if (!user) redirect("/sign-in");
 
   const { id } = user;
-
-//   const [organization, members, serviceTypes, user] = await Promise.all([
-//     getOrganizationById(orgId),
-//     getMembersByOrganization(orgId),
-//     getServiceTypesByOrganization(orgId),
-//     getCurrentUser(),
-//   ])
-
-//   if (!organization) {
-//     notFound()
-//   }
-
 
   const [membership, members, serviceTypes] = await Promise.all([
     
