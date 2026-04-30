@@ -6,7 +6,7 @@ import { notFound } from "next/navigation";
 //   getCurrentUser,
 //   getServiceTypesByOrganization,
 // } from "@/lib/services/data"
-// import { EventHeader } from "@/components/dashboard/events/event-header";
+import { EventHeader } from "@/components/dashboard/events/event-header";
 // import { EventDetailsCard } from "@/components/dashboard/events/event-details-card";
 // import { EventSetlistSection } from "@/components/dashboard/events/event-setlist-section";
 // import { EventVolunteersSection } from "@/components/dashboard/events/event-volunteers-section";
@@ -33,13 +33,14 @@ export default async function EventDetailPage({
         organizationId: orgId
       },
       include: {
-        serviceType: {
+        organization: {
           select: {
             name: true
           }
         },
         assignments: true,
         dates: true,
+        serviceType: true,
       }
     }),
 
@@ -68,16 +69,16 @@ export default async function EventDetailPage({
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
-      {/* <EventHeader
+      <EventHeader
         event={event}
         orgId={orgId}
-        orgName={org.name}
+        orgName={event.organization.name}
         userId={user.id}
         canManage={canManage}
-        serviceType={serviceType}
+        serviceType={event.serviceType}
       />
 
-      <div className="mx-auto w-full max-w-4xl px-4 py-6 sm:px-6">
+      {/* <div className="mx-auto w-full max-w-4xl px-4 py-6 sm:px-6">
         <div className="grid gap-6 lg:grid-cols-3">
           <div className="space-y-6 lg:col-span-2">
             <EventDetailsCard event={event} canManage={canManage} />
