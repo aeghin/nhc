@@ -6,6 +6,8 @@ import { notFound } from "next/navigation";
 //   getCurrentUser,
 //   getServiceTypesByOrganization,
 // } from "@/lib/services/data"
+import { AnimatedSection } from "@/components/dashboard/animate-section";
+import { BackLink } from "@/components/dashboard/back-link-button";
 import { EventHeader } from "@/components/dashboard/events/event-header";
 // import { EventDetailsCard } from "@/components/dashboard/events/event-details-card";
 // import { EventSetlistSection } from "@/components/dashboard/events/event-setlist-section";
@@ -68,18 +70,24 @@ export default async function EventDetailPage({
   if (!hasAccess) notFound();
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
-      <EventHeader
-        event={event}
-        orgId={orgId}
-        orgName={event.organization.name}
-        userId={user.id}
-        canManage={canManage}
-        serviceType={event.serviceType}
-      />
+    <main className="mx-auto max-w-screen-2xl px-6 py-8">
+      <div className="space-y-8">
+        <AnimatedSection delay={0.05}>
+          <BackLink
+            href={`/dashboard/organizations/${orgId}`}
+            label={`Back to ${event.organization.name}`}
+          />
+        </AnimatedSection>
 
-      {/* <div className="mx-auto w-full max-w-4xl px-4 py-6 sm:px-6">
-        <div className="grid gap-6 lg:grid-cols-3">
+        <AnimatedSection delay={0.1}>
+          <EventHeader
+            event={event}
+            userId={user.id}
+            serviceType={event.serviceType}
+          />
+        </AnimatedSection>
+
+        {/* <div className="grid gap-6 lg:grid-cols-3">
           <div className="space-y-6 lg:col-span-2">
             <EventDetailsCard event={event} canManage={canManage} />
             <EventSetlistSection event={event} canManage={canManage} />
@@ -93,9 +101,9 @@ export default async function EventDetailPage({
             />
             <EventStatusCard event={event} />
           </div>
-        </div>
-      </div> */}
-      event details test
-    </div>
+        </div> */}
+        event details test
+      </div>
+    </main>
   )
 }
