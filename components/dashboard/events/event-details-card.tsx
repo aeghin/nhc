@@ -1,11 +1,14 @@
 import { Calendar, Clock, MapPin } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
+import { colorClasses } from "@/lib/config/service-types-config";
 
 
 type Event = {
   id: string
   name: string
   description: string
+  location: string
   createdAt: Date
   updatedAt: Date
   dates: {
@@ -18,38 +21,67 @@ type Event = {
 
 interface EventDetailsCardProps {
   event: Event
+  serviceType: {
+    color: string
+  }
 };
 
-export function EventDetailsCard({ event }: EventDetailsCardProps) {
+export function EventDetailsCard({ event, serviceType }: EventDetailsCardProps) {
+  const serviceColors = colorClasses[serviceType.color];
 
-  console.log(event.dates);
   const start = event.dates[0].startTime;
-  
-  // const end = event.dateEnd && event.dateEnd !== event.date ? getDateParts(event.dateEnd) : null
+  const end = event.dates[0].endTime;
 
-  // const rows = [
-  //   {
-  //     icon: Calendar,
-  //     label: "Date",
-  //     value: start.full,
-  //     sub: end ? `through ${end.full}` : undefined,
-  //   },
-  //   {
-  //     icon: Clock,
-  //     label: "Time",
-  //     value: event.time,
-  //   },
-  //   {
-  //     icon: MapPin,
-  //     label: "Where",
-  //     value: event.location,
-  //   },
-  // ]
+  const rows = [
+    {
+      icon: Calendar,
+      label: "Date",
+      value: start.toLocaleDateString("en-US", {
+        weekday: "long",
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+      }),
+    },
+    {
+      icon: Clock,
+      label: "Time",
+      value: `${start.toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+      })} – ${end.toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+      })}`,
+    },
+    {
+      icon: MapPin,
+      label: "Where",
+      value: event.location,
+    },
+  ]
 
   return (
-    <Card className="overflow-hidden p-0">
-      <ul className="divide-y divide-border/60">
-        {/* {rows.map(({ icon: Icon, label, value, sub }) => (
+    <Card
+      className={cn(
+        "relative overflow-hidden p-0 bg-linear-to-br from-card via-card",
+        serviceColors.gradientTo,
+      )}
+    >
+      <div
+        className={cn(
+          "pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full blur-3xl",
+          serviceColors.blurSoft,
+        )}
+      />
+      <div
+        className={cn(
+          "pointer-events-none absolute -bottom-16 -left-16 h-32 w-32 rounded-full blur-3xl",
+          serviceColors.blurSoft,
+        )}
+      />
+      <ul className="relative divide-y divide-border/60">
+        {rows.map(({ icon: Icon, label, value }) => (
           <li
             key={label}
             className="flex items-center gap-3 px-4 py-3"
@@ -62,12 +94,9 @@ export function EventDetailsCard({ event }: EventDetailsCardProps) {
                 {label}
               </p>
               <p className="truncate text-sm font-medium text-foreground">{value}</p>
-              {sub && (
-                <p className="truncate text-xs text-muted-foreground">{sub}</p>
-              )}
             </div>
           </li>
-        ))} */}
+        ))}
       </ul>
     </Card>
   )

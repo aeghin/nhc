@@ -88,7 +88,7 @@ export default async function EventDetailPage({
 
         <div className="grid gap-6 lg:grid-cols-3">
           <div className="space-y-6 lg:col-span-2">
-            <EventDetailsCard event={event} />
+            <EventDetailsCard event={event} serviceType={event.serviceType} />
             {/* <EventSetlistSection event={event} canManage={canManage} /> */}
           </div>
           {/* <div className="space-y-6">
