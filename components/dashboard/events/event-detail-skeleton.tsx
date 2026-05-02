@@ -3,24 +3,21 @@ import { Skeleton } from "@/components/ui/skeleton"
 
 export function EventDetailSkeleton() {
   return (
-    <div className="flex min-h-screen flex-col bg-background">
-      <div className="border-b bg-card border-l-[3px] border-l-muted">
-        <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6">
-          <Skeleton className="mb-4 h-4 w-32" />
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex items-start gap-4">
-              <Skeleton className="h-18 w-16 rounded-xl" />
-              <div className="space-y-2">
-                <Skeleton className="h-5 w-24" />
-                <Skeleton className="h-7 w-64" />
-                <Skeleton className="h-4 w-80" />
-              </div>
+    <main className="mx-auto max-w-screen-2xl px-6 py-8">
+      <div className="space-y-8">
+        <Skeleton className="h-4 w-40" />
+
+        <div className="rounded-2xl border border-border/40 border-l-[3px] border-l-muted bg-card p-8">
+          <div className="flex items-start gap-5">
+            <Skeleton className="h-16 w-16 rounded-2xl" />
+            <div className="space-y-3">
+              <Skeleton className="h-5 w-24" />
+              <Skeleton className="h-9 w-72" />
+              <Skeleton className="h-4 w-80" />
             </div>
           </div>
         </div>
-      </div>
 
-      <div className="mx-auto w-full max-w-4xl px-4 py-6 sm:px-6">
         <div className="grid gap-6 lg:grid-cols-3">
           <div className="space-y-6 lg:col-span-2">
             <Card>
@@ -65,6 +62,6 @@ export function EventDetailSkeleton() {
           </div>
         </div>
       </div>
-    </div>
+    </main>
   )
 }

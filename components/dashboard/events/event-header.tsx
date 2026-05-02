@@ -1,13 +1,7 @@
-import { Badge } from "@/components/ui/badge"
-import { cn } from "@/lib/utils"
-// import { EditEventButton } from "./edit-event-button"
-// import { getColorClasses, getRoleInfo, getDateParts } from "./utils"
-// import type { Event, ServiceType } from "@/lib/types"
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+// import { EditEventButton } from "./edit-event-button";
 import { colorClasses } from "@/lib/config/service-types-config";
-import { VolunteerRole, InvitationStatus } from "@/generated/prisma/enums";
-import { volunteerRoleConfig } from "@/lib/config/roles";
-
-
 
 type Event = {
   id: string
@@ -15,31 +9,16 @@ type Event = {
   description: string
   createdAt: Date
   updatedAt: Date
-  assignments: {
-        userId: string;
-        id: string;
-        role: VolunteerRole;
-        eventId: string;
-        createdAt: Date;
-        updatedAt: Date;
-        organizationId: string;
-        assignedById: string;
-        status: InvitationStatus;
-        expiresAt: Date;
-  }[],
   dates: {
         id: string;
         eventId: string;
         startTime: Date;
         endTime: Date;
   }[],
-  serviceType: any,
-  organization: any
 };
 
 interface EventHeaderProps {
   event: Event
-  userId: string
   serviceType: {
     id: string;
     name: string;
@@ -52,87 +31,79 @@ interface EventHeaderProps {
 
 export function EventHeader({
   event,
-  userId,
   serviceType,
 }: EventHeaderProps) {
   const serviceColors = colorClasses[serviceType.color];
-  // const dateParts = getDateParts(event.date)
 
-  const userAssignment = event.assignments.find((e) => e.userId === userId);
+  const firstDate = event.dates[0]?.startTime;
+
+  const dateParts = firstDate
+    ? {
+        month: firstDate.toLocaleString("en-US", { month: "short" }).toUpperCase(),
+        day: firstDate.getDate(),
+        weekday: firstDate.toLocaleString("en-US", { weekday: "short" }).toUpperCase(),
+      }
+    : null;
 
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-2xl border border-border/40 border-l-[3px] bg-linear-to-br from-card via-card to-primary/5 p-8",
+        "relative overflow-hidden rounded-2xl border border-border/40 border-l-[3px] bg-linear-to-br from-card via-card p-8",
         serviceColors.border,
+        serviceColors.gradientTo,
       )}
     >
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex items-start gap-4">
-          <div
-            className={
-              "flex w-16 flex-col items-center justify-center rounded-xl border py-3 border-emerald-500/30 bg-emerald-500/5"
-            }
-          >
-            <span
-              className={
-                "text-[10px] font-bold tracking-wider text-emerald-600"
-              }
-            >
-              {/* {dateParts.month} */}
-            </span>
-            <span
-              className={
-                "text-2xl font-bold leading-none text-emerald-700"
-                  }
-            >
-              {/* {dateParts.day} */}
-            </span>
-            <span className="text-[10px] text-muted-foreground">
-              {/* {dateParts.weekday} */}
-            </span>
-          </div>
+      <div
+        className={cn(
+          "pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full blur-3xl",
+          serviceColors.blurSoft,
+        )}
+      />
+      <div
+        className={cn(
+          "pointer-events-none absolute -bottom-20 -left-20 h-48 w-48 rounded-full blur-3xl",
+          serviceColors.blurStrong,
+        )}
+      />
 
-          <div>
+      <div className="relative flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex items-start gap-5">
+          {dateParts && (
+            <div
+              className={cn(
+                "flex h-16 w-16 flex-col items-center justify-center rounded-2xl border border-border/40 bg-muted/30 shadow-lg",
+                serviceColors.shadow,
+              )}
+            >
+              <span className="text-[10px] font-bold tracking-wider text-muted-foreground">
+                {dateParts.month}
+              </span>
+              <span className="text-2xl font-bold leading-none text-foreground">
+                {dateParts.day}
+              </span>
+              <span className="text-[10px] text-muted-foreground">{dateParts.weekday}</span>
+            </div>
+          )}
+
+          <div className="space-y-3">
             {serviceType && (
               <Badge
                 className={cn(
-                  "mb-2 text-xs font-medium",
+                  "text-xs font-medium",
                   serviceColors.badge,
                   serviceColors.badgeText,
                 )}
               >
-                <span
-                  className={cn(
-                    "mr-1.5 h-2 w-2 rounded-full",
-                    serviceColors.dot,
-                  )}
-                />
+                <span className={cn("mr-1.5 h-2 w-2 rounded-full", serviceColors.dot)} />
                 {serviceType.name}
               </Badge>
             )}
-            <div className="flex items-center gap-2 mb-1">
-              <h1 className="text-xl font-bold sm:text-2xl text-balance">
-                {event.name}
-              </h1>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              {event.description}
-            </p>
-              {userAssignment && (
-                <Badge
-                  className={
-                    "mt-2 gap-1.5 font-medium border"
-                  }
-                >
-                  <span>{volunteerRoleConfig[userAssignment.role].icon}</span>
-                  {volunteerRoleConfig[userAssignment.role].label} - Assigned
-                </Badge>
-              )}
+            <h1 className="text-3xl font-bold tracking-tight text-balance">{event.name}</h1>
+            {event.description && (
+              <p className="max-w-lg text-muted-foreground">{event.description}</p>
+            )}
           </div>
         </div>
-
-        {/* {canManage && <EditEventButton eventId={event.id} />} */}
       </div>
     </div>
   )

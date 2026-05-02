@@ -9,7 +9,7 @@ import { notFound } from "next/navigation";
 import { AnimatedSection } from "@/components/dashboard/animate-section";
 import { BackLink } from "@/components/dashboard/back-link-button";
 import { EventHeader } from "@/components/dashboard/events/event-header";
-// import { EventDetailsCard } from "@/components/dashboard/events/event-details-card";
+import { EventDetailsCard } from "@/components/dashboard/events/event-details-card";
 // import { EventSetlistSection } from "@/components/dashboard/events/event-setlist-section";
 // import { EventVolunteersSection } from "@/components/dashboard/events/event-volunteers-section";
 // import { EventStatusCard } from "@/components/dashboard/events/event-status-card";
@@ -82,17 +82,16 @@ export default async function EventDetailPage({
         <AnimatedSection delay={0.1}>
           <EventHeader
             event={event}
-            userId={user.id}
             serviceType={event.serviceType}
           />
         </AnimatedSection>
 
-        {/* <div className="grid gap-6 lg:grid-cols-3">
+        <div className="grid gap-6 lg:grid-cols-3">
           <div className="space-y-6 lg:col-span-2">
-            <EventDetailsCard event={event} canManage={canManage} />
-            <EventSetlistSection event={event} canManage={canManage} />
+            <EventDetailsCard event={event} />
+            {/* <EventSetlistSection event={event} canManage={canManage} /> */}
           </div>
-          <div className="space-y-6">
+          {/* <div className="space-y-6">
             <EventVolunteersSection
               event={event}
               userId={user.id}
@@ -100,8 +99,8 @@ export default async function EventDetailPage({
               canManage={canManage}
             />
             <EventStatusCard event={event} />
-          </div>
-        </div> */}
+          </div> */}
+        </div>
         event details test
       </div>
     </main>
