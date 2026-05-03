@@ -166,6 +166,7 @@ export async function acceptOrgInvite(token: string): Promise<ActionResponse> {
          updateTag(`user-${user.id}-orgs`);
          updateTag(`org-${acceptedInvitation.organizationId}-member-count`);
          updateTag(`org-${acceptedInvitation.organizationId}-members-list`);
+         updateTag(`user-${user.id}-memberships`);
 
          return { success: true, orgId: acceptedInvitation.organizationId }
 

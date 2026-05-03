@@ -63,6 +63,7 @@ export async function createOrganization(data: OrganizationInput): Promise<Actio
         });
 
         updateTag(`user-${user.id}-orgs`);
+        updateTag(`user-${user.id}-memberships`);
         revalidatePath('/dashboard');
         
         return { success: true, orgId: organization.id }

@@ -167,7 +167,7 @@ model EventAssignment {
   assignedBy User @relation("assignedBy", fields: [assignedById], references: [id])
 
   organizationId String
-  organization Organization @relation(fields: [organizationId], references: [id])
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   role VolunteerRole
   status InvitationStatus @default(PENDING)

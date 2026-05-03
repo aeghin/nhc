@@ -14,7 +14,8 @@ import { EventDetailsCard } from "@/components/dashboard/events/event-details-ca
 // import { EventVolunteersSection } from "@/components/dashboard/events/event-volunteers-section";
 // import { EventStatusCard } from "@/components/dashboard/events/event-status-card";
 import { currentUser } from "@/lib/services/user";
-import prisma from "@/lib/prisma";
+import { getEventDetailsById } from "@/lib/services/events";
+import { getUserMembershipRole } from "@/lib/services/organization";
 import { OrgRole } from "@/generated/prisma/enums";
 
 export default async function EventDetailPage({
@@ -29,34 +30,8 @@ export default async function EventDetailPage({
   if (!user) notFound();
 
   const [event, membership] = await Promise.all([
-    prisma.event.findFirst({
-      where: {
-        id: eventId,
-        organizationId: orgId
-      },
-      include: {
-        organization: {
-          select: {
-            name: true
-          }
-        },
-        assignments: true,
-        dates: true,
-        serviceType: true,
-      }
-    }),
-
-    prisma.membership.findUnique({
-      where: {
-        userId_organizationId: {
-          userId: user.id,
-          organizationId: orgId
-        },
-      },
-      select: {
-        role: true
-      }
-    }),
+    getEventDetailsById(eventId, orgId),
+    getUserMembershipRole(user.id, orgId),
   ]);
 
   if (!event || !membership) notFound();

@@ -69,3 +69,33 @@ export const getUserEvents = async (organizationId: string, userId: string) => {
 
     return events;
 };
+
+
+export const getEventDetailsById = async (eventId: string, organizationId: string) => {
+  
+  "use cache";
+
+  cacheLife("hours");
+
+  cacheTag(`event-${eventId}-org-${organizationId}-details`);
+
+  const details = await prisma.event.findFirst({
+      where: {
+        id: eventId,
+        organizationId
+      },
+      include: {
+        organization: {
+          select: {
+            name: true
+          }
+        },
+        assignments: true,
+        dates: true,
+        serviceType: true,
+      }
+    });
+
+    return details;
+
+}

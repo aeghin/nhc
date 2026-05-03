@@ -115,7 +115,7 @@ export const getUserVolunteerRolesByOrg = async (organizationId: string, userId:
 
 export const organizationMembersList = async (organizationId: string) => {
 
-  "use cache"
+  "use cache";
 
   cacheLife("hours");
 
@@ -146,4 +146,99 @@ export const organizationMembersList = async (organizationId: string) => {
 
   return members;
 
+};
+
+
+export const getUserMembershipCount = async (userId: string) => {
+  
+  "use cache";
+  
+  cacheLife("hours");
+
+  cacheTag(`user-${userId}-memberships`);
+
+
+  const count = await prisma.membership.count({
+      where: {
+        userId
+      },
+    });
+
+    return count;
+
+};
+
+export const getUserMembershipRole = async (userId: string, organizationId: string) => {
+
+  "use cache"
+
+  cacheLife("hours");
+
+  cacheTag(`user-${userId}-org-${organizationId}-role`);
+
+  const role = await prisma.membership.findUnique({
+        where: {
+          userId_organizationId: {
+            userId,
+            organizationId,
+          },
+        },
+        select: {
+          role: true
+        }
+      });
+
+      return role;
+};
+
+export const getUserMembershipWithOrg = async (userId: string, organizationId: string) => {
+
+  "use cache";
+
+  cacheLife("hours");
+
+  cacheTag(`user-${userId}-org-${organizationId}-role`);
+
+  const membership = await prisma.membership.findFirst({
+    where: {
+      userId,
+      organizationId,
+    },
+    include: {
+      organization: {
+        select: {
+          name: true,
+        },
+      },
+    },
+  });
+
+  return membership;
+};
+
+export const getOrgMembersWithUser = async (organizationId: string) => {
+
+  "use cache";
+
+  cacheLife("hours");
+
+  cacheTag(`org-${organizationId}-members-list`);
+
+  const members = await prisma.membership.findMany({
+    where: {
+      organizationId,
+    },
+    include: {
+      user: {
+        select: {
+          firstName: true,
+          lastName: true,
+          email: true,
+          userImageUrl: true,
+        },
+      },
+    },
+  });
+
+  return members;
 };

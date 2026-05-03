@@ -1,8 +1,12 @@
 import { redirect } from "next/navigation";
 import { CreateEventPageContent } from "@/components/dashboard/create-event-content";
-import prisma from "@/lib/prisma";
 import { OrgRole } from "@/generated/prisma/enums";
 import { currentUser } from "@/lib/services/user";
+import {
+  getUserMembershipWithOrg,
+  getOrgMembersWithUser,
+} from "@/lib/services/organization";
+import { getOrgServiceTypes } from "@/lib/services/service-types";
 
 
 export default async function CreateEventPage({
@@ -16,55 +20,12 @@ export default async function CreateEventPage({
 
   if (!user) redirect("/sign-in");
 
-  const { id } = user;
-
   const [membership, members, serviceTypes] = await Promise.all([
-    
-      prisma.membership.findFirst({
-      where: {
-          userId: id,
-          organizationId: orgId
-      },
-      include: {
-          organization: {
-              select: {
-                  name: true
-              }
-          }
-      }
-    }),
+    getUserMembershipWithOrg(user.id, orgId),
+    getOrgMembersWithUser(orgId),
+    getOrgServiceTypes(orgId),
+  ])
 
-    prisma.membership.findMany({
-       where: {
-           organizationId: orgId
-       },
-       include: {
-           user: {
-               select: {
-                   firstName: true,
-                   lastName: true,
-                   email: true,
-                   userImageUrl: true,
-               }
-           },
-       }
-     }),
-     
-     prisma.serviceType.findMany({
-      where: {
-        organizationId: orgId
-      }, 
-      select: {
-        id: true, 
-        name: true, 
-        color: true, 
-      }
-    })
-  ]) 
-    
-
-
-  
   const organizationName = membership?.organization.name || '';
 
   const canManage = membership?.role === OrgRole.OWNER || membership?.role === OrgRole.ADMIN;

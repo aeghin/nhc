@@ -1,17 +1,15 @@
 import { Navbar } from "@/components/dashboard/navbar";
-import prisma from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { currentUser } from "@/lib/services/user";
+import { getUserMembershipCount } from "@/lib/services/organization";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
 
     const user = await currentUser();
 
-    const membershipsCount = await prisma.membership.count({
-      where: {
-        userId: user?.id
-      },
-    });
+    if (!user) redirect("/sign-in");
+
+    const membershipsCount = await getUserMembershipCount(user.id);
 
     if (membershipsCount < 1) redirect("/setup");
 

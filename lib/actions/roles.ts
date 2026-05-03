@@ -139,6 +139,7 @@ export const removeMember = async (userId: string, organizationId: string): Prom
         updateTag(`org-${organizationId}-members-list`);
         updateTag(`org-${organizationId}-member-count`);
         updateTag(`user-${userId}-org-${organizationId}-role`);
+        updateTag(`user-${userId}-memberships`);
 
         revalidatePath(`/dashboard/organizations/${organizationId}`);
 
