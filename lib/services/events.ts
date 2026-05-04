@@ -1,7 +1,7 @@
 import "server-only";
 
 import prisma from "@/lib/prisma";
-import { InvitationStatus } from "@/generated/prisma/enums";
+import { InvitationStatus, type VolunteerRole } from "@/generated/prisma/enums";
 import { cacheLife, cacheTag } from "next/cache";
 
 
@@ -90,12 +90,70 @@ export const getEventDetailsById = async (eventId: string, organizationId: strin
             name: true
           }
         },
-        assignments: true,
         dates: true,
         serviceType: true,
+        assignments: {
+          include: {
+            user: {
+              select: {
+                firstName: true,
+                lastName: true,
+                userImageUrl: true,
+              }
+            }
+          }
+        }
       }
     });
 
     return details;
 
+}
+
+export type EventDetailsAssignment = {
+  id: string
+  eventId: string
+  userId: string
+  assignedById: string
+  organizationId: string
+  role: VolunteerRole
+  status: InvitationStatus
+  expiresAt: Date
+  createdAt: Date
+  updatedAt: Date
+  user: {
+    firstName: string
+    lastName: string
+    userImageUrl: string | null
+  }
+}
+
+export type EventDetails = {
+  id: string
+  name: string
+  description: string
+  location: string
+  createdAt: Date
+  updatedAt: Date
+  createdById: string
+  serviceTypeId: string
+  organizationId: string
+  organization: {
+    name: string
+  }
+  dates: {
+    id: string
+    eventId: string
+    startTime: Date
+    endTime: Date
+  }[]
+  serviceType: {
+    id: string
+    name: string
+    color: string
+    organizationId: string
+    createdAt: Date
+    updatedAt: Date
+  }
+  assignments: EventDetailsAssignment[]
 }

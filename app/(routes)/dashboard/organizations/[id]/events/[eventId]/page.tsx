@@ -11,7 +11,7 @@ import { BackLink } from "@/components/dashboard/back-link-button";
 import { EventHeader } from "@/components/dashboard/events/event-header";
 import { EventDetailsCard } from "@/components/dashboard/events/event-details-card";
 // import { EventSetlistSection } from "@/components/dashboard/events/event-setlist-section";
-// import { EventVolunteersSection } from "@/components/dashboard/events/event-volunteers-section";
+import { EventAssignmentsCard } from "@/components/dashboard/events/event-assignment-section";
 // import { EventStatusCard } from "@/components/dashboard/events/event-status-card";
 import { currentUser } from "@/lib/services/user";
 import { getEventDetailsById } from "@/lib/services/events";
@@ -66,15 +66,14 @@ export default async function EventDetailPage({
             <EventDetailsCard event={event} serviceType={event.serviceType} />
             {/* <EventSetlistSection event={event} canManage={canManage} /> */}
           </div>
-          {/* <div className="space-y-6">
-            <EventVolunteersSection
+          <div className="space-y-6">
+            <EventAssignmentsCard
               event={event}
-              userId={user.id}
-              userRoles={userRoles}
+              currentUserId={user.id}
               canManage={canManage}
             />
-            <EventStatusCard event={event} />
-          </div> */}
+            {/* <EventStatusCard event={event} /> */}
+          </div>
         </div>
         event details test
       </div>

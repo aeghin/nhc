@@ -15,6 +15,31 @@ export const volunteerRoleConfig: Record<VolunteerRole, { label: string; icon: s
   [VolunteerRole.GREETER]:    { label: "Greeter",       icon: "👋" },
 };
 
+export type RoleCategory = "band" | "vocals" | "production" | "hospitality";
+
+export const roleCategoryConfig: Record<
+  RoleCategory,
+  { label: string; order: number }
+> = {
+  band: { label: "Band", order: 0 },
+  vocals: { label: "Vocals", order: 1 },
+  production: { label: "Production", order: 2 },
+  hospitality: { label: "Hospitality", order: 3 },
+};
+
+export const roleToCategory: Record<VolunteerRole, RoleCategory> = {
+  [VolunteerRole.PIANIST]: "band",
+  [VolunteerRole.AUX_KEYS]: "band",
+  [VolunteerRole.BASSIST]: "band",
+  [VolunteerRole.GUITARIST]: "band",
+  [VolunteerRole.DRUMMER]: "band",
+  [VolunteerRole.LEAD_VOCALIST]: "vocals",
+  [VolunteerRole.BGVS]: "vocals",
+  [VolunteerRole.SOUND_TECH]: "production",
+  [VolunteerRole.USHER]: "hospitality",
+  [VolunteerRole.GREETER]: "hospitality",
+};
+
 export const getRoleConfig = (role: OrgRole) => {
   switch (role) {
       case OrgRole.OWNER:
