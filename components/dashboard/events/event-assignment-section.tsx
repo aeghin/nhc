@@ -4,7 +4,6 @@ import {
   Check,
   X,
   LucideIcon,
-  MoreVertical,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -19,8 +18,7 @@ import { EventDetails } from "@/lib/services/events";
 import { InvitationStatus, VolunteerRole } from "@/generated/prisma/enums";
 import { statusStyles } from "@/lib/config/status";
 import { colorClasses } from "@/lib/config/service-types-config";
-// import { VolunteerRowMenu } from "./volunteer-row-menu"
-// import { InviteMoreButton } from "./invite-more-button"
+// import { VolunteerRowMenu } from "./volunteer-row-menu";
 
 import {
   volunteerRoleConfig,
@@ -28,6 +26,7 @@ import {
   roleToCategory,
   RoleCategory,
 } from "@/lib/config/roles";
+import { EventVolunteerRowMenu } from "./event-volunteer-row-menu";
 
 interface EventAssignmentsCardProps {
   event: EventDetails;
@@ -255,24 +254,7 @@ export function EventAssignmentsCard({
                                     : `${assignment.user.firstName} ${assignment.user.lastName}`}
                                 </p>
                               </div>
-
-                              {/* {canManage && (
-                                <VolunteerRowMenu
-                                  eventId={eventId}
-                                  assignedUserId={assignment.userId}
-                                  roleId={assignment.role}
-                                  status={assignment.status}
-                                />
-                              )} */}
-                              {canManage && (
-                                <button
-                                  type="button"
-                                  aria-label="Manage assignment"
-                                  className="ml-auto rounded-md p-1.5 text-muted-foreground opacity-0 transition hover:bg-muted group-hover:opacity-100"
-                                >
-                                  <MoreVertical className="h-4 w-4" />
-                                </button>
-                              )}
+                              {!isDeclined && canManage && <EventVolunteerRowMenu assignedUserId={assignment.userId} eventId={assignment.eventId} organizationId={assignment.organizationId} />}
                             </div>
                           );
                         })}
@@ -284,12 +266,6 @@ export function EventAssignmentsCard({
             </AccordionItem>
           ))}
         </Accordion>
-
-        {/* {canManage && (
-          <div className="border-t border-border/40 pt-3">
-            <InviteMoreButton eventId={eventId} />
-          </div>
-        )} */}
       </CardContent>
     </Card>
   );

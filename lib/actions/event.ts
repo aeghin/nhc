@@ -268,7 +268,7 @@ export async function createEvent(
 
     return { success: true };
     
-  } catch (error) {
+  } catch {
     return { success: false, error: "Unable to create event" };
   }
 }
@@ -308,7 +308,7 @@ export const acceptEventInvitation = async (organizationId: string, eventId: str
 
     return { success: true };
 
-  } catch (error) {
+  } catch {
 
     return { success: false, error: "Failed to accept invite" };
 
@@ -349,10 +349,58 @@ export const declineEventInvitation = async (organizationId: string, eventId: st
 
     return { success: true };
 
-  } catch (error) {
+  } catch {
 
     return { success: false, error: "Unable to decline Invite" };
 
   };
 };
 
+export const cancelUserEventAssignment = async (userId: string, organizationId: string, eventId: string): Promise<ActionResponse> => {
+  
+  try {
+
+    const user = await currentUser();
+
+    if (!user) return { success: false, error: "Unauthorized" };
+
+    const userMembership = await prisma.membership.findUnique({
+      where: {
+        userId_organizationId: {
+          userId: user.id, 
+          organizationId,
+        }
+      },
+      select: {
+        role: true
+      }
+    });
+
+    if (!userMembership) return { success: false, error: "Unable to locate membership" };
+
+    if (userMembership.role === OrgRole.MEMBER) return { success: false, error: "Unauthorized" };
+
+    await prisma.eventAssignment.update({
+      where: {
+        eventId_userId: {
+          eventId,
+          userId
+        },
+        organizationId
+      },
+      data: {
+        status: InvitationStatus.CANCELED
+      }
+    }); 
+
+    updateTag(`user-${userId}-events-${organizationId}`);
+    updateTag(`event-${eventId}-org-${organizationId}-details`);
+
+    return { success: true };
+
+  } catch {
+    
+    return { success: false, error: "Something went wrong, try again" };
+
+  };
+}
