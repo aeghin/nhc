@@ -14,7 +14,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { cn } from "@/lib/utils";
-import { EventDetails } from "@/lib/services/events";
+import type { EventDetails } from "@/lib/types";
 import { InvitationStatus, VolunteerRole } from "@/generated/prisma/enums";
 import { statusStyles } from "@/lib/config/status";
 import { colorClasses } from "@/lib/config/service-types-config";

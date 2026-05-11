@@ -10,7 +10,7 @@ import { AnimatedSection } from "@/components/dashboard/animate-section";
 import { BackLink } from "@/components/dashboard/back-link-button";
 import { EventHeader } from "@/components/dashboard/events/event-header";
 import { EventDetailsCard } from "@/components/dashboard/events/event-details-card";
-// import { EventSetlistSection } from "@/components/dashboard/events/event-setlist-section";
+import { EventSetlistSection } from "@/components/dashboard/events/event-setlist-section";
 import { EventAssignmentsCard } from "@/components/dashboard/events/event-assignment-section";
 // import { EventStatusCard } from "@/components/dashboard/events/event-status-card";
 import { currentUser } from "@/lib/services/user";
@@ -64,7 +64,7 @@ export default async function EventDetailPage({
         <div className="grid gap-6 lg:grid-cols-3">
           <div className="space-y-6 lg:col-span-2">
             <EventDetailsCard event={event} serviceType={event.serviceType} />
-            {/* <EventSetlistSection event={event} canManage={canManage} /> */}
+            <EventSetlistSection event={event} orgId={orgId} canManage={canManage} />
           </div>
           <div className="space-y-6">
             <EventAssignmentsCard

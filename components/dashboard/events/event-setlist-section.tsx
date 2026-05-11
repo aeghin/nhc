@@ -1,22 +1,38 @@
-import { auth } from "@clerk/nextjs/server"
-import { Music, Youtube } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-// import { SetlistEditingControls } from "./setlist-editing-controls"
-// import type { Event } from "@/lib/types"
+import Link from "next/link";
+import { Music, ArrowUpRight } from "lucide-react";
+import { YoutubeIcon, SpotifyIcon } from "@/components/icons/brand-icons";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { EditSetlistButton } from "./edit-setlist-button";
+import { formatKey } from "@/lib/constants/key";
+import type { EventDetails, SetlistSong } from "@/lib/types";
 
 interface EventSetlistSectionProps {
-  event: Event
+  event: EventDetails
+  orgId: string
   canManage: boolean
 }
 
-export async function EventSetlistSection({
+export function EventSetlistSection({
   event,
+  orgId,
   canManage,
 }: EventSetlistSectionProps) {
-  const { has } = await auth()
-  const canUseAi = canManage && has({ feature: "ai_setlist_generation" })
-  // const songs = event.setlist?.songs ?? []
+  const songs: SetlistSong[] = event.setlistSongs.map((s) => ({
+    id: s.id,
+    songId: s.songId,
+    position: s.position,
+    pitch: s.pitch,
+    keyQuality: s.keyQuality,
+    bpm: s.bpm,
+    timeSignature: s.timeSignature,
+    title: s.song.title,
+    artist: s.song.artist,
+    youtubeUrl: s.song.youtubeUrl,
+    spotifyUrl: s.song.spotifyUrl,
+  }))
+  const editorHref = `/dashboard/organizations/${orgId}/events/${event.id}/setlist/edit`
 
   return (
     <Card>
@@ -26,18 +42,27 @@ export async function EventSetlistSection({
             <Music className="h-4 w-4 text-primary" />
             Setlist
           </CardTitle>
-          {/* {canManage && (
-            <SetlistEditingControls
-              eventId={event.id}
-              eventName={event.name}
-              initialSongs={songs}
-              canUseAi={canUseAi}
-            />
-          )} */}
+          {canManage && (
+            <div className="flex items-center gap-2">
+              {songs.length > 0 && (
+                <EditSetlistButton
+                  eventId={event.id}
+                  eventName={event.name}
+                  initialSongs={songs}
+                />
+              )}
+              <Button asChild variant="outline" size="sm">
+                <Link href={editorHref}>
+                  Open editor
+                  <ArrowUpRight className="ml-1 h-3.5 w-3.5" />
+                </Link>
+              </Button>
+            </div>
+          )}
         </div>
       </CardHeader>
-      {/* <CardContent> */}
-        {/* {songs.length > 0 ? (
+      <CardContent>
+        {songs.length > 0 ? (
           <div className="space-y-1">
             {songs.map((song, idx) => (
               <div
@@ -60,19 +85,29 @@ export async function EventSetlistSection({
                     variant="outline"
                     className="text-[10px] font-mono px-1.5 py-0"
                   >
-                    {song.key}
+                    {formatKey(song.pitch, song.keyQuality)}
                   </Badge>
                   <span className="text-[10px] text-muted-foreground font-mono w-12 text-right">
                     {song.bpm} bpm
                   </span>
+                  {song.spotifyUrl && (
+                    <a
+                      href={song.spotifyUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-muted-foreground opacity-0 group-hover:opacity-100 hover:text-green-500 transition-all"
+                    >
+                      <SpotifyIcon className="h-4 w-4" />
+                    </a>
+                  )}
                   {song.youtubeUrl && (
-                    
+                    <a
                       href={song.youtubeUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-muted-foreground opacity-0 group-hover:opacity-100 hover:text-red-500 transition-all"
                     >
-                      <Youtube className="h-4 w-4" />
+                      <YoutubeIcon className="h-4 w-4" />
                     </a>
                   )}
                 </div>
@@ -85,13 +120,13 @@ export async function EventSetlistSection({
               <Music className="mx-auto mb-1.5 h-6 w-6 text-muted-foreground/30" />
               <p className="text-xs text-muted-foreground">
                 {canManage
-                  ? "No setlist yet. Click Edit to add songs."
+                  ? "No setlist yet. Open the editor to add songs."
                   : "No setlist added yet."}
               </p>
             </div>
           </div>
         )}
-      </CardContent> */}
+      </CardContent>
     </Card>
   )
 }
