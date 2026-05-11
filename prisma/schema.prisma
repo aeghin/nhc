@@ -33,6 +33,33 @@ enum InvitationStatus {
   CANCELED
 }
 
+enum Pitch {
+  C
+  C_SHARP   @map("C#")
+  D_FLAT    @map("Db")
+  D
+  D_SHARP   @map("D#")
+  E_FLAT    @map("Eb")
+  E
+  F
+  F_SHARP   @map("F#")
+  G_FLAT    @map("Gb")
+  G
+  G_SHARP   @map("G#")
+  A_FLAT    @map("Ab")
+  A
+  A_SHARP   @map("A#")
+  B_FLAT    @map("Bb")
+  B
+}
+
+enum KeyQuality {
+  MAJOR
+  MINOR
+}
+
+
+
 model User {
   id        String @id @default(uuid())
   clerkId   String @unique
@@ -63,6 +90,7 @@ model Organization {
   serviceTypes ServiceType[]
   events Event[]
   eventAssignments EventAssignment[]
+  songs Song[]
   
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -140,6 +168,9 @@ model Event {
   assignments EventAssignment[]
   dates EventDate[]
 
+  setlistSongs SetlistSong[]
+  
+
   createdById String
   createdBy User @relation(fields: [createdById], references: [id])
 
@@ -193,4 +224,54 @@ model EventDate {
   event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
 
   @@index([eventId])
+}
+
+model Song {
+  id String @id @default(uuid())
+  title String
+  artist String
+  bpm Int
+  timeSignature String
+  defaultPitch Pitch?
+  defaultKeyQuality KeyQuality?
+  spotifyUrl String?
+  youtubeUrl String?
+  themes String[]
+
+  organizationId String
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  setlistSongs SetlistSong[]
+
+
+  deletedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([organizationId, title, artist])
+  @@index([organizationId, deletedAt])
+
+}
+
+model SetlistSong {
+  id String @id @default(uuid())
+  pitch Pitch
+  keyQuality KeyQuality
+  bpm Int
+  timeSignature String
+  position Int
+
+  eventId String
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  songId String
+  song Song @relation(fields: [songId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([eventId, songId])
+  @@index([eventId])
+  @@index([songId])
+
 }
