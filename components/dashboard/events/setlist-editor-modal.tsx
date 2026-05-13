@@ -18,7 +18,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-// import { updateSetlist } from "@/lib/actions/setlist";
+import { toast } from "sonner";
+import { saveSetlist } from "@/lib/actions/song-setlist";
 import {
   KEY_OPTIONS,
   encodeKey,
@@ -55,9 +56,14 @@ export function SetlistEditorModal({
 
   const handleSave = () => {
     startTransition(async () => {
-      // await updateSetlist(eventId, songs)
-      // onOpenChange(false)
-      console.log("saved song")
+      const result = await saveSetlist(eventId, songs)
+
+      if (result.success) {
+        toast.success("Setlist saved")
+        onOpenChange(false)
+      } else {
+        toast.error(result.error)
+      }
     })
   };
 

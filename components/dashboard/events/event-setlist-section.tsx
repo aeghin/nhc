@@ -31,8 +31,8 @@ export function EventSetlistSection({
     artist: s.song.artist,
     youtubeUrl: s.song.youtubeUrl,
     spotifyUrl: s.song.spotifyUrl,
-  }))
-  const editorHref = `/dashboard/organizations/${orgId}/events/${event.id}/setlist/edit`
+  }));
+  const editorHref = `/dashboard/organizations/${orgId}/events/${event.id}/setlist/editor`;
 
   return (
     <Card>
@@ -53,7 +53,7 @@ export function EventSetlistSection({
               )}
               <Button asChild variant="outline" size="sm">
                 <Link href={editorHref}>
-                  Open editor
+                  Open Editor
                   <ArrowUpRight className="ml-1 h-3.5 w-3.5" />
                 </Link>
               </Button>
@@ -72,13 +72,40 @@ export function EventSetlistSection({
                 <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-muted text-[11px] font-bold text-muted-foreground">
                   {idx + 1}
                 </span>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium leading-tight truncate">
-                    {song.title}
-                  </p>
-                  <p className="text-xs text-muted-foreground truncate">
-                    {song.artist}
-                  </p>
+                <div className="flex min-w-0 flex-1 items-center gap-3">
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium leading-tight truncate">
+                      {song.title}
+                    </p>
+                    <p className="text-xs text-muted-foreground truncate">
+                      {song.artist}
+                    </p>
+                  </div>
+
+                  {(song.spotifyUrl || song.youtubeUrl) && (
+                    <div className="flex shrink-0 items-center gap-3 ml-2">
+                      {song.spotifyUrl && (
+                        <a
+                          href={song.spotifyUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-muted-foreground transition-colors hover:text-green-500"
+                        >
+                          <SpotifyIcon className="h-5 w-5" />
+                        </a>
+                      )}
+                      {song.youtubeUrl && (
+                        <a
+                          href={song.youtubeUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-muted-foreground transition-colors hover:text-red-500"
+                        >
+                          <YoutubeIcon className="h-5 w-5" />
+                        </a>
+                      )}
+                    </div>
+                  )}
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <Badge
@@ -87,29 +114,10 @@ export function EventSetlistSection({
                   >
                     {formatKey(song.pitch, song.keyQuality)}
                   </Badge>
-                  <span className="text-[10px] text-muted-foreground font-mono w-12 text-right">
+                  <span className="text-[12px] text-muted-foreground font-mono w-12 text-right">
                     {song.bpm} bpm
                   </span>
-                  {song.spotifyUrl && (
-                    <a
-                      href={song.spotifyUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-muted-foreground opacity-0 group-hover:opacity-100 hover:text-green-500 transition-all"
-                    >
-                      <SpotifyIcon className="h-4 w-4" />
-                    </a>
-                  )}
-                  {song.youtubeUrl && (
-                    <a
-                      href={song.youtubeUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-muted-foreground opacity-0 group-hover:opacity-100 hover:text-red-500 transition-all"
-                    >
-                      <YoutubeIcon className="h-4 w-4" />
-                    </a>
-                  )}
+                  
                 </div>
               </div>
             ))}

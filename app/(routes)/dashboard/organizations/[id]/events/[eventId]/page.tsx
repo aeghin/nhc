@@ -75,7 +75,6 @@ export default async function EventDetailPage({
             {/* <EventStatusCard event={event} /> */}
           </div>
         </div>
-        event details test
       </div>
     </main>
   )
