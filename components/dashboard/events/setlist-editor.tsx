@@ -50,11 +50,11 @@ export function SetlistEditor({
     const result = await saveSetlist(eventId, songs)
 
     if (result.success) {
-      toast.success("Setlist saved")
+      toast.success("Setlist saved", { position: "top-center" });
       setIsDirty(false)
       router.push(backHref)
     } else {
-      toast.error(result.error)
+      toast.error(result.error, { position: "top-center" });
     }
   })
 };

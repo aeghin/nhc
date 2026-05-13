@@ -70,7 +70,7 @@ export function CreateOrganizationModal({
         onOpenChange(false);
         onSuccess?.();
       } else {
-        toast.error(result.error);
+        toast.error(result.error, { position: "top-center" });
       }
     });
   };

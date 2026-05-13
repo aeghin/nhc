@@ -59,10 +59,10 @@ export function SetlistEditorModal({
       const result = await saveSetlist(eventId, songs)
 
       if (result.success) {
-        toast.success("Setlist saved")
+        toast.success("Setlist saved", { position: "top-center" });
         onOpenChange(false)
       } else {
-        toast.error(result.error)
+        toast.error(result.error, { position: "top-center" });
       }
     })
   };

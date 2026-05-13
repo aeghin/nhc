@@ -44,7 +44,7 @@ export const InviteActions = ({
         setStatus("accepted");
       } else {
         setStatus("idle");
-        toast.error(result.error);
+        toast.error(result.error, { position: "top-center" });
       }
     });
   };
@@ -58,7 +58,7 @@ export const InviteActions = ({
         setStatus("declined");
       } else {
         setStatus("idle");
-        toast.error(result.error);
+        toast.error(result.error, { position: "top-center" });
       }
     });
   };
