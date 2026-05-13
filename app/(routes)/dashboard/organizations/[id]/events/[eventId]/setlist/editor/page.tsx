@@ -8,7 +8,7 @@ import { getUserMembershipRole } from "@/lib/services/organization";
 import { getEventDetailsById } from "@/lib/services/events";
 import { OrgRole } from "@/generated/prisma/enums";
 import type { SetlistSong } from "@/lib/types";
-import prisma from "@/lib/prisma";
+import { getOrganizationSongs } from "@/lib/services/songs";
 
 
 interface PageProps {
@@ -26,11 +26,7 @@ export default async function SetlistEditPage({ params }: PageProps) {
   const [membership, event, catalog] = await Promise.all([
     getUserMembershipRole(user.id, orgId),
     getEventDetailsById(eventId, orgId),
-    prisma.song.findMany({
-      where: {
-        organizationId: orgId
-      }
-    })
+    getOrganizationSongs(orgId),
   ]);
 
   const canManage =
