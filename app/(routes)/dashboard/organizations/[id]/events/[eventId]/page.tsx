@@ -1,15 +1,21 @@
-import { Suspense } from "react";
+
 import { notFound } from "next/navigation";
+// import {
+//   getEventById,
+//   getOrganizationById,
+//   getCurrentUser,
+//   getServiceTypesByOrganization,
+// } from "@/lib/services/data"
 import { AnimatedSection } from "@/components/dashboard/animate-section";
 import { BackLink } from "@/components/dashboard/back-link-button";
 import { EventHeader } from "@/components/dashboard/events/event-header";
 import { EventDetailsCard } from "@/components/dashboard/events/event-details-card";
 import { EventSetlistSection } from "@/components/dashboard/events/event-setlist-section";
 import { EventAssignmentsCard } from "@/components/dashboard/events/event-assignment-section";
-import { EventDetailContentSkeleton } from "@/components/dashboard/events/event-detail-skeleton";
+// import { EventStatusCard } from "@/components/dashboard/events/event-status-card";
 import { currentUser } from "@/lib/services/user";
 import { getEventDetailsById } from "@/lib/services/events";
-import { getUserMembershipWithOrg } from "@/lib/services/organization";
+import { getUserMembershipRole } from "@/lib/services/organization";
 import { OrgRole } from "@/generated/prisma/enums";
 
 export default async function EventDetailPage({
@@ -20,13 +26,23 @@ export default async function EventDetailPage({
   const { id: orgId, eventId } = await params;
 
   const user = await currentUser();
+
   if (!user) notFound();
 
-  const membership = await getUserMembershipWithOrg(user.id, orgId);
-  if (!membership) notFound();
+  const [event, membership] = await Promise.all([
+    getEventDetailsById(eventId, orgId),
+    getUserMembershipRole(user.id, orgId),
+  ]);
 
-  const canManage =
-    membership.role === OrgRole.ADMIN || membership.role === OrgRole.OWNER;
+  if (!event || !membership) notFound();
+
+  const canManage = membership.role === OrgRole.ADMIN || membership.role === OrgRole.OWNER;
+
+  const hasAssignment = event.assignments.some((e) => e.userId === user.id);
+
+  const hasAccess = canManage || hasAssignment;
+
+  if (!hasAccess) notFound();
 
   return (
     <main className="mx-auto max-w-screen-2xl px-6 py-8">
@@ -34,60 +50,32 @@ export default async function EventDetailPage({
         <AnimatedSection delay={0.05}>
           <BackLink
             href={`/dashboard/organizations/${orgId}`}
-            label={`Back to ${membership.organization.name}`}
+            label={`Back to ${event.organization.name}`}
           />
         </AnimatedSection>
 
-        <Suspense fallback={<EventDetailContentSkeleton />}>
-          <EventDetailContent
-            eventId={eventId}
-            orgId={orgId}
-            userId={user.id}
-            canManage={canManage}
+        <AnimatedSection delay={0.1}>
+          <EventHeader
+            event={event}
+            serviceType={event.serviceType}
           />
-        </Suspense>
+        </AnimatedSection>
+
+        <div className="grid gap-6 lg:grid-cols-3">
+          <div className="space-y-6 lg:col-span-2">
+            <EventDetailsCard event={event} serviceType={event.serviceType} />
+            <EventSetlistSection event={event} orgId={orgId} canManage={canManage} />
+          </div>
+          <div className="space-y-6">
+            <EventAssignmentsCard
+              event={event}
+              currentUserId={user.id}
+              canManage={canManage}
+            />
+            {/* <EventStatusCard event={event} /> */}
+          </div>
+        </div>
       </div>
     </main>
-  )
-}
-
-async function EventDetailContent({
-  eventId,
-  orgId,
-  userId,
-  canManage,
-}: {
-  eventId: string;
-  orgId: string;
-  userId: string;
-  canManage: boolean;
-}) {
-  const event = await getEventDetailsById(eventId, orgId);
-  if (!event) notFound();
-
-  const hasAccess =
-    canManage || event.assignments.some((a) => a.userId === userId);
-  if (!hasAccess) notFound();
-
-  return (
-    <>
-      <AnimatedSection delay={0.1}>
-        <EventHeader event={event} serviceType={event.serviceType} />
-      </AnimatedSection>
-
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="space-y-6 lg:col-span-2">
-          <EventDetailsCard event={event} serviceType={event.serviceType} />
-          <EventSetlistSection event={event} orgId={orgId} canManage={canManage} />
-        </div>
-        <div className="space-y-6">
-          <EventAssignmentsCard
-            event={event}
-            currentUserId={userId}
-            canManage={canManage}
-          />
-        </div>
-      </div>
-    </>
   )
 }
