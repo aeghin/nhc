@@ -72,10 +72,6 @@ export function SetlistEditor({
   const handleBack = () => {
     startTransition(() => {
       router.push(backHref)
-      if (isDirty) {
-        setSongs(initialSongs)
-        setIsDirty(false)
-      }
     })
   };
 

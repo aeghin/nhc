@@ -15,7 +15,16 @@ export const userEventsTotalCount = async (userId: string, organizationId: strin
         where: {
           userId,
           organizationId,
-          status: InvitationStatus.ACCEPTED
+          status: InvitationStatus.ACCEPTED,
+          event: {
+            dates: {
+              some: {
+                endTime: {
+                  gte: new Date(),
+                }
+              }
+            }
+          }
         },
       });
 

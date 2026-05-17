@@ -405,6 +405,16 @@ export function MemberEventsDashboard({
     );
   }, [events]);
 
+  const nonPastPendingEvents = useMemo(
+    () => pendingEvents.filter((e) => !isEventPast(e.dates, today)),
+    [pendingEvents, today],
+  );
+
+  const nonPastAcceptedEvents = useMemo(
+    () => acceptedEvents.filter((e) => !isEventPast(e.dates, today)),
+    [acceptedEvents, today],
+  );
+
   const filteredPendingEvents = useMemo(() => {
     return pendingEvents.filter((event) => {
       const inScope = isEventInTimeScope(
@@ -415,7 +425,9 @@ export function MemberEventsDashboard({
       );
       const matchesService =
         !selectedServiceType || event.serviceTypeId === selectedServiceType;
-      return inScope && matchesService;
+      const notPast =
+        timeScope === "past" || !isEventPast(event.dates, today);
+      return inScope && matchesService && notPast;
     });
   }, [pendingEvents, timeScope, currentMonth, selectedServiceType, today]);
 
@@ -430,7 +442,9 @@ export function MemberEventsDashboard({
         );
         const matchesService =
           !selectedServiceType || event.serviceTypeId === selectedServiceType;
-        return inScope && matchesService;
+        const notPast =
+          timeScope === "past" || !isEventPast(event.dates, today);
+        return inScope && matchesService && notPast;
       })
       .sort(
         (a, b) =>
@@ -464,8 +478,8 @@ export function MemberEventsDashboard({
 
   // ── Helpers ─────────────────────────────────────────────────
 
-  const pendingCount = pendingEvents.length;
-  const scheduleCount = acceptedEvents.length;
+  const pendingCount = nonPastPendingEvents.length;
+  const scheduleCount = nonPastAcceptedEvents.length;
 
   const nextUpcomingDate = groupedAcceptedEvents.find(
     ([dateStr]) => new Date(dateStr) >= today,

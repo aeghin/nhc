@@ -79,6 +79,7 @@ export const saveSetlist = async (
 
     updateTag(`event-${eventId}-org-${organizationId}-details`);
     revalidatePath(`/dashboard/organizations/${organizationId}/events/${eventId}`);
+    revalidatePath(`/dashboard/organizations/${organizationId}/events/${eventId}/setlist/editor`);
 
     return { success: true };
   } catch {

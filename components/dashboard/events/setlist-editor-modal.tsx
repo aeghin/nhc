@@ -20,6 +20,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { saveSetlist } from "@/lib/actions/song-setlist";
+
 import {
   KEY_OPTIONS,
   encodeKey,
@@ -42,6 +43,7 @@ export function SetlistEditorModal({
   eventId,
   initialSongs,
 }: SetlistEditorModalProps) {
+  
   const [songs, setSongs] = useState<SetlistSong[]>(initialSongs)
   const [isPending, startTransition] = useTransition()
 
@@ -60,7 +62,7 @@ export function SetlistEditorModal({
 
       if (result.success) {
         toast.success("Setlist saved", { position: "top-center" });
-        onOpenChange(false)
+        onOpenChange(false);
       } else {
         toast.error(result.error, { position: "top-center" });
       }

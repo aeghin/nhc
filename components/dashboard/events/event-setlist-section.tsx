@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { Music, ArrowUpRight } from "lucide-react";
 import { YoutubeIcon, SpotifyIcon } from "@/components/icons/brand-icons";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -52,10 +51,10 @@ export function EventSetlistSection({
                 />
               )}
               <Button asChild variant="outline" size="sm">
-                <Link href={editorHref}>
+                <a href={editorHref}>
                   Open Editor
                   <ArrowUpRight className="ml-1 h-3.5 w-3.5" />
-                </Link>
+                </a>
               </Button>
             </div>
           )}
@@ -101,7 +100,7 @@ export function EventSetlistSection({
                           rel="noopener noreferrer"
                           className="text-muted-foreground transition-colors hover:text-red-500"
                         >
-                          <YoutubeIcon className="h-5 w-5" />
+                          <YoutubeIcon className="h-6 w-6" />
                         </a>
                       )}
                     </div>
