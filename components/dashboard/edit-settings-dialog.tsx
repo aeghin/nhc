@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Pencil, Settings2 } from "lucide-react";
+import { updateOrganizationDetails } from "@/lib/actions/organizations";
 
 import {
   Dialog,
@@ -25,6 +26,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 import {
   OrganizationInput,
@@ -35,14 +37,16 @@ interface EditSettingsDialogProps {
   organizationId: string;
   name: string;
   description: string;
-}
+};
 
 export const EditSettingsDialog = ({
   organizationId,
   name,
   description,
 }: EditSettingsDialogProps) => {
+
   const [open, setOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
   const form = useForm<OrganizationInput>({
     resolver: zodResolver(organizationSchema),
@@ -54,12 +58,20 @@ export const EditSettingsDialog = ({
     setOpen(next);
   };
 
-  const { isValid, isSubmitting } = form.formState;
+  const { isValid } = form.formState;
 
   const handleSubmit = (values: OrganizationInput) => {
-    // TODO: wire updateOrganization(organizationId, values)
-    console.log("submit", organizationId, values);
-    setOpen(false);
+      startTransition(async () => {
+        const result = await updateOrganizationDetails(organizationId, values);
+
+        if (result.success) {
+          toast.success("Details Updated!", { position: "top-center" });
+          form.reset();
+          handleOpenChange(false);
+        } else {
+          toast.error(result.error)
+        }; 
+      });
   };
 
   return (
@@ -98,7 +110,7 @@ export const EditSettingsDialog = ({
                 <FormItem>
                   <FormLabel>Organization Name</FormLabel>
                   <FormControl>
-                    <Input {...field} disabled={isSubmitting} />
+                    <Input {...field} disabled={isPending} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -111,7 +123,7 @@ export const EditSettingsDialog = ({
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Textarea {...field} rows={3} disabled={isSubmitting} />
+                    <Textarea {...field} rows={3} disabled={isPending} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -122,11 +134,11 @@ export const EditSettingsDialog = ({
                 type="button"
                 variant="outline"
                 onClick={() => handleOpenChange(false)}
-                disabled={isSubmitting}
+                disabled={isPending}
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={isSubmitting || !isValid} size="sm">
+              <Button type="submit" disabled={isPending || !isValid} size="sm">
                 Save Changes
               </Button>
             </DialogFooter>

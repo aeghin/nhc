@@ -117,10 +117,9 @@ export const updateOrganizationDetails = async (organizationId: string, values: 
             }
         });
 
-        revalidatePath("/dashboard");
-        revalidatePath(`/dashboard/organizations/${organizationId}`);
-        revalidatePath(`/dashboard/organizations/${organizationId}/settings`);
-        revalidatePath(`/dashboard/organizations/${organizationId}/events/create`);
+        updateTag(`org-${organizationId}-details`);
+        updateTag(`org-${organizationId}-setting-details`);
+        updateTag(`org-${organizationId}-list-entry`);
 
         
         return { success: true };

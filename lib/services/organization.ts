@@ -74,6 +74,10 @@ if (!user) return [];
       invitationCount: m.organization._count.invitations,
     }));
 
+    for (const o of organizations) {
+      cacheTag(`org-${o.id}-list-entry`);
+    };
+
     return organizations;
 };
 
