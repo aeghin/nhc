@@ -242,3 +242,26 @@ export const getOrgMembersWithUser = async (organizationId: string) => {
 
   return members;
 };
+
+
+export const getOrganizationSettings = async (organizationId: string) => {
+
+  "use cache";
+
+  cacheLife("hours");
+
+  cacheTag(`org-${organizationId}-setting-details`);
+
+  const details = await prisma.organization.findUnique({
+    where: {
+      id: organizationId
+    },
+    select: {
+      name: true,
+      description: true
+    }
+  });
+
+  return details;
+  
+};

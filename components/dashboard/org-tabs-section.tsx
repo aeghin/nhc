@@ -2,7 +2,8 @@ import { Suspense } from "react";
 import { EventsTabContent } from "@/components/dashboard/events-tab-content";
 import { MembersTabContent } from "@/components/dashboard/members-tab-content";
 import { InvitationsTabContent } from "@/components/dashboard/invitations-tab-content";
-// import { SettingsTabContent } from "@/components/dashboard/settings-tab-content";
+import { SettingsTabContent } from "@/components/dashboard/settings-tab-content";
+import { SettingsTabSkeleton } from "@/components/dashboard/settings-tab-skeleton";
 import { OrgTabNav } from "./org-tab-nav";
 import { EventsTabSkeleton } from "@/components/dashboard/events-tab-skeleton";
 import { MembersTabSkeleton } from "@/components/dashboard/members-tab-skeleton";
@@ -13,15 +14,13 @@ import { userEventsTotalCount } from "@/lib/services/events";
 
 interface OrganizationTabsSectionProps {
   organizationId: string;
-  organizationName: string;
   canManage: boolean;
   userId: string;
   activeTab: string;
-}
+};
 
 export const OrganizationTabsSection = async ({
   organizationId,
-  organizationName,
   canManage,
   userId,
   activeTab,
@@ -81,12 +80,11 @@ export const OrganizationTabsSection = async ({
           </Suspense>
         )}
  
-        {/* {effectiveTab === "settings" && canManage && (
-          <SettingsTabContent
-            organizationId={organizationId}
-            organizationName={organizationName}
-          />
-        )} */}
+        {effectiveTab === "settings" && canManage && (
+        <Suspense fallback={<SettingsTabSkeleton />}>
+          <SettingsTabContent organizationId={organizationId}/>
+        </Suspense>
+        )}
       </div>
     </div>
   );

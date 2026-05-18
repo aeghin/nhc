@@ -7,7 +7,7 @@ import { revalidatePath, updateTag } from "next/cache";
 import { OrgRole } from "@/generated/prisma/enums";
 
 type ActionResponse =
-  | { success: true; orgId: string }
+  | { success: true; orgId?: string }
   | { success: false; error: string }
 
 
@@ -76,3 +76,15 @@ export async function createOrganization(data: OrganizationInput): Promise<Actio
     };
 };
 
+
+export const updateOrganizationDetails = async (organizationId: string, values: OrganizationInput): Promise<ActionResponse> => {
+    try {
+
+        
+
+        return { success: true };
+
+    } catch (err) {
+        return { success: false, error: "Something went wrong, please try again." }
+    }
+}
