@@ -42,6 +42,7 @@ export const getUserOrganizations = async (userId: string) => {
   cacheLife('hours');
 
   cacheTag(`user-${userId}-orgs`)
+  
 
   
   const user = await prisma.user.findUnique({

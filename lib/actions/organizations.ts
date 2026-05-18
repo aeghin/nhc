@@ -6,6 +6,7 @@ import { organizationSchema, OrganizationInput } from "@/lib/validations/organiz
 import { revalidatePath, updateTag } from "next/cache";
 import { OrgRole } from "@/generated/prisma/enums";
 
+
 type ActionResponse =
   | { success: true; orgId?: string }
   | { success: false; error: string }
@@ -78,10 +79,50 @@ export async function createOrganization(data: OrganizationInput): Promise<Actio
 
 
 export const updateOrganizationDetails = async (organizationId: string, values: OrganizationInput): Promise<ActionResponse> => {
+
     try {
 
-        
+        const { userId } = await auth();
 
+        if (!userId) return { success: false, error: "Unauthorized" };
+
+        const { name, description } = organizationSchema.parse(values);
+
+        const user = await prisma.user.findUnique({
+            where: {
+                clerkId: userId
+            },
+        });
+
+        if (!user) return { success: false, error: "Unable to find the user" };
+
+        const currentUser = await prisma.membership.findFirst({
+            where: {
+                userId: user.id,
+                organizationId,
+                role: OrgRole.OWNER
+            },
+        });
+
+        if (!currentUser) return { success: false, error: "Unable to make edits. Please reach out to an owner."}
+
+        
+        await prisma.organization.update({
+            where: {
+                id: organizationId
+            },
+            data: {
+                name,
+                description
+            }
+        });
+
+        revalidatePath("/dashboard");
+        revalidatePath(`/dashboard/organizations/${organizationId}`);
+        revalidatePath(`/dashboard/organizations/${organizationId}/settings`);
+        revalidatePath(`/dashboard/organizations/${organizationId}/events/create`);
+
+        
         return { success: true };
 
     } catch (err) {
