@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getOrganizationSettings } from "@/lib/services/organization";
 import { EditSettingsDialog } from "./edit-settings-dialog";
+import { DeleteOrgDialog } from "./delete-org-dialog";
 
 interface SettingsTabContentProps {
   organizationId: string;
@@ -73,14 +74,7 @@ export const SettingsTabContent = async ({
           Permanently delete this organization and all its data. This action
           cannot be undone.
         </p>
-        <Button
-          variant="destructive"
-          size="sm"
-          className="mt-4 cursor-pointer"
-        >
-          <Trash2 className="mr-2 h-4 w-4" />
-          Delete Organization
-        </Button>
+        <DeleteOrgDialog organizationId={organizationId} name={org?.name ?? ""}/>
       </section>
     </CardContent>
   </Card>

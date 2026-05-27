@@ -27,6 +27,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { Spinner } from "@/components/ui/spinner";
 
 import {
   OrganizationInput,
@@ -50,7 +51,7 @@ export const EditSettingsDialog = ({
 
   const form = useForm<OrganizationInput>({
     resolver: zodResolver(organizationSchema),
-    defaultValues: { name, description },
+    values: { name, description },
   });
 
   const handleOpenChange = (next: boolean) => {
@@ -139,7 +140,8 @@ export const EditSettingsDialog = ({
                 Cancel
               </Button>
               <Button type="submit" disabled={isPending || !isValid} size="sm">
-                Save Changes
+                {isPending && <Spinner className="mr-2" />}
+                {isPending ? "Saving..." : "Save Changes"}
               </Button>
             </DialogFooter>
           </form>

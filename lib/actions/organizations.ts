@@ -5,6 +5,7 @@ import prisma from "@/lib/prisma";
 import { organizationSchema, OrganizationInput } from "@/lib/validations/organization";
 import { revalidatePath, updateTag } from "next/cache";
 import { OrgRole } from "@/generated/prisma/enums";
+import { redirect } from "next/navigation";
 
 
 type ActionResponse =
@@ -128,3 +129,61 @@ export const updateOrganizationDetails = async (organizationId: string, values: 
         return { success: false, error: "Something went wrong, please try again." }
     }
 }
+
+
+export const deleteOrganization = async (organizationId: string): Promise<ActionResponse> => {
+
+    try {
+
+        const { userId } = await auth();
+
+        if (!userId) return { success: false, error: "Unauthorized" };
+
+        const membership = await prisma.membership.findFirst({
+            where: {
+                user: {
+                    clerkId: userId
+                },
+                organizationId,
+                role: OrgRole.OWNER
+            },
+            select: { userId: true }
+        });
+
+        if (!membership) return { success: false, error: "Forbidden" };
+
+        const members = await prisma.membership.findMany({
+            where: { organizationId },
+            select: { userId: true }
+        });
+
+        await prisma.$transaction([
+            prisma.event.deleteMany({ where: { organizationId } }),
+            prisma.song.deleteMany({ where: { organizationId } }),
+            prisma.serviceType.deleteMany({ where: { organizationId } }),
+            prisma.organization.delete({ where: { id: organizationId } }),
+        ]);
+
+        for (const { userId: memberId } of members) {
+            updateTag(`user-${memberId}-orgs`);
+            updateTag(`user-${memberId}-memberships`);
+        }
+
+        updateTag(`org-${organizationId}-details`);
+        updateTag(`org-${organizationId}-setting-details`);
+        updateTag(`org-${organizationId}-list-entry`);
+        updateTag(`org-${organizationId}-member-count`);
+        updateTag(`org-${organizationId}-members-list`);
+        updateTag(`org-${organizationId}-st`);
+        updateTag(`org-${organizationId}-songs`);
+        updateTag(`invitations-${organizationId}-list`);
+
+        revalidatePath('/dashboard');
+        
+        return { success: true };
+        
+    } catch (error) {
+        console.error('deleteOrganization error:', error);
+        return { success: false, error: "Something went wrong." };
+    }
+};
