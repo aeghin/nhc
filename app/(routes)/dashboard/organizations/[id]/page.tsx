@@ -45,6 +45,8 @@ export default async function OrganizationPage({
 
   const canManage = userRole === OrgRole.OWNER || userRole === OrgRole.ADMIN;
 
+  const isOwner = userRole === OrgRole.OWNER;
+
 
  return (
     <main className="mx-auto max-w-screen-2xl px-6 py-8">
@@ -78,6 +80,7 @@ export default async function OrganizationPage({
             <OrganizationTabsSection
               organizationId={organization.id}
               canManage={canManage}
+              isOwner={isOwner}
               userId={userId}
               activeTab={tab}
             />
