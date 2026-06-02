@@ -15,6 +15,7 @@ import { userEventsTotalCount } from "@/lib/services/events";
 interface OrganizationTabsSectionProps {
   organizationId: string;
   canManage: boolean;
+  isOwner: boolean;
   userId: string;
   activeTab: string;
 };
@@ -22,6 +23,7 @@ interface OrganizationTabsSectionProps {
 export const OrganizationTabsSection = async ({
   organizationId,
   canManage,
+  isOwner,
   userId,
   activeTab,
 }: OrganizationTabsSectionProps) => {
@@ -30,9 +32,7 @@ export const OrganizationTabsSection = async ({
  
   
   const effectiveTab =
-    (tab === "invitations" || tab === "settings") && !canManage
-      ? "events"
-      : tab;
+    tab === "invitations" && !canManage ? "events" : tab;
  
     const [totalEventsCount, totalMembersCount] = await Promise.all([
       userEventsTotalCount(userId, organizationId),
@@ -80,10 +80,14 @@ export const OrganizationTabsSection = async ({
           </Suspense>
         )}
  
-        {effectiveTab === "settings" && canManage && (
-        <Suspense fallback={<SettingsTabSkeleton />}>
-          <SettingsTabContent organizationId={organizationId}/>
-        </Suspense>
+        {effectiveTab === "settings" && (
+          <Suspense fallback={<SettingsTabSkeleton />}>
+            <SettingsTabContent
+              organizationId={organizationId}
+              canManage={canManage}
+              isOwner={isOwner}
+            />
+          </Suspense>
         )}
       </div>
     </div>

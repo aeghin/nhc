@@ -1,16 +1,20 @@
-import { Settings, Trash2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Eye, Settings } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getOrganizationSettings } from "@/lib/services/organization";
 import { EditSettingsDialog } from "./edit-settings-dialog";
 import { DeleteOrgDialog } from "./delete-org-dialog";
+import { LeaveOrgDialog } from "./leave-org-dialog";
 
 interface SettingsTabContentProps {
   organizationId: string;
+  canManage: boolean;
+  isOwner: boolean;
 };
 
 export const SettingsTabContent = async ({
   organizationId,
+  canManage,
+  isOwner,
 }: SettingsTabContentProps) => {
   
 
@@ -21,14 +25,18 @@ export const SettingsTabContent = async ({
     <CardHeader className="border-b border-border/40 bg-secondary/20 px-6 py-4">
       <div className="flex items-center gap-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
-          <Settings className="h-5 w-5 text-primary" />
+          {canManage
+            ? <Settings className="h-5 w-5 text-primary" />
+            : <Eye className="h-5 w-5 text-primary" />}
         </div>
         <div>
           <CardTitle className="text-lg font-semibold">
             Organization Settings
           </CardTitle>
           <p className="text-sm text-muted-foreground">
-            Manage your organization details
+            {canManage
+              ? "Manage your organization details"
+              : "View your organization details"}
           </p>
         </div>
       </div>
@@ -60,21 +68,31 @@ export const SettingsTabContent = async ({
           </div>
         </div>
 
-        <div className="flex justify-start border-t border-border/40 bg-secondary/20 px-3 py-2">
+        {canManage && (
+          <div className="flex justify-start border-t border-border/40 bg-secondary/20 px-3 py-2">
             <EditSettingsDialog
               organizationId={organizationId}
               name={org?.name ?? ""}
               description={org?.description ?? ""}
             />
-        </div>
+          </div>
+        )}
       </div>
       <section className="rounded-xl border border-destructive/30 bg-destructive/5 p-5">
         <h3 className="text-sm font-semibold text-destructive">Danger Zone</h3>
+
         <p className="mt-1 text-xs text-muted-foreground">
-          Permanently delete this organization and all its data. This action
-          cannot be undone.
+          {isOwner
+            ? "Permanently delete this organization and all its data, or leave the organization. Deletion can't be undone."
+            : "Leave the organization. You'll lose access to its events and assignments until you're invited back."}
         </p>
-        <DeleteOrgDialog organizationId={organizationId} name={org?.name ?? ""}/>
+
+        <div className="flex items-center gap-2">
+          {isOwner && (
+            <DeleteOrgDialog organizationId={organizationId} name={org?.name ?? ""} />
+          )}
+          <LeaveOrgDialog organizationId={organizationId} name={org?.name ?? ""} isOwner={isOwner} />
+        </div>
       </section>
     </CardContent>
   </Card>

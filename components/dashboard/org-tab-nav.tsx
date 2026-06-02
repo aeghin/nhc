@@ -8,7 +8,7 @@ const tabs = [
   { value: "events", label: "Events", icon: Calendar, adminOnly: false },
   { value: "members", label: "Members", icon: Users, adminOnly: false },
   { value: "invitations", label: "Invitations", icon: Mail, adminOnly: true },
-  { value: "settings", label: "Settings", icon: Settings, adminOnly: true },
+  { value: "settings", label: "Settings", icon: Settings, adminOnly: false },
 ] as const;
 
 interface OrgTabNavProps {

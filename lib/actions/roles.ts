@@ -6,6 +6,7 @@ import { OrgRole, VolunteerRole } from "@/generated/prisma/enums";
 import { revalidatePath, updateTag } from "next/cache";
 import { userRoleSchema, UserRoleInput } from "../validations/roles";
 
+
 type ActionResponse = { success: true, role?: OrgRole } | 
 { success: false, error: string }
 
@@ -124,15 +125,31 @@ export const removeMember = async (userId: string, organizationId: string): Prom
 
         if (userMembership.role === OrgRole.ADMIN && assignee.role !== OrgRole.MEMBER) return { success: false, error: "Admins can only remove members." };
 
-        await prisma.membership.delete({
+        const upcoming = await prisma.eventAssignment.findMany({
             where: {
-                userId_organizationId: {
-                    userId,
-                    organizationId
-                }
-            }
+                userId,
+                organizationId,
+                event: { dates: { some: { endTime: { gte: new Date() } } } },
+            },
+            select: { eventId: true },
         });
 
+        await prisma.$transaction([
+            prisma.eventAssignment.deleteMany({
+                where: {
+                    userId,
+                    organizationId,
+                    event: { dates: { some: { endTime: { gte: new Date() } } } },
+                },
+            }),
+            prisma.membership.delete({
+                where: { userId_organizationId: { userId, organizationId } },
+            }),
+        ]);
+
+        for (const { eventId } of upcoming) {
+            updateTag(`event-${eventId}-org-${organizationId}-details`);
+        };
         updateTag(`user-${userId}-roles`);
         updateTag(`user-${userId}-orgs`);
         updateTag(`user-${userId}-events-${organizationId}`);
@@ -149,8 +166,8 @@ export const removeMember = async (userId: string, organizationId: string): Prom
 
         console.error(err)
         return { success: false, error: "Unable to process request" };
-    }
-}
+    };
+};
 
 
 export const updateVolunteerRoles = async (userId: string, organizationId: string, role: VolunteerRole): Promise<ActionResponse> => {
@@ -219,4 +236,88 @@ export const updateVolunteerRoles = async (userId: string, organizationId: strin
         return { success: false, error: "Something went wrong, please try again."}
     }
 
-}
+};
+
+export const leaveOrganization = async (organizationId: string): Promise<ActionResponse> => {
+    try {
+
+        const user = await currentUser();
+
+        if (!user) return { success: false, error: "Unauthorized" };
+
+        if (!organizationId) return { success: false, error: "No valid data received" };
+
+        const membership = await prisma.membership.findUnique({
+            where: {
+                userId_organizationId: {
+                    userId: user.id,
+                    organizationId
+                }
+            },
+            select: {
+                role: true
+            }
+        });
+
+        if (!membership) return { success: false, error: "Unable to locate membership" };
+
+        if (membership.role === OrgRole.OWNER) {
+            
+            const ownerCount = await prisma.membership.count({
+            where: {
+                organizationId,
+                role: OrgRole.OWNER
+               }
+            });
+
+            if (ownerCount <= 1) {
+                return {
+                    success: false,
+                    error: "You're the only owner. Transfer ownership or delete the organization before leaving."
+                }
+            }
+        };
+
+        const upcoming = await prisma.eventAssignment.findMany({
+      where: {
+          userId: user.id,
+          organizationId,
+          event: { dates: { some: { endTime: { gte: new Date() } } } },
+      },
+      select: { eventId: true },
+  });   
+
+        
+
+        await prisma.$transaction([
+      prisma.eventAssignment.deleteMany({
+          where: {
+              userId: user.id,
+              organizationId,
+              event: { dates: { some: { endTime: { gte: new Date() } } } },
+          },
+      }),
+      prisma.membership.delete({
+          where: { userId_organizationId: { userId: user.id, organizationId } },
+        }),
+      ]);
+      
+        for (const { eventId } of upcoming) {
+            updateTag(`event-${eventId}-org-${organizationId}-details`);
+        }
+          updateTag(`user-${user.id}-roles`);
+          updateTag(`user-${user.id}-orgs`);
+          updateTag(`user-${user.id}-events-${organizationId}`);
+          updateTag(`org-${organizationId}-members-list`);
+          updateTag(`org-${organizationId}-member-count`);
+          updateTag(`user-${user.id}-org-${organizationId}-role`);
+          updateTag(`user-${user.id}-memberships`);
+          revalidatePath(`/dashboard/organizations/${organizationId}`);
+
+        return { success: true }
+
+    } catch (err) {
+        console.log(err);
+        return { success: false, error: "Something went wrong" }
+    };
+};   
