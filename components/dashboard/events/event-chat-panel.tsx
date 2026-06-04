@@ -88,7 +88,7 @@ export function EventChatPanel({
                 <div
                   key={m.id}
                   className={cn(
-                    "flex items-start gap-2.5",
+                    "flex items-end gap-2.5",
                     isMe && "flex-row-reverse",
                   )}
                 >
