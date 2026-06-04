@@ -12,11 +12,13 @@ import { EventHeader } from "@/components/dashboard/events/event-header";
 import { EventDetailsCard } from "@/components/dashboard/events/event-details-card";
 import { EventSetlistSection } from "@/components/dashboard/events/event-setlist-section";
 import { EventAssignmentsCard } from "@/components/dashboard/events/event-assignment-section";
+import { EventChatPanel } from "@/components/dashboard/events/event-chat-panel";
 // import { EventStatusCard } from "@/components/dashboard/events/event-status-card";
 import { currentUser } from "@/lib/services/user";
 import { getEventDetailsById } from "@/lib/services/events";
+import { getEventMessages } from "@/lib/services/chat";
 import { getUserMembershipRole } from "@/lib/services/organization";
-import { OrgRole } from "@/generated/prisma/enums";
+import { InvitationStatus, OrgRole } from "@/generated/prisma/enums";
 
 export default async function EventDetailPage({
   params,
@@ -43,6 +45,14 @@ export default async function EventDetailPage({
   const hasAccess = canManage || hasAssignment;
 
   if (!hasAccess) notFound();
+
+  // Accepted-volunteers-only chat gate (reuses already-fetched assignments).
+  const canChat = event.assignments.some(
+    (a) => a.userId === user.id && a.status === InvitationStatus.ACCEPTED,
+  );
+  const { messages: initialMessages } = canChat
+    ? await getEventMessages(eventId)
+    : { messages: [] };
 
   return (
     <main className="mx-auto max-w-screen-2xl px-6 py-8">
@@ -72,6 +82,18 @@ export default async function EventDetailPage({
               currentUserId={user.id}
               canManage={canManage}
             />
+            {canChat && (
+              <EventChatPanel
+                eventId={eventId}
+                currentUserId={user.id}
+                me={{
+                  firstName: user.firstName,
+                  lastName: user.lastName,
+                  userImageUrl: user.userImageUrl,
+                }}
+                initialMessages={initialMessages}
+              />
+            )}
             {/* <EventStatusCard event={event} /> */}
           </div>
         </div>
