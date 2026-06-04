@@ -44,31 +44,46 @@ export function useEventChat(
     client.connection.on("connected", () => setStatus("connected"));
     client.connection.on("disconnected", () => setStatus("disconnected"));
     client.connection.on("suspended", () => setStatus("disconnected"));
+    client.connection.on("failed", () => setStatus("disconnected"));
 
     const channel = client.channels.get(channelName(eventId));
 
     channel.subscribe("message", (msg) => upsert(msg.data as ChatMessage));
 
     const syncPresence = async () => {
-      const members = await channel.presence.get();
-      setPresence(
-        members.map((p) => ({
-          clientId: p.clientId,
-          ...(p.data as Omit<PresenceMember, "clientId">),
-        })),
-      );
+      try {
+        const members = await channel.presence.get();
+        setPresence(
+          members.map((p) => ({
+            clientId: p.clientId,
+            ...(p.data as Omit<PresenceMember, "clientId">),
+          })),
+        );
+      } catch {
+        // channel not attached yet / detached during teardown — ignore
+      }
     };
     channel.presence.subscribe(["enter", "leave", "present"], syncPresence);
-    channel.presence.enter({
-      firstName: me.firstName,
-      lastName: me.lastName,
-      userImageUrl: me.userImageUrl,
-    });
+    // Fire-and-forget; rejects if the connection never establishes (bad token)
+    // or is torn down mid-connect (React StrictMode double-mount in dev).
+    channel.presence
+      .enter({
+        firstName: me.firstName,
+        lastName: me.lastName,
+        userImageUrl: me.userImageUrl,
+      })
+      .catch(() => {});
 
     return () => {
-      channel.presence.leave();
+      // Best-effort teardown — a connection that never finished connecting will
+      // reject these; we don't care once we're unmounting.
+      channel.presence.leave().catch(() => {});
       channel.unsubscribe();
-      client.close();
+      try {
+        client.close();
+      } catch {
+        // already closing/closed
+      }
     };
   }, [eventId, me.id, me.firstName, me.lastName, me.userImageUrl, upsert]);
 
