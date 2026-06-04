@@ -1,15 +1,7 @@
 import Link from "next/link";
-import { Command, Shield } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-// import { NavLinks } from "./nav-links";
-// import { NotificationsMenu } from "./notifications-menu";
-// import type { Notification, User } from "@/lib/types"
+import { Command } from "lucide-react";
 import { UserButton } from "@clerk/nextjs";
-
-// interface NavbarProps {
-//   notifications: Notification[]
-//   // user: User
-// }
+import { NavLinks } from "./nav-links";
 
 export function Navbar() {
   return (
@@ -22,22 +14,12 @@ export function Navbar() {
             </div>
             <span className="text-sm font-semibold tracking-tight">NHC</span>
           </Link>
-
-          {/* <NavLinks isAdmin={user.isAdmin} /> */}
+          <NavLinks />
         </div>
 
         <div className="flex items-center gap-2">
-          {/* <NotificationsMenu notifications={notifications} /> */}
-
           <UserButton
-            appearance={{
-              elements: {
-                avatarBox: {
-                  width: "36px",
-                  height: "36px",
-                },
-              },
-            }}
+            appearance={{ elements: { avatarBox: { width: "36px", height: "36px" } } }}
           />
         </div>
       </div>
