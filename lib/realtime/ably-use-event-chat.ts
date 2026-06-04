@@ -75,14 +75,26 @@ export function useEventChat(
       .catch(() => {});
 
     return () => {
-      // Best-effort teardown — a connection that never finished connecting will
-      // reject these; we don't care once we're unmounting.
-      channel.presence.leave().catch(() => {});
+      // Remove listeners synchronously so no state updates fire post-unmount.
       channel.unsubscribe();
-      try {
+      channel.presence.unsubscribe();
+
+      const conn = client.connection;
+      const close = () => {
+        channel.presence.leave().catch(() => {});
         client.close();
-      } catch {
-        // already closing/closed
+      };
+
+      // Closing while the connection is still CONNECTING rejects Ably's
+      // internal connect promise with "Connection closed" (unhandled, and not
+      // catchable here since it's async). React StrictMode's dev double-mount
+      // hits exactly this path. So only close once the connection has settled.
+      if (conn.state === "connected") {
+        close();
+      } else {
+        conn.once("connected", close);
+        conn.once("failed", () => client.close());
+        conn.once("closed", () => {});
       }
     };
   }, [eventId, me.id, me.firstName, me.lastName, me.userImageUrl, upsert]);
