@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 
-// import { AddSongModal } from "./add-song-modal";
+import { AddSongModal } from "@/components/dashboard/songs/add-song-modal";
 
 import { Pitch, KeyQuality } from "@/generated/prisma/enums";
 import { YoutubeIcon, SpotifyIcon } from "@/components/icons/brand-icons";
@@ -43,7 +43,7 @@ type Song = {
     spotifyUrl: string | null
     youtubeUrl: string | null
     themes: string[]
-}
+};
 
 interface SongLibraryProps {
   songs: Song[]
@@ -449,7 +449,7 @@ export function SongLibrary({ songs, orgId, orgName, canManage }: SongLibraryPro
         </Card>
       )}
 
-      {/* {canManage && (
+      {canManage && (
         <AddSongModal
           open={addOpen}
           onOpenChange={setAddOpen}
@@ -459,7 +459,7 @@ export function SongLibrary({ songs, orgId, orgName, canManage }: SongLibraryPro
             console.log("[v0] add song", song)
           }}
         />
-      )} */}
+      )}
     </div>
   )
 }
