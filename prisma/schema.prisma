@@ -76,6 +76,8 @@ model User {
   assignedEvents EventAssignment[] @relation("assignedUser")
   createdAssignments EventAssignment[] @relation("assignedBy")
 
+  authoredMessages Message[] @relation("authoredMessages")
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -91,7 +93,8 @@ model Organization {
   events Event[]
   eventAssignments EventAssignment[]
   songs Song[]
-  
+  messages Message[]
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -169,7 +172,8 @@ model Event {
   dates EventDate[]
 
   setlistSongs SetlistSong[]
-  
+  messages Message[]
+
 
   createdById String
   createdBy User @relation(fields: [createdById], references: [id])
@@ -220,10 +224,30 @@ model EventDate {
   startTime DateTime
   endTime DateTime
 
-  eventId String 
+  eventId String
   event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
 
   @@index([eventId])
+}
+
+model Message {
+  id   String @id @default(uuid())
+  body String
+
+  eventId String
+  event   Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  authorId String
+  author   User @relation("authoredMessages", fields: [authorId], references: [id], onDelete: Cascade)
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([eventId, createdAt])
+  @@index([organizationId])
+  @@index([authorId])
 }
 
 model Song {
