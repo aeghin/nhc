@@ -7,7 +7,6 @@ import {
   ArrowUpDown,
   ChevronDown,
   Music,
-  Plus,
   Search,
   SlidersHorizontal,
   X
@@ -72,7 +71,6 @@ export function SongLibrary({ songs, orgId, orgName, canManage }: SongLibraryPro
   const [selectedThemes, setSelectedThemes] = useState<Set<string>>(new Set())
   const [selectedArtists, setSelectedArtists] = useState<Set<string>>(new Set())
   const [sort, setSort] = useState<SortKey>("title")
-  const [addOpen, setAddOpen] = useState(false)
 
   // Derive available filter options
   const allThemes = useMemo(() => {
@@ -155,9 +153,9 @@ export function SongLibrary({ songs, orgId, orgName, canManage }: SongLibraryPro
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
           <Link
             href={`/dashboard/organizations/${orgId}`}
-            className="inline-flex items-center gap-1.5 transition-colors hover:text-foreground"
+            className="group inline-flex items-center gap-1.5 hover:text-foreground transition-colors"
           >
-            <ArrowLeft className="h-3.5 w-3.5" />
+            <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-1" />
             {orgName}
           </Link>
         </div>
@@ -176,10 +174,7 @@ export function SongLibrary({ songs, orgId, orgName, canManage }: SongLibraryPro
           </div>
 
           {canManage && (
-            <Button className="gap-2" onClick={() => setAddOpen(true)}>
-              <Plus className="h-4 w-4" />
-              Add song
-            </Button>
+            <AddSongModal orgId={orgId} />
           )}
         </div>
       </div>
@@ -447,18 +442,6 @@ export function SongLibrary({ songs, orgId, orgName, canManage }: SongLibraryPro
             ))}
           </ul>
         </Card>
-      )}
-
-      {canManage && (
-        <AddSongModal
-          open={addOpen}
-          onOpenChange={setAddOpen}
-          orgId={orgId}
-          onSongAdded={(song) => {
-            // Logic-only: parent owns persistence; nothing to wire here.
-            console.log("[v0] add song", song)
-          }}
-        />
       )}
     </div>
   )
