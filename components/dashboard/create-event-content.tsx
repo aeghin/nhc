@@ -184,6 +184,7 @@ export type MemberConflict = {
 
 function formatConflictTime(iso: string): string {
   return new Date(iso).toLocaleTimeString("en-US", {
+    timeZone: "UTC",
     hour: "numeric",
     minute: "2-digit",
     hour12: true,
@@ -445,8 +446,8 @@ export function CreateEventPageContent({
           const times = watchedDayTimes[key];
           return {
             date: key,
-            startTime: new Date(`${key}T${times.startTime}:00`).toISOString(),
-            endTime: new Date(`${key}T${times.endTime}:00`).toISOString(),
+            startTime: new Date(`${key}T${times.startTime}:00Z`).toISOString(),
+            endTime: new Date(`${key}T${times.endTime}:00Z`).toISOString(),
           };
         }),
       });
@@ -467,8 +468,8 @@ export function CreateEventPageContent({
       Object.entries(data.dayTimes).map(([key, times]) => [
         key,
         {
-          startTime: new Date(`${key}T${times.startTime}:00`).toISOString(),
-          endTime: new Date(`${key}T${times.endTime}:00`).toISOString(),
+          startTime: new Date(`${key}T${times.startTime}:00Z`).toISOString(),
+          endTime: new Date(`${key}T${times.endTime}:00Z`).toISOString(),
         },
       ]),
     );

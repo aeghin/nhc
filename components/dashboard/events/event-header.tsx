@@ -39,9 +39,9 @@ export function EventHeader({
 
   const dateParts = firstDate
     ? {
-        month: firstDate.toLocaleString("en-US", { month: "short" }).toUpperCase(),
-        day: firstDate.getDate(),
-        weekday: firstDate.toLocaleString("en-US", { weekday: "short" }).toUpperCase(),
+        month: firstDate.toLocaleString("en-US", { timeZone: "UTC", month: "short" }).toUpperCase(),
+        day: firstDate.getUTCDate(),
+        weekday: firstDate.toLocaleString("en-US", { timeZone: "UTC", weekday: "short" }).toUpperCase(),
       }
     : null;
 

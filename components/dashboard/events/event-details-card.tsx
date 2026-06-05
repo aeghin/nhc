@@ -37,6 +37,7 @@ export function EventDetailsCard({ event, serviceType }: EventDetailsCardProps) 
       icon: Calendar,
       label: "Date",
       value: start.toLocaleDateString("en-US", {
+        timeZone: "UTC",
         weekday: "long",
         month: "long",
         day: "numeric",
@@ -47,11 +48,15 @@ export function EventDetailsCard({ event, serviceType }: EventDetailsCardProps) 
       icon: Clock,
       label: "Time",
       value: `${start.toLocaleTimeString("en-US", {
+        timeZone: "UTC",
         hour: "numeric",
         minute: "2-digit",
+        hour12: true,
       })} – ${end.toLocaleTimeString("en-US", {
+        timeZone: "UTC",
         hour: "numeric",
         minute: "2-digit",
+        hour12: true,
       })}`,
     },
     {

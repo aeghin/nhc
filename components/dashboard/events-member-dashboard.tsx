@@ -168,11 +168,12 @@ function isMultiDay(dates: EventDate[]): boolean {
   if (dates.length === 0) return false;
   const start = new Date(dates[0].startTime);
   const end = new Date(dates[0].endTime);
-  return start.toDateString() !== end.toDateString();
+  return start.toISOString().slice(0, 10) !== end.toISOString().slice(0, 10);
 }
 
 function formatShortDate(date: Date): string {
   return date.toLocaleDateString("en-US", {
+    timeZone: "UTC",
     weekday: "short",
     month: "short",
     day: "numeric",
@@ -181,6 +182,7 @@ function formatShortDate(date: Date): string {
 
 function formatTime(date: Date): string {
   return date.toLocaleTimeString("en-US", {
+    timeZone: "UTC",
     hour: "numeric",
     minute: "2-digit",
     hour12: true,
@@ -197,11 +199,11 @@ function formatDateRange(dates: EventDate[]): string {
     return formatShortDate(earliest);
   }
 
-  if (earliest.getMonth() === latest.getMonth()) {
-    return `${earliest.toLocaleDateString("en-US", { month: "short", day: "numeric" })} – ${latest.getDate()}`;
+  if (earliest.getUTCMonth() === latest.getUTCMonth()) {
+    return `${earliest.toLocaleDateString("en-US", { timeZone: "UTC", month: "short", day: "numeric" })} – ${latest.getUTCDate()}`;
   }
 
-  return `${earliest.toLocaleDateString("en-US", { month: "short", day: "numeric" })} – ${latest.toLocaleDateString("en-US", { month: "short", day: "numeric" })}`;
+  return `${earliest.toLocaleDateString("en-US", { timeZone: "UTC", month: "short", day: "numeric" })} – ${latest.toLocaleDateString("en-US", { timeZone: "UTC", month: "short", day: "numeric" })}`;
 }
 
 /** Time range for the earliest EventDate (for card display) */
