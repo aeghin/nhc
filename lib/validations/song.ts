@@ -8,10 +8,10 @@ export const songSchema = z.object({
     timeSignature: z.string().min(1, "time signature required"),
     defaultPitch: pitchSchema,
     defaultKeyQuality: keyQualitySchema,
-    spotifyUrl: z.url().min(1, "Linked required"),
-    youtubeUrl: z.url().min(1, "Linked required"),
+    spotifyUrl: z.url("Link required"),
+    youtubeUrl: z.url("Link required"),
     themes: z.string().array().min(1, "Theme selection is required"),
     organizationId: z.uuid(),
-})
+});
 
-export type songSchemaInput = z.infer<typeof songSchema>
+export type songSchemaInput = z.infer<typeof songSchema>;

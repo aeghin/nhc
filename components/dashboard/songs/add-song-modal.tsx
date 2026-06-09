@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { Music, Plus, X } from "lucide-react";
 import {
   Dialog,
@@ -14,6 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Spinner } from "@/components/ui/spinner";
 import {
   Select,
   SelectContent,
@@ -38,6 +39,8 @@ import { YoutubeIcon, SpotifyIcon } from "@/components/icons/brand-icons";
 
 import { Pitch, KeyQuality } from "@/generated/prisma/enums";
 import { songSchema, songSchemaInput } from "@/lib/validations/song";
+import { addSongToLibrary } from "@/lib/actions/song";
+import { toast } from "sonner";
 
 const PITCH_LABELS: Record<Pitch, string> = {
   C: "C",
@@ -80,11 +83,12 @@ const COMMON_THEMES = [
 
 interface AddSongModalProps {
   orgId: string;
-}
+};
 
 export function AddSongModal({ orgId }: AddSongModalProps) {
 
   const [themeInput, setThemeInput] = useState("");
+  const [isPending, startTransition] = useTransition();
 
   const form = useForm<songSchemaInput>({
     resolver: zodResolver(songSchema),
@@ -100,13 +104,11 @@ export function AddSongModal({ orgId }: AddSongModalProps) {
     },
   });
 
-  const { isValid, isSubmitting } = form.formState;
+  const { isValid } = form.formState;
 
   const themes = form.watch("themes");
 
   const [open, setOpen] = useState(false);
-
-  
 
   const handleClose = (next: boolean) => {
     if (!next) {
@@ -142,12 +144,17 @@ export function AddSongModal({ orgId }: AddSongModalProps) {
     }
   };
 
-  
+  const handleSubmit = (data: songSchemaInput) => {
+      startTransition(async () => {
+        const result = await addSongToLibrary(data);
 
-  const handleSubmit = async (data: songSchemaInput) => {
-    console.log(data);
-
-    handleClose(false);
+        if (result.success) {
+          toast.success(`${data.title} has been added to the song library 🎵`, { position: "top-center" });
+          handleClose(false);
+        } else {
+          toast.error(result.error, { position: "top-center" });
+        };
+      });
   };
 
   return (
@@ -187,7 +194,7 @@ export function AddSongModal({ orgId }: AddSongModalProps) {
                       <FormItem>
                         <FormLabel>Title</FormLabel>
                         <FormControl>
-                          <Input {...field} disabled={isSubmitting} />
+                          <Input {...field} disabled={isPending} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -203,7 +210,7 @@ export function AddSongModal({ orgId }: AddSongModalProps) {
                       <FormItem>
                         <FormLabel>Artist</FormLabel>
                         <FormControl>
-                          <Input {...field} disabled={isSubmitting} />
+                          <Input {...field} disabled={isPending} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -219,7 +226,7 @@ export function AddSongModal({ orgId }: AddSongModalProps) {
                       <FormItem>
                         <FormLabel>BPM</FormLabel>
                         <FormControl>
-                          <Input type="number" {...field} value={field.value ?? ""} onChange={(e) => { const v = e.target.valueAsNumber; field.onChange(Number.isNaN(v) ? undefined : v); }} disabled={isSubmitting} />
+                          <Input type="number" {...field} value={field.value ?? ""} onChange={(e) => { const v = e.target.valueAsNumber; field.onChange(Number.isNaN(v) ? undefined : v); }} disabled={isPending} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -325,7 +332,7 @@ export function AddSongModal({ orgId }: AddSongModalProps) {
                               {...field}
                               placeholder="Spotify URL"
                               className="pl-9"
-                              disabled={isSubmitting}
+                              disabled={isPending}
                             />
                           </FormControl>
                         </div>
@@ -346,7 +353,7 @@ export function AddSongModal({ orgId }: AddSongModalProps) {
                               {...field}
                               placeholder="YouTube URL"
                               className="pl-9"
-                              disabled={isSubmitting}
+                              disabled={isPending}
                             />
                           </FormControl>
                         </div>
@@ -423,17 +430,17 @@ export function AddSongModal({ orgId }: AddSongModalProps) {
                 type="button"
                 variant="outline"
                 onClick={() => handleClose(false)}
-                disabled={isSubmitting}
+                disabled={isPending}
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
-                disabled={!isValid || isSubmitting}
+                disabled={!isValid || isPending}
                 className="gap-1.5"
               >
-                <Plus className="h-4 w-4" />
-                {isSubmitting ? "Adding..." : "Add song"}
+                {isPending ? <Spinner className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+                {isPending ? "Adding..." : "Add song"}
               </Button>
             </DialogFooter>
           </form>

@@ -256,10 +256,10 @@ model Song {
   artist String
   bpm Int
   timeSignature String
-  defaultPitch Pitch?
-  defaultKeyQuality KeyQuality?
-  spotifyUrl String?
-  youtubeUrl String?
+  defaultPitch Pitch
+  defaultKeyQuality KeyQuality
+  spotifyUrl String
+  youtubeUrl String
   themes String[]
 
   organizationId String

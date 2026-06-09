@@ -48,7 +48,11 @@ export function useEventChat(
 
     const channel = client.channels.get(channelName(eventId));
 
-    channel.subscribe("message", (msg) => upsert(msg.data as ChatMessage));
+    // .subscribe() implicitly attaches and rejects if teardown interrupts the
+    // attach (StrictMode double-mount); the listener still binds synchronously.
+    channel
+      .subscribe("message", (msg) => upsert(msg.data as ChatMessage))
+      .catch(() => {});
 
     const syncPresence = async () => {
       try {
@@ -63,15 +67,24 @@ export function useEventChat(
         // channel not attached yet / detached during teardown — ignore
       }
     };
-    channel.presence.subscribe(["enter", "leave", "present"], syncPresence);
-    // Fire-and-forget; rejects if the connection never establishes (bad token)
-    // or is torn down mid-connect (React StrictMode double-mount in dev).
     channel.presence
-      .enter({
-        firstName: me.firstName,
-        lastName: me.lastName,
-        userImageUrl: me.userImageUrl,
-      })
+      .subscribe(["enter", "leave", "present"], syncPresence)
+      .catch(() => {});
+    // Enter presence only after WE attach the channel. enter() on an unattached
+    // channel makes Ably fire an internal, un-catchable channel.attach()
+    // (_enterOrUpdateClient) whose promise is discarded and rejects with
+    // "Connection closed" on teardown mid-connect (StrictMode double-mount).
+    // Gating on our own attach() — which we can catch — sidesteps it: once
+    // attached, enter() goes straight to sendPresence.
+    channel
+      .attach()
+      .then(() =>
+        channel.presence.enter({
+          firstName: me.firstName,
+          lastName: me.lastName,
+          userImageUrl: me.userImageUrl,
+        }),
+      )
       .catch(() => {});
 
     return () => {
@@ -79,23 +92,13 @@ export function useEventChat(
       channel.unsubscribe();
       channel.presence.unsubscribe();
 
-      const conn = client.connection;
-      const close = () => {
-        channel.presence.leave().catch(() => {});
-        client.close();
-      };
-
-      // Closing while the connection is still CONNECTING rejects Ably's
-      // internal connect promise with "Connection closed" (unhandled, and not
-      // catchable here since it's async). React StrictMode's dev double-mount
-      // hits exactly this path. So only close once the connection has settled.
-      if (conn.state === "connected") {
-        close();
-      } else {
-        conn.once("connected", close);
-        conn.once("failed", () => client.close());
-        conn.once("closed", () => {});
-      }
+      // Close in any state: the in-flight attach/enter/leave promises reject
+      // with "Connection closed" when we tear down mid-connect (StrictMode's
+      // dev double-mount), but each is caught, so closing is safe. The old
+      // "defer close until connected" guard left those rejections unhandled and
+      // leaked the client whenever it never reached the connected state.
+      channel.presence.leave().catch(() => {});
+      client.close();
     };
   }, [eventId, me.id, me.firstName, me.lastName, me.userImageUrl, upsert]);
 

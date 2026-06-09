@@ -6,6 +6,7 @@ import { GripVertical } from "lucide-react";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -74,6 +75,9 @@ export function SetlistEditorModal({
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="text-base">Edit setlist</DialogTitle>
+          <DialogDescription>
+            Drag to reorder songs and set the key for each.
+          </DialogDescription>
         </DialogHeader>
 
         <Reorder.Group
