@@ -26,23 +26,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 
-import { AddSongModal } from "@/components/dashboard/songs/add-song-modal";
+import { SongModal } from "@/components/dashboard/songs/song-modal";
+import { EditSongDetails } from "@/components/dashboard/songs/song-edit";
 
-import { Pitch, KeyQuality } from "@/generated/prisma/enums";
+import { KeyQuality } from "@/generated/prisma/enums";
 import { YoutubeIcon, SpotifyIcon } from "@/components/icons/brand-icons";
-
-type Song = {
-    id: string
-    title: string
-    artist: string
-    bpm: number
-    timeSignature: string
-    defaultPitch: Pitch | null
-    defaultKeyQuality: KeyQuality | null
-    spotifyUrl: string | null
-    youtubeUrl: string | null
-    themes: string[]
-};
+import type { LibrarySong as Song } from "@/lib/types";
 
 interface SongLibraryProps {
   songs: Song[]
@@ -174,7 +163,7 @@ export function SongLibrary({ songs, orgId, orgName, canManage }: SongLibraryPro
           </div>
 
           {canManage && (
-            <AddSongModal orgId={orgId} />
+            <SongModal orgId={orgId} />
           )}
         </div>
       </div>
@@ -347,7 +336,14 @@ export function SongLibrary({ songs, orgId, orgName, canManage }: SongLibraryPro
       ) : (
         <Card className="overflow-hidden p-0">
           {/* Header row (desktop) */}
-          <div className="hidden grid-cols-[1fr_180px_64px_84px_72px_120px] items-center gap-4 border-b border-border/60 bg-muted/30 px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground md:grid">
+          <div
+            className={cn(
+              "hidden items-center gap-4 border-b border-border/60 bg-muted/30 px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground md:grid",
+              canManage
+                ? "grid-cols-[1fr_180px_64px_84px_72px_120px_44px]"
+                : "grid-cols-[1fr_180px_64px_84px_72px_120px]",
+            )}
+          >
             <span>Song</span>
             <span>Themes</span>
             <span>Key</span>
@@ -363,7 +359,12 @@ export function SongLibrary({ songs, orgId, orgName, canManage }: SongLibraryPro
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: Math.min(idx * 0.015, 0.2) }}
-                className="grid grid-cols-1 gap-2 px-4 py-3 transition-colors hover:bg-muted/30 md:grid-cols-[1fr_180px_64px_84px_72px_120px] md:items-center md:gap-4"
+                className={cn(
+                  "grid grid-cols-1 gap-2 px-4 py-3 transition-colors hover:bg-muted/30 md:items-center md:gap-4",
+                  canManage
+                    ? "md:grid-cols-[1fr_180px_64px_84px_72px_120px_44px]"
+                    : "md:grid-cols-[1fr_180px_64px_84px_72px_120px]",
+                )}
               >
                 {/* Song */}
                 <div className="min-w-0">
@@ -438,6 +439,13 @@ export function SongLibrary({ songs, orgId, orgName, canManage }: SongLibraryPro
                     </a>
                   )}
                 </div>
+
+                {/* Actions */}
+                {canManage && (
+                  <div className="flex md:justify-center">
+                    <EditSongDetails song={song} orgId={orgId} />
+                  </div>
+                )}
               </motion.li>
             ))}
           </ul>

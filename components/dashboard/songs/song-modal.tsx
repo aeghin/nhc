@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Music, Plus, X } from "lucide-react";
+import { Music, Plus, Save, X } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -42,6 +42,8 @@ import { songSchema, songSchemaInput } from "@/lib/validations/song";
 import { addSongToLibrary } from "@/lib/actions/song";
 import { toast } from "sonner";
 
+import type { LibrarySong } from "@/lib/types";
+
 const PITCH_LABELS: Record<Pitch, string> = {
   C: "C",
   C_SHARP: "C♯",
@@ -81,11 +83,16 @@ const COMMON_THEMES = [
   "Resurrection",
 ];
 
-interface AddSongModalProps {
+interface SongModalProps {
   orgId: string;
+  song?: LibrarySong;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 };
 
-export function AddSongModal({ orgId }: AddSongModalProps) {
+export function SongModal({ orgId, song, open, onOpenChange }: SongModalProps) {
+
+  const isEditing = Boolean(song);
 
   const [themeInput, setThemeInput] = useState("");
   const [isPending, startTransition] = useTransition();
@@ -93,22 +100,41 @@ export function AddSongModal({ orgId }: AddSongModalProps) {
   const form = useForm<songSchemaInput>({
     resolver: zodResolver(songSchema),
     mode: "onChange",
-    defaultValues: {
-      organizationId: orgId,
-      title: "",
-      artist: "",
-      timeSignature: "4/4",
-      spotifyUrl: "",
-      youtubeUrl: "",
-      themes: [],
-    },
+    defaultValues: song
+      ? {
+          organizationId: orgId,
+          title: song.title,
+          artist: song.artist,
+          bpm: song.bpm,
+          timeSignature: song.timeSignature,
+          defaultPitch: song.defaultPitch ?? undefined,
+          defaultKeyQuality: song.defaultKeyQuality ?? undefined,
+          spotifyUrl: song.spotifyUrl ?? "",
+          youtubeUrl: song.youtubeUrl ?? "",
+          themes: song.themes,
+        }
+      : {
+          organizationId: orgId,
+          title: "",
+          artist: "",
+          timeSignature: "4/4",
+          spotifyUrl: "",
+          youtubeUrl: "",
+          themes: [],
+        },
   });
 
   const { isValid } = form.formState;
 
   const themes = form.watch("themes");
 
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isControlled = open !== undefined;
+  const isOpen = isControlled ? open : internalOpen;
+  const setOpen = (next: boolean) => {
+    if (!isControlled) setInternalOpen(next);
+    onOpenChange?.(next);
+  };
 
   const handleClose = (next: boolean) => {
     if (!next) {
@@ -146,10 +172,17 @@ export function AddSongModal({ orgId }: AddSongModalProps) {
 
   const handleSubmit = (data: songSchemaInput) => {
       startTransition(async () => {
-        const result = await addSongToLibrary(data);
+        const result = song
+          ? await addSongToLibrary(data) // TODO: replace with updateSongInLibrary(song.id, data)
+          : await addSongToLibrary(data);
 
         if (result.success) {
-          toast.success(`${data.title} has been added to the song library 🎵`, { position: "top-center" });
+          toast.success(
+            isEditing
+              ? `${data.title} has been updated 🎵`
+              : `${data.title} has been added to the song library 🎵`,
+            { position: "top-center" },
+          );
           handleClose(false);
         } else {
           toast.error(result.error, { position: "top-center" });
@@ -158,27 +191,30 @@ export function AddSongModal({ orgId }: AddSongModalProps) {
   };
 
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
-      <DialogTrigger asChild>
-        <Button
-          size="sm"
-          className="gap-2 shadow-lg shadow-primary/20 transition-all hover:scale-105 hover:shadow-primary/30"
-        >
-          <Plus className="h-4 w-4" />
-          Add Song
-        </Button>
-      </DialogTrigger>
+    <Dialog open={isOpen} onOpenChange={handleClose}>
+      {!isControlled && (
+        <DialogTrigger asChild>
+          <Button
+            size="sm"
+            className="gap-2 shadow-lg shadow-primary/20 transition-all hover:scale-105 hover:shadow-primary/30"
+          >
+            <Plus className="h-4 w-4" />
+            Add Song
+          </Button>
+        </DialogTrigger>
+      )}
       <DialogContent className="sm:max-w-140 max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
               <Music className="h-4 w-4" />
             </span>
-            Add a song
+            {isEditing ? "Edit song" : "Add a song"}
           </DialogTitle>
           <DialogDescription>
-            Add a song to your library so anyone on the team can find it when
-            building setlists.
+            {isEditing
+              ? "Update this song's details. Changes apply everywhere it's used."
+              : "Add a song to your library so anyone on the team can find it when building setlists."}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -439,8 +475,20 @@ export function AddSongModal({ orgId }: AddSongModalProps) {
                 disabled={!isValid || isPending}
                 className="gap-1.5"
               >
-                {isPending ? <Spinner className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
-                {isPending ? "Adding..." : "Add song"}
+                {isPending ? (
+                  <Spinner className="h-4 w-4" />
+                ) : isEditing ? (
+                  <Save className="h-4 w-4" />
+                ) : (
+                  <Plus className="h-4 w-4" />
+                )}
+                {isPending
+                  ? isEditing
+                    ? "Saving..."
+                    : "Adding..."
+                  : isEditing
+                    ? "Save changes"
+                    : "Add song"}
               </Button>
             </DialogFooter>
           </form>

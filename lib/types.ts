@@ -87,3 +87,16 @@ export type EventDetails = {
   assignments: EventDetailsAssignment[]
   setlistSongs: EventDetailsSetlistSong[]
 }
+
+export type LibrarySong = {
+  id: string
+  title: string
+  artist: string
+  bpm: number
+  timeSignature: string
+  defaultPitch: Pitch | null
+  defaultKeyQuality: KeyQuality | null
+  spotifyUrl: string | null
+  youtubeUrl: string | null
+  themes: string[]
+}
