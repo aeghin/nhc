@@ -87,6 +87,7 @@ export const getEventDetailsById = async (eventId: string, organizationId: strin
   cacheLife("hours");
 
   cacheTag(`event-${eventId}-org-${organizationId}-details`);
+  cacheTag(`org-${organizationId}-songs`);
 
   const details = await prisma.event.findFirst({
       where: {
@@ -122,6 +123,9 @@ export const getEventDetailsById = async (eventId: string, organizationId: strin
                 artist: true,
                 youtubeUrl: true,
                 spotifyUrl: true,
+                attachments: {
+                  orderBy: { createdAt: "asc" }
+                }
               }
             }
           }

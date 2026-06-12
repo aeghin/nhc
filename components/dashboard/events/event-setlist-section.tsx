@@ -1,4 +1,4 @@
-import { Music, ArrowUpRight } from "lucide-react";
+import { Music, ArrowUpRight, FileText, AudioLines } from "lucide-react";
 import { YoutubeIcon, SpotifyIcon } from "@/components/icons/brand-icons";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -30,6 +30,7 @@ export function EventSetlistSection({
     artist: s.song.artist,
     youtubeUrl: s.song.youtubeUrl,
     spotifyUrl: s.song.spotifyUrl,
+    attachments: s.song.attachments,
   }));
   const editorHref = `/dashboard/organizations/${orgId}/events/${event.id}/setlist/editor`;
 
@@ -81,7 +82,7 @@ export function EventSetlistSection({
                     </p>
                   </div>
 
-                  {(song.spotifyUrl || song.youtubeUrl) && (
+                  {(song.spotifyUrl || song.youtubeUrl || (song.attachments && song.attachments.length > 0)) && (
                     <div className="flex shrink-0 items-center gap-3 ml-2">
                       {song.spotifyUrl && (
                         <a
@@ -103,6 +104,27 @@ export function EventSetlistSection({
                           <YoutubeIcon className="h-6 w-6" />
                         </a>
                       )}
+                      {song.attachments?.map((attachment) => {
+                        const isPdf = attachment.type === "application/pdf";
+                        const Icon = isPdf ? FileText : AudioLines;
+                        return (
+                          <a
+                            key={attachment.id}
+                            href={attachment.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            title={attachment.name}
+                            className={
+                              isPdf
+                                ? "text-muted-foreground transition-colors hover:text-red-500"
+                                : "text-muted-foreground transition-colors hover:text-sky-500"
+                            }
+                          >
+                            <Icon className="h-4.5 w-4.5" />
+                            <span className="sr-only">{attachment.name}</span>
+                          </a>
+                        );
+                      })}
                     </div>
                   )}
                 </div>

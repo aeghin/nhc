@@ -5,7 +5,9 @@ import Link from "next/link";
 import {
   ArrowLeft,
   ArrowUpDown,
+  AudioLines,
   ChevronDown,
+  FileText,
   Music,
   Search,
   SlidersHorizontal,
@@ -340,8 +342,8 @@ export function SongLibrary({ songs, orgId, orgName, canManage }: SongLibraryPro
             className={cn(
               "hidden items-center gap-4 border-b border-border/60 bg-muted/30 px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground md:grid",
               canManage
-                ? "grid-cols-[1fr_180px_64px_84px_72px_120px_44px]"
-                : "grid-cols-[1fr_180px_64px_84px_72px_120px]",
+                ? "grid-cols-[1fr_180px_64px_84px_72px_72px_120px_44px]"
+                : "grid-cols-[1fr_180px_64px_84px_72px_72px_120px]",
             )}
           >
             <span>Song</span>
@@ -350,6 +352,7 @@ export function SongLibrary({ songs, orgId, orgName, canManage }: SongLibraryPro
             <span className="text-right">BPM</span>
             <span className="text-right">Time</span>
             <span className="text-center">Links</span>
+            <span className="text-center">Attachments</span>
           </div>
 
           <ul className="divide-y divide-border/60">
@@ -362,8 +365,8 @@ export function SongLibrary({ songs, orgId, orgName, canManage }: SongLibraryPro
                 className={cn(
                   "grid grid-cols-1 gap-2 px-4 py-3 transition-colors hover:bg-muted/30 md:items-center md:gap-4",
                   canManage
-                    ? "md:grid-cols-[1fr_180px_64px_84px_72px_120px_44px]"
-                    : "md:grid-cols-[1fr_180px_64px_84px_72px_120px]",
+                    ? "md:grid-cols-[1fr_180px_64px_84px_72px_72px_120px_44px]"
+                    : "md:grid-cols-[1fr_180px_64px_84px_72px_72px_120px]",
                 )}
               >
                 {/* Song */}
@@ -437,6 +440,34 @@ export function SongLibrary({ songs, orgId, orgName, canManage }: SongLibraryPro
                     >
                       <YoutubeIcon className="h-4.5 w-4.5" />
                     </a>
+                  )}
+                </div>
+
+                {/* Attachments */}
+                <div className="flex flex-wrap items-center gap-1 md:justify-center">
+                  {song.attachments.length === 0 ? (
+                    <span className="text-xs text-muted-foreground">—</span>
+                  ) : (
+                    song.attachments.map((attachment) => {
+                      const isPdf = attachment.type === "application/pdf";
+                      const Icon = isPdf ? FileText : AudioLines;
+                      return (
+                        <a
+                          key={attachment.id}
+                          href={attachment.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title={attachment.name}
+                          className={cn(
+                            "flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted",
+                            isPdf ? "hover:text-red-600" : "hover:text-sky-600",
+                          )}
+                          aria-label={`Open ${attachment.name}`}
+                        >
+                          <Icon className="h-4 w-4" />
+                        </a>
+                      );
+                    })
                   )}
                 </div>
 

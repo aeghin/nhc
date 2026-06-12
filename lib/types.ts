@@ -40,6 +40,7 @@ export type EventDetailsSetlistSong = {
     artist: string
     youtubeUrl: string | null
     spotifyUrl: string | null
+    attachments: SongAttachment[]
   }
 }
 
@@ -55,6 +56,7 @@ export type SetlistSong = {
   artist: string
   youtubeUrl: string | null
   spotifyUrl: string | null
+  attachments?: SongAttachment[]
 }
 
 export type EventDetails = {
@@ -99,4 +101,16 @@ export type LibrarySong = {
   spotifyUrl: string
   youtubeUrl: string
   themes: string[]
+  attachments: SongAttachment[]
+}
+
+export type SongAttachment = {
+  id: string
+  name: string
+  url: string
+  key: string
+  type: string
+  size: number
+  songId: string
+  createdAt: Date
 }

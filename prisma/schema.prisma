@@ -266,6 +266,7 @@ model Song {
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   setlistSongs SetlistSong[]
+  attachments SongAttachment[]
 
 
   deletedAt DateTime?
@@ -298,4 +299,20 @@ model SetlistSong {
   @@index([eventId])
   @@index([songId])
 
+}
+
+model SongAttachment {
+  id   String @id @default(uuid())
+  name String
+  url  String
+  key  String @unique
+  type String
+  size Int
+
+  songId String
+  song   Song @relation(fields: [songId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([songId])
 }

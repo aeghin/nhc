@@ -36,6 +36,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { YoutubeIcon, SpotifyIcon } from "@/components/icons/brand-icons";
+import { SongAttachments } from "@/components/dashboard/songs/song-attachments";
 
 import { Pitch, KeyQuality } from "@/generated/prisma/enums";
 import { songSchema, songSchemaInput } from "@/lib/validations/song";
@@ -399,6 +400,15 @@ export function SongModal({ orgId, song, open, onOpenChange }: SongModalProps) {
                     )}
                   />
                 </div>
+
+              {/* Attachments (existing songs only) */}
+              {song && (
+                <SongAttachments
+                  songId={song.id}
+                  organizationId={orgId}
+                  attachments={song.attachments}
+                />
+              )}
 
               {/* Themes */}
               <FormField

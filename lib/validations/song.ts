@@ -15,3 +15,17 @@ export const songSchema = z.object({
 });
 
 export type songSchemaInput = z.infer<typeof songSchema>;
+
+export const songAttachmentsSchema = z.object({
+    songId: z.uuid(),
+    organizationId: z.uuid(),
+    files: z.object({
+        name: z.string().min(1, "File name required"),
+        url: z.url("File URL required"),
+        key: z.string().min(1, "File key required"),
+        type: z.string().min(1, "File type required"),
+        size: z.number().int().min(0),
+    }).array().min(1, "At least one file is required").max(10),
+});
+
+export type songAttachmentsInput = z.infer<typeof songAttachmentsSchema>;

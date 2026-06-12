@@ -16,6 +16,11 @@ export const getOrganizationSongs = async (organizationId: string) => {
         organizationId,
         deletedAt: null,
       },
+      include: {
+        attachments: {
+          orderBy: { createdAt: "asc" }
+        }
+      },
       orderBy: { title: "asc" }
     });
 
