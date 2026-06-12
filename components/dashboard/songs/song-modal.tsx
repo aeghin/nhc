@@ -39,7 +39,7 @@ import { YoutubeIcon, SpotifyIcon } from "@/components/icons/brand-icons";
 
 import { Pitch, KeyQuality } from "@/generated/prisma/enums";
 import { songSchema, songSchemaInput } from "@/lib/validations/song";
-import { addSongToLibrary } from "@/lib/actions/song";
+import { addSongToLibrary, updateSongInLibrary } from "@/lib/actions/song";
 import { toast } from "sonner";
 
 import type { LibrarySong } from "@/lib/types";
@@ -83,6 +83,19 @@ const COMMON_THEMES = [
   "Resurrection",
 ];
 
+const getFormValues = (orgId: string, song: LibrarySong): songSchemaInput => ({
+  organizationId: orgId,
+  title: song.title,
+  artist: song.artist,
+  bpm: song.bpm,
+  timeSignature: song.timeSignature,
+  defaultPitch: song.defaultPitch,
+  defaultKeyQuality: song.defaultKeyQuality,
+  spotifyUrl: song.spotifyUrl,
+  youtubeUrl: song.youtubeUrl,
+  themes: song.themes,
+});
+
 interface SongModalProps {
   orgId: string;
   song?: LibrarySong;
@@ -100,28 +113,16 @@ export function SongModal({ orgId, song, open, onOpenChange }: SongModalProps) {
   const form = useForm<songSchemaInput>({
     resolver: zodResolver(songSchema),
     mode: "onChange",
-    defaultValues: song
-      ? {
-          organizationId: orgId,
-          title: song.title,
-          artist: song.artist,
-          bpm: song.bpm,
-          timeSignature: song.timeSignature,
-          defaultPitch: song.defaultPitch ?? undefined,
-          defaultKeyQuality: song.defaultKeyQuality ?? undefined,
-          spotifyUrl: song.spotifyUrl ?? "",
-          youtubeUrl: song.youtubeUrl ?? "",
-          themes: song.themes,
-        }
-      : {
-          organizationId: orgId,
-          title: "",
-          artist: "",
-          timeSignature: "4/4",
-          spotifyUrl: "",
-          youtubeUrl: "",
-          themes: [],
-        },
+    defaultValues: {
+      organizationId: orgId,
+      title: "",
+      artist: "",
+      timeSignature: "4/4",
+      spotifyUrl: "",
+      youtubeUrl: "",
+      themes: [],
+    },
+    values: song ? getFormValues(orgId, song) : undefined,
   });
 
   const { isValid } = form.formState;
@@ -173,13 +174,13 @@ export function SongModal({ orgId, song, open, onOpenChange }: SongModalProps) {
   const handleSubmit = (data: songSchemaInput) => {
       startTransition(async () => {
         const result = song
-          ? await addSongToLibrary(data) // TODO: replace with updateSongInLibrary(song.id, data)
+          ? await updateSongInLibrary(song.id, data)
           : await addSongToLibrary(data);
 
         if (result.success) {
           toast.success(
             isEditing
-              ? `${data.title} has been updated 🎵`
+              ? `Song has been updated 🎵`
               : `${data.title} has been added to the song library 🎵`,
             { position: "top-center" },
           );

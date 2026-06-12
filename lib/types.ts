@@ -94,9 +94,9 @@ export type LibrarySong = {
   artist: string
   bpm: number
   timeSignature: string
-  defaultPitch: Pitch | null
-  defaultKeyQuality: KeyQuality | null
-  spotifyUrl: string | null
-  youtubeUrl: string | null
+  defaultPitch: Pitch
+  defaultKeyQuality: KeyQuality
+  spotifyUrl: string
+  youtubeUrl: string
   themes: string[]
 }
