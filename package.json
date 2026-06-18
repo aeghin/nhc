@@ -11,6 +11,7 @@
     "postinstall": "prisma generate"
   },
   "dependencies": {
+    "@ai-sdk/react": "^3.0.208",
     "@clerk/nextjs": "^7.2.1",
     "@hookform/resolvers": "^5.2.2",
     "@prisma/adapter-pg": "^7.2.0",
@@ -24,6 +25,7 @@
     "@react-email/components": "^1.0.7",
     "@uploadthing/react": "^7.3.3",
     "ably": "^2.21.0",
+    "ai": "^6.0.206",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
@@ -38,6 +40,8 @@
     "react-day-picker": "^9.14.0",
     "react-dom": "^19.2.7",
     "react-hook-form": "^7.71.1",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1",
     "resend": "^6.9.1",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.4.0",
