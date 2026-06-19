@@ -14,7 +14,7 @@ import {
 import { saveSetlist } from "@/lib/actions/song-setlist";
 import { SetlistDraft } from "./setlist-draft";
 import { CatalogPicker } from "./song-catalog-picker";
-// import { AiSetlistPanel } from "./ai-setlist-panel";
+import { AiSetlistPanel } from "./ai-setlist-panel";
 import type { SetlistSong } from "@/lib/types";
 import { Song } from "@/generated/prisma/client";
 
@@ -31,6 +31,7 @@ interface SetlistEditorProps {
 export function SetlistEditor({
   eventId,
   eventName,
+  orgId,
   backHref,
   initialSongs,
   catalog,
@@ -119,11 +120,11 @@ export function SetlistEditor({
               />
             </TabsContent>
             <TabsContent value="ai" className="mt-3">
-              {/* <AiSetlistPanel
+              <AiSetlistPanel
                 eventId={eventId}
-                canUseAi={canUseAi}
+                orgId={orgId}
                 onApply={updateSongs}
-              /> */}
+              />
             </TabsContent>
           </Tabs>
         </aside>

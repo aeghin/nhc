@@ -1,4 +1,3 @@
-import { auth } from "@clerk/nextjs/server";
 import { notFound } from "next/navigation";
 // import { getOrgSongCatalog } from "@/lib/services/songs"
 import { SetlistEditor } from "@/components/dashboard/events/setlist-editor";
@@ -9,6 +8,7 @@ import { getEventDetailsById } from "@/lib/services/events";
 import { OrgRole } from "@/generated/prisma/enums";
 import type { SetlistSong } from "@/lib/types";
 import { getOrganizationSongs } from "@/lib/services/songs";
+import { getAiSetlistAccess } from "@/lib/billing/entitlements";
 
 
 interface PageProps {
@@ -34,8 +34,7 @@ export default async function SetlistEditPage({ params }: PageProps) {
 
   if (!event || !canManage) notFound();
 
-  const { has } = await auth();
-  const canUseAi = has({ feature: "ai_setlist_generation" });
+  const canUseAi = await getAiSetlistAccess({ userId: user.id, orgId });
 
   const backHref = `/dashboard/organizations/${orgId}/events/${eventId}`;
 
