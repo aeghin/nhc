@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Save, Sparkles } from "lucide-react";
+import { ArrowLeft, Lock, Save, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,6 +15,7 @@ import { saveSetlist } from "@/lib/actions/song-setlist";
 import { SetlistDraft } from "./setlist-draft";
 import { CatalogPicker } from "./song-catalog-picker";
 import { AiSetlistPanel } from "./ai-setlist-panel";
+import { AiSetlistUpgrade } from "./ai-setlist-upgrade";
 import type { SetlistSong } from "@/lib/types";
 import { Song } from "@/generated/prisma/client";
 
@@ -110,6 +111,7 @@ export function SetlistEditor({
               <TabsTrigger value="ai">
                 <Sparkles />
                 AI
+                {!canUseAi && <Lock className="size-3 text-muted-foreground" />}
               </TabsTrigger>
             </TabsList>
             <TabsContent value="catalog" className="mt-3">
@@ -120,11 +122,15 @@ export function SetlistEditor({
               />
             </TabsContent>
             <TabsContent value="ai" className="mt-3">
-              <AiSetlistPanel
-                eventId={eventId}
-                orgId={orgId}
-                onApply={updateSongs}
-              />
+              {canUseAi ? (
+                <AiSetlistPanel
+                  eventId={eventId}
+                  orgId={orgId}
+                  onApply={updateSongs}
+                />
+              ) : (
+                <AiSetlistUpgrade />
+              )}
             </TabsContent>
           </Tabs>
         </aside>
