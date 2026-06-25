@@ -4,6 +4,7 @@ import { getOrganizationSettings } from "@/lib/services/organization";
 import { EditSettingsDialog } from "./edit-settings-dialog";
 import { DeleteOrgDialog } from "./delete-org-dialog";
 import { LeaveOrgDialog } from "./leave-org-dialog";
+import { ManageSubscriptionButton } from "./manage-subscription-button";
 
 interface SettingsTabContentProps {
   organizationId: string;
@@ -78,6 +79,18 @@ export const SettingsTabContent = async ({
           </div>
         )}
       </div>
+      {canManage && (
+        <section className="rounded-xl border border-border/40 bg-secondary/10 p-5">
+          <h3 className="text-sm font-semibold">Billing</h3>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Manage your subscription, update payment details, view invoices, or
+            cancel.
+          </p>
+          <div className="mt-3">
+            <ManageSubscriptionButton orgId={organizationId} />
+          </div>
+        </section>
+      )}
       <section className="rounded-xl border border-destructive/30 bg-destructive/5 p-5">
         <h3 className="text-sm font-semibold text-destructive">Danger Zone</h3>
 

@@ -4,6 +4,7 @@ import { stripe } from "@/lib/stripe";
 import prisma from "@/lib/prisma";
 import { currentUser } from "@/lib/services/user";
 import { getUserMembershipRole } from "@/lib/services/organization";
+import { getAiSetlistAccess } from "@/lib/billing/entitlements";
 import { OrgRole } from "@/generated/prisma/enums";
 
 type ActionResult =
@@ -85,4 +86,20 @@ export async function openBillingPortal(orgId: string): Promise<ActionResult> {
   });
 
   return { success: true, url: portal.url };
+}
+
+/** Read-only org premium status for the navbar (badge + subscribe button). */
+export async function getOrgPremiumStatus(
+  orgId: string,
+): Promise<{ hasPremium: boolean; canManage: boolean }> {
+  const user = await currentUser();
+  if (!user) return { hasPremium: false, canManage: false };
+
+  const [hasPremium, membership] = await Promise.all([
+    getAiSetlistAccess({ userId: user.id, orgId }),
+    getUserMembershipRole(user.id, orgId),
+  ]);
+  const canManage =
+    membership?.role === OrgRole.ADMIN || membership?.role === OrgRole.OWNER;
+  return { hasPremium, canManage };
 }

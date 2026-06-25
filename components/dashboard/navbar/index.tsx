@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Command } from "lucide-react";
 import { UserButton } from "@clerk/nextjs";
 import { NavLinks } from "./nav-links";
+import { PremiumNav } from "./premium-nav";
 
 export function Navbar() {
   return (
@@ -17,7 +18,8 @@ export function Navbar() {
           <NavLinks />
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
+          <PremiumNav />
           <UserButton
             appearance={{ elements: { avatarBox: { width: "36px", height: "36px" } } }}
           />
