@@ -1,7 +1,7 @@
 import prisma from "@/lib/prisma";
 import { verifyWebhook } from "@clerk/nextjs/webhooks";
 import { NextRequest } from "next/server";
-import { updateTag } from "next/cache";
+import { revalidateTag } from "next/cache";
 
 export async function POST(req: NextRequest) {
   const event = await verifyWebhook(req, {
@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
         data: updates,
       });
 
-      updateTag(`user-${id}`);
+      revalidateTag(`user-${id}`, "hours");
 
       const memberships = await prisma.membership.findMany({
         where: { user: { clerkId: id } },
@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
       });
 
       for (const { organizationId } of memberships) {
-        updateTag(`org-${organizationId}-members-list`);
+        revalidateTag(`org-${organizationId}-members-list`, "hours");
       }
     }
   }
