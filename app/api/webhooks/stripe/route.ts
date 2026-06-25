@@ -1,6 +1,6 @@
 import { stripe } from "@/lib/stripe";
 import prisma from "@/lib/prisma";
-import { updateTag } from "next/cache";
+import { revalidateTag } from "next/cache";
 import { NextRequest } from "next/server";
 import type Stripe from "stripe";
 
@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
         where: { id: org.id },
         data: { entitlements: lookupKeys },
       });
-      updateTag(`org-${org.id}-billing`); // bust the cached entitlement read
+      revalidateTag(`org-${org.id}-billing`, "hours"); // bust the cached entitlement read
     }
   }
 
