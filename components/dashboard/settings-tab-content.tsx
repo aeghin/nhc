@@ -79,7 +79,7 @@ export const SettingsTabContent = async ({
           </div>
         )}
       </div>
-      {canManage && (
+      {isOwner && (
         <section className="rounded-xl border border-border/40 bg-secondary/10 p-5">
           <h3 className="text-sm font-semibold">Billing</h3>
           <p className="mt-1 text-xs text-muted-foreground">

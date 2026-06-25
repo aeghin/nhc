@@ -11,12 +11,12 @@ type ActionResult =
   | { success: true; url: string }
   | { success: false; error: string };
 
-async function isOrgManager(orgId: string): Promise<boolean> {
+async function isOrgOwner(orgId: string): Promise<boolean> {
   const user = await currentUser();
   if (!user) return false;
   const membership = await getUserMembershipRole(user.id, orgId);
   return (
-    membership?.role === OrgRole.ADMIN || membership?.role === OrgRole.OWNER
+    membership?.role === OrgRole.OWNER
   );
 }
 
@@ -44,7 +44,7 @@ async function getOrCreateCustomer(orgId: string): Promise<string> {
 export async function startAiSetlistCheckout(
   orgId: string,
 ): Promise<ActionResult> {
-  if (!(await isOrgManager(orgId))) {
+  if (!(await isOrgOwner(orgId))) {
     return { success: false, error: "Forbidden" };
   }
 
@@ -68,7 +68,7 @@ export async function startAiSetlistCheckout(
 
 /** Open the Stripe Customer Portal for self-service subscription management. */
 export async function openBillingPortal(orgId: string): Promise<ActionResult> {
-  if (!(await isOrgManager(orgId))) {
+  if (!(await isOrgOwner(orgId))) {
     return { success: false, error: "Forbidden" };
   }
 
@@ -91,15 +91,14 @@ export async function openBillingPortal(orgId: string): Promise<ActionResult> {
 /** Read-only org premium status for the navbar (badge + subscribe button). */
 export async function getOrgPremiumStatus(
   orgId: string,
-): Promise<{ hasPremium: boolean; canManage: boolean }> {
+): Promise<{ hasPremium: boolean; canSubscribe: boolean }> {
   const user = await currentUser();
-  if (!user) return { hasPremium: false, canManage: false };
+  if (!user) return { hasPremium: false, canSubscribe: false };
 
   const [hasPremium, membership] = await Promise.all([
     getAiSetlistAccess({ userId: user.id, orgId }),
     getUserMembershipRole(user.id, orgId),
   ]);
-  const canManage =
-    membership?.role === OrgRole.ADMIN || membership?.role === OrgRole.OWNER;
-  return { hasPremium, canManage };
+  const canSubscribe = membership?.role === OrgRole.OWNER;
+  return { hasPremium, canSubscribe };
 }

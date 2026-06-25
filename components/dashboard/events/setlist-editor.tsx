@@ -27,6 +27,7 @@ interface SetlistEditorProps {
   initialSongs: SetlistSong[]
   catalog: Song[]
   canUseAi: boolean
+  canSubscribe: boolean
 }
 
 export function SetlistEditor({
@@ -37,6 +38,7 @@ export function SetlistEditor({
   initialSongs,
   catalog,
   canUseAi,
+  canSubscribe
 }: SetlistEditorProps) {
   const router = useRouter();
   const [songs, setSongs] = useState<SetlistSong[]>(initialSongs);
@@ -129,7 +131,7 @@ export function SetlistEditor({
                   onApply={updateSongs}
                 />
               ) : (
-                <AiSetlistUpgrade orgId={orgId} />
+                <AiSetlistUpgrade orgId={orgId} canSubscribe={canSubscribe} />
               )}
             </TabsContent>
           </Tabs>

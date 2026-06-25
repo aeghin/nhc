@@ -32,6 +32,8 @@ export default async function SetlistEditPage({ params }: PageProps) {
   const canManage =
     membership?.role === OrgRole.ADMIN || membership?.role === OrgRole.OWNER;
 
+  const canSubscribe = membership?.role === OrgRole.OWNER;
+
   if (!event || !canManage) notFound();
 
   const canUseAi = await getAiSetlistAccess({ userId: user.id, orgId });
@@ -61,6 +63,7 @@ export default async function SetlistEditPage({ params }: PageProps) {
       initialSongs={initialSongs}
       catalog={catalog}
       canUseAi={canUseAi}
+      canSubscribe={canSubscribe}
     />
   )
 }

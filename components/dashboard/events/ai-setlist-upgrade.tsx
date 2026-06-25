@@ -7,7 +7,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { startAiSetlistCheckout } from "@/lib/actions/billing";
 
-export function AiSetlistUpgrade({ orgId }: { orgId: string }) {
+
+export function AiSetlistUpgrade({ orgId, canSubscribe }: { orgId: string, canSubscribe: boolean }) {
   const [isPending, startTransition] = useTransition();
 
   const handleUpgrade = () => {
@@ -34,11 +35,16 @@ export function AiSetlistUpgrade({ orgId }: { orgId: string }) {
             Describe the vibe and let AI build a setlist from your catalog.
             Available on a premium plan.
           </p>
+          {!canSubscribe && (
+            <p className="mt-2 text-xs text-muted-foreground">
+              Reach out to an organization owner to subscribe.
+            </p>
+          )}
         </div>
         <Button
           size="sm"
           onClick={handleUpgrade}
-          disabled={isPending}
+          disabled={isPending || !canSubscribe}
           className="cursor-pointer"
         >
           <Lock className="mr-1.5 h-3.5 w-3.5" />

@@ -11,7 +11,7 @@ import {
   startAiSetlistCheckout,
 } from "@/lib/actions/billing";
 
-type Status = { hasPremium: boolean; canManage: boolean };
+type Status = { hasPremium: boolean; canSubscribe: boolean };
 
 export function PremiumNav() {
   const pathname = usePathname();
@@ -55,8 +55,8 @@ export function PremiumNav() {
     );
   }
 
-  // Only managers can subscribe — don't show a dead button to members.
-  if (!status.canManage) return null;
+  
+  if (!status.canSubscribe) return null;
 
   const handleUpgrade = () => {
     startTransition(async () => {
