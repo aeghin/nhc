@@ -1,9 +1,27 @@
-import Link from "next/link";
+"use client";
+
+import { useTransition } from "react";
 import { Lock, Sparkles } from "lucide-react";
+import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { startAiSetlistCheckout } from "@/lib/actions/billing";
 
-export function AiSetlistUpgrade() {
+export function AiSetlistUpgrade({ orgId }: { orgId: string }) {
+  const [isPending, startTransition] = useTransition();
+
+  const handleUpgrade = () => {
+    startTransition(async () => {
+      const result = await startAiSetlistCheckout(orgId);
+      if (result.success) {
+        // Full navigation — Stripe Checkout is an external URL.
+        window.location.href = result.url;
+      } else {
+        toast.error(result.error, { position: "top-center" });
+      }
+    });
+  };
+
   return (
     <Card>
       <CardContent className="flex h-120 flex-col items-center justify-center gap-4 p-6 text-center">
@@ -17,11 +35,14 @@ export function AiSetlistUpgrade() {
             Available on a premium plan.
           </p>
         </div>
-        <Button asChild size="sm" className="cursor-pointer">
-          <Link href="/#pricing">
-            <Lock className="mr-1.5 h-3.5 w-3.5" />
-            Upgrade to unlock
-          </Link>
+        <Button
+          size="sm"
+          onClick={handleUpgrade}
+          disabled={isPending}
+          className="cursor-pointer"
+        >
+          <Lock className="mr-1.5 h-3.5 w-3.5" />
+          {isPending ? "Redirecting…" : "Upgrade to unlock"}
         </Button>
       </CardContent>
     </Card>

@@ -129,7 +129,7 @@ export function SetlistEditor({
                   onApply={updateSongs}
                 />
               ) : (
-                <AiSetlistUpgrade />
+                <AiSetlistUpgrade orgId={orgId} />
               )}
             </TabsContent>
           </Tabs>

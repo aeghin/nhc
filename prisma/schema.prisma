@@ -87,6 +87,10 @@ model Organization {
   name        String
   description String
 
+  // Stripe billing — mirror of entitlement feature lookup_keys from Stripe
+  stripeCustomerId String?  @unique
+  entitlements     String[] @default([])
+
   memberships Membership[]
   invitations Invitation[]
   serviceTypes ServiceType[]
