@@ -7,7 +7,7 @@ import { getAiSetlistAccess } from "@/lib/billing/entitlements";
 import { OrgRole } from "@/generated/prisma/enums";
 import { createSetlistAgent } from "@/lib/agents/setlist/agent";
 
-// Allow the model time to reason over the catalog and call the tool.
+
 export const maxDuration = 30;
 
 export async function POST(req: Request) {
@@ -19,7 +19,7 @@ export async function POST(req: Request) {
   const user = await currentUser();
   if (!user) return new Response("Unauthorized", { status: 401 });
 
-  // Premium gate — placeholder until Stripe is wired (lib/billing/entitlements.ts).
+  
   const allowed = await getAiSetlistAccess({ userId: user.id, orgId });
   if (!allowed) return new Response("Upgrade required", { status: 403 });
 
@@ -33,6 +33,7 @@ export async function POST(req: Request) {
   if (!event || !canManage) return new Response("Not found", { status: 404 });
 
   const catalog = await getOrganizationSongs(orgId);
+  
   if (catalog.length === 0) {
     return new Response("No songs in catalog", { status: 422 });
   }
