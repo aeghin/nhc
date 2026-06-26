@@ -100,21 +100,26 @@ export const InvitationsTabContent = async ({
               const statusConfig = getStatusConfig(invitation.status);
               const StatusIcon = statusConfig.icon;
 
+              const statusDate = new Date(invitation.updatedAt).toLocaleDateString(
+                "en-US",
+                { month: "short", day: "numeric", year: "numeric" },
+              );
+
               return (
                 <AnimatedInvitationRow key={invitation.id} index={i}>
-                  <div className="flex items-center gap-4">
+                  <div className="flex min-w-0 items-start gap-4 sm:items-center">
                     <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-secondary to-secondary/50 text-sm font-semibold text-secondary-foreground">
                       {invitation.email.charAt(0).toUpperCase()}
                     </div>
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium">
+                    <div className="min-w-0 space-y-1">
+                      <div className="flex min-w-0 items-center gap-2">
+                        <span className="min-w-0 truncate font-medium">
                           {invitation.email}
                         </span>
                         <Badge
                           variant="outline"
                           className={cn(
-                            "text-[10px] font-medium capitalize",
+                            "shrink-0 text-[10px] font-medium capitalize",
                             statusConfig.className
                           )}
                         >
@@ -134,26 +139,21 @@ export const InvitationsTabContent = async ({
                         )}
                         {` By ${invitation.invitedBy.firstName} ${invitation.invitedBy.lastName}`}
                       </p>
+                      <p className="text-xs text-muted-foreground sm:hidden">
+                        {`${statusConfig.label} on ${statusDate}`}
+                      </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className="text-xs text-muted-foreground">
-                      <span>{`${statusConfig.label} on `}</span>
-                      {new Date(invitation.updatedAt).toLocaleDateString(
-                        "en-US",
-                        {
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric"
-                        }
-                      )}
+                    <span className="hidden text-xs text-muted-foreground sm:inline-block">
+                      {`${statusConfig.label} on ${statusDate}`}
                     </span>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8 cursor-pointer opacity-0 transition-opacity group-hover:opacity-100"
+                          className="h-8 w-8 cursor-pointer opacity-100 transition-opacity group-hover:opacity-100 sm:opacity-0"
                         >
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>

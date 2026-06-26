@@ -56,6 +56,72 @@ function formatKey(song: Song) {
   return `${song.defaultPitch}${quality}`
 }
 
+function SongLinks({ song }: { song: Song }) {
+  return (
+    <>
+      {song.spotifyUrl && (
+        <a
+          href={song.spotifyUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-emerald-600"
+          aria-label="Open in Spotify"
+        >
+          <SpotifyIcon className="h-4 w-4" />
+        </a>
+      )}
+      {song.youtubeUrl && (
+        <a
+          href={song.youtubeUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-red-600"
+          aria-label="Open in YouTube"
+        >
+          <YoutubeIcon className="h-4.5 w-4.5" />
+        </a>
+      )}
+    </>
+  )
+}
+
+function SongAttachments({ song, max }: { song: Song; max?: number }) {
+  if (song.attachments.length === 0) {
+    return <span className="text-xs text-muted-foreground">—</span>
+  }
+  const shown = max ? song.attachments.slice(0, max) : song.attachments
+  const extra = song.attachments.length - shown.length
+  return (
+    <>
+      {shown.map((attachment) => {
+        const isPdf = attachment.type === "application/pdf"
+        const Icon = isPdf ? FileText : AudioLines
+        return (
+          <a
+            key={attachment.id}
+            href={attachment.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            title={attachment.name}
+            className={cn(
+              "flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted",
+              isPdf ? "hover:text-red-600" : "hover:text-sky-600",
+            )}
+            aria-label={`Open ${attachment.name}`}
+          >
+            <Icon className="h-4 w-4" />
+          </a>
+        )
+      })}
+      {extra > 0 && (
+        <span className="px-1 text-[10px] font-medium text-muted-foreground">
+          +{extra}
+        </span>
+      )}
+    </>
+  )
+}
+
 export function SongLibrary({ songs, orgId, orgName, canManage }: SongLibraryProps) {
 
   const [query, setQuery] = useState("")
@@ -362,13 +428,53 @@ export function SongLibrary({ songs, orgId, orgName, canManage }: SongLibraryPro
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: Math.min(idx * 0.015, 0.2) }}
-                className={cn(
-                  "grid grid-cols-1 gap-2 px-4 py-3 transition-colors hover:bg-muted/30 md:items-center md:gap-4",
-                  canManage
-                    ? "md:grid-cols-[1fr_180px_64px_84px_72px_72px_120px_44px]"
-                    : "md:grid-cols-[1fr_180px_64px_84px_72px_72px_120px]",
-                )}
+                className="px-4 py-3 transition-colors hover:bg-muted/30"
               >
+                {/* ── Mobile (spread row + themes) ── */}
+                <div className="md:hidden">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium leading-tight">{song.title}</p>
+                      <p className="truncate text-xs text-muted-foreground">{song.artist}</p>
+                    </div>
+                    <span className="shrink-0 font-mono text-xs text-muted-foreground tabular-nums">
+                      {formatKey(song)} · {song.bpm} · {song.timeSignature}
+                    </span>
+                    <div className="flex shrink-0 items-center gap-1">
+                      <SongLinks song={song} />
+                      <SongAttachments song={song} max={3} />
+                    </div>
+                    {canManage && <EditSongDetails song={song} orgId={orgId} />}
+                  </div>
+                  {song.themes.length > 0 && (
+                    <div className="mt-2 flex flex-wrap items-center gap-1">
+                      {song.themes.slice(0, 3).map((theme) => (
+                        <Badge
+                          key={theme}
+                          variant="secondary"
+                          className="px-1.5 py-0 text-[10px] font-medium capitalize"
+                        >
+                          {theme}
+                        </Badge>
+                      ))}
+                      {song.themes.length > 3 && (
+                        <span className="text-[10px] text-muted-foreground">
+                          +{song.themes.length - 3}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* ── Desktop table row ── */}
+                <div
+                  className={cn(
+                    "hidden md:grid md:items-center md:gap-4",
+                    canManage
+                      ? "md:grid-cols-[1fr_180px_64px_84px_72px_72px_120px_44px]"
+                      : "md:grid-cols-[1fr_180px_64px_84px_72px_72px_120px]",
+                  )}
+                >
                 {/* Song */}
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium leading-tight">{song.title}</p>
@@ -410,7 +516,7 @@ export function SongLibrary({ songs, orgId, orgName, canManage }: SongLibraryPro
 
                 {/* BPM */}
                 <div className="font-mono text-xs text-muted-foreground tabular-nums md:text-right">
-                  {song.bpm} <span className="ml-1 text-[10px] opacity-60 md:hidden">bpm</span>
+                  {song.bpm}
                 </div>
 
                 <div className="font-mono text-xs text-muted-foreground tabular-nums md:text-right">
@@ -419,56 +525,12 @@ export function SongLibrary({ songs, orgId, orgName, canManage }: SongLibraryPro
 
                 {/* Links */}
                 <div className="flex items-center gap-1 md:justify-center">
-                  {song.spotifyUrl && (
-                    <a
-                      href={song.spotifyUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-emerald-600"
-                      aria-label="Open in Spotify"
-                    >
-                      <SpotifyIcon className="h-4 w-4" />
-                    </a>
-                  )}
-                  {song.youtubeUrl && (
-                    <a
-                      href={song.youtubeUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-red-600"
-                      aria-label="Open in YouTube"
-                    >
-                      <YoutubeIcon className="h-4.5 w-4.5" />
-                    </a>
-                  )}
+                  <SongLinks song={song} />
                 </div>
 
                 {/* Attachments */}
                 <div className="flex flex-wrap items-center gap-1 md:justify-center">
-                  {song.attachments.length === 0 ? (
-                    <span className="text-xs text-muted-foreground">—</span>
-                  ) : (
-                    song.attachments.map((attachment) => {
-                      const isPdf = attachment.type === "application/pdf";
-                      const Icon = isPdf ? FileText : AudioLines;
-                      return (
-                        <a
-                          key={attachment.id}
-                          href={attachment.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          title={attachment.name}
-                          className={cn(
-                            "flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted",
-                            isPdf ? "hover:text-red-600" : "hover:text-sky-600",
-                          )}
-                          aria-label={`Open ${attachment.name}`}
-                        >
-                          <Icon className="h-4 w-4" />
-                        </a>
-                      );
-                    })
-                  )}
+                  <SongAttachments song={song} />
                 </div>
 
                 {/* Actions */}
@@ -477,6 +539,7 @@ export function SongLibrary({ songs, orgId, orgName, canManage }: SongLibraryPro
                     <EditSongDetails song={song} orgId={orgId} />
                   </div>
                 )}
+                </div>
               </motion.li>
             ))}
           </ul>

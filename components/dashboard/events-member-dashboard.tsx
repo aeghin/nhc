@@ -617,13 +617,13 @@ export function MemberEventsDashboard({
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.15 }}
-        className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide"
+        className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide snap-x snap-mandatory sm:snap-none"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         <motion.button
           whileTap={{ scale: 0.97 }}
           onClick={() => setSelectedServiceType(null)}
-          className={`flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all cursor-pointer ${
+          className={`flex shrink-0 snap-start items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all cursor-pointer ${
             !selectedServiceType
               ? "bg-foreground text-background"
               : "border border-border bg-background text-muted-foreground hover:border-foreground/20 hover:text-foreground"
@@ -642,7 +642,7 @@ export function MemberEventsDashboard({
                   service.id === selectedServiceType ? null : service.id,
                 )
               }
-              className={`flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all cursor-pointer ${
+              className={`flex shrink-0 snap-start items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all cursor-pointer ${
                 selectedServiceType === service.id
                   ? "bg-foreground text-background"
                   : "border border-border bg-background text-muted-foreground hover:border-foreground/20 hover:text-foreground"

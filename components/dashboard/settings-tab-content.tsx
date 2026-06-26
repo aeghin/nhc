@@ -100,7 +100,7 @@ export const SettingsTabContent = async ({
             : "Leave the organization. You'll lose access to its events and assignments until you're invited back."}
         </p>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
           {isOwner && (
             <DeleteOrgDialog organizationId={organizationId} name={org?.name ?? ""} />
           )}

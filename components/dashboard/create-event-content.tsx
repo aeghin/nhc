@@ -549,7 +549,7 @@ export function CreateEventPageContent({
   }
 
   return (
-    <div className="flex h-[calc(100dvh-3.5rem)] flex-col bg-background overflow-hidden">
+    <div className="flex min-h-[calc(100dvh-3.5rem)] flex-col bg-background lg:h-[calc(100dvh-3.5rem)] lg:overflow-hidden">
       {/* Conflict Warning Modal */}
       <Dialog
         open={!!conflictWarning}
@@ -674,8 +674,8 @@ export function CreateEventPageContent({
       </motion.div>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-hidden">
-        <div className="container max-w-5xl h-full px-4 py-6 flex flex-col mx-auto">
+      <div className="flex-1 lg:overflow-hidden">
+        <div className="container max-w-5xl px-4 py-6 flex flex-col mx-auto lg:h-full">
           {/* Error Banner */}
           {error && (
             <motion.div
@@ -722,9 +722,9 @@ export function CreateEventPageContent({
                   transition={{ duration: 0.2 }}
                   className="flex-1 flex flex-col min-h-0"
                 >
-                  <div className="flex-1 grid gap-6 lg:grid-cols-2 min-h-0 overflow-hidden">
+                  <div className="flex-1 grid gap-6 lg:grid-cols-2 min-h-0 lg:overflow-hidden">
                     {/* Left Column - Basic Info */}
-                    <div className="space-y-6 overflow-y-auto pr-2">
+                    <div className="space-y-6 lg:overflow-y-auto lg:pr-2">
                       <Card>
                         <CardHeader>
                           <CardTitle className="flex items-center gap-2 text-lg">
@@ -1064,7 +1064,7 @@ export function CreateEventPageContent({
                     </div>
 
                     {/* Right Column - Roles */}
-                    <Card className="flex flex-col min-h-0 overflow-hidden">
+                    <Card className="lg:min-h-0 lg:overflow-hidden">
                       <CardHeader className="shrink-0">
                         <CardTitle className="flex items-center gap-2 text-lg">
                           <Users className="h-5 w-5 text-muted-foreground" />
@@ -1079,7 +1079,7 @@ export function CreateEventPageContent({
                           </p>
                         )}
                       </CardHeader>
-                      <CardContent className="flex-1 overflow-y-auto min-h-0">
+                      <CardContent className="flex-1 lg:overflow-y-auto min-h-0">
                         <div className="grid gap-2">
                           {volunteerRoleEntries.map(([role, config]) => {
                             const isSelected =
@@ -1251,7 +1251,7 @@ export function CreateEventPageContent({
                   </Card>
 
                   {/* Role Assignments */}
-                  <div className="flex-1 grid gap-4 lg:grid-cols-2 mt-4 overflow-y-auto min-h-0 content-start">
+                  <div className="flex-1 grid gap-4 lg:grid-cols-2 mt-4 lg:overflow-y-auto min-h-0 content-start">
                     {watchedRolesNeeded.map((role) => {
                       const config = volunteerRoleConfig[role];
                       const availableMembers = membersByRole[role] || [];
@@ -1272,7 +1272,7 @@ export function CreateEventPageContent({
                           </CardHeader>
                           <CardContent className="p-0">
                             {availableMembers.length > 0 ? (
-                              <div className="max-h-64 overflow-y-auto p-4">
+                              <div className="lg:max-h-64 lg:overflow-y-auto p-4">
                                 <div className="space-y-2">
                                   {availableMembers.map((member) => {
                                     const isAssigned = assignedToRole.includes(

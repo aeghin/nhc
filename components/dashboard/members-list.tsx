@@ -1,4 +1,4 @@
-import { Mail, Phone, ChevronRight } from "lucide-react";
+import { Mail, Phone, ChevronRight, CalendarDays } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 import { Badge } from "@/components/ui/badge";
@@ -58,6 +58,11 @@ export function MembersList({ members, currentUserId, viewerRole }: MembersListP
 
         const isSelf = member.user.id === currentUserId;
 
+        const joinedDate = new Date(member.user.createdAt).toLocaleDateString(
+          "en-US",
+          { month: "short", day: "numeric", year: "numeric" },
+        );
+
         const canManageMember =
           viewerRole !== OrgRole.MEMBER &&
           !isSelf &&
@@ -71,16 +76,16 @@ export function MembersList({ members, currentUserId, viewerRole }: MembersListP
         return (
           <div
             key={member.user.id}
-            className="group flex items-center justify-between gap-4 px-6 py-4 transition-colors hover:bg-accent/30"
+            className="group flex items-start justify-between gap-4 px-6 py-4 transition-colors hover:bg-accent/30 sm:items-center"
           >
-            <div className="flex items-center gap-4">
+            <div className="flex min-w-0 items-start gap-4 sm:items-center">
               <Avatar className="h-11 w-11 transition-transform group-hover:scale-105">
                 <AvatarImage src={member.user.userImageUrl ?? undefined} />
                 <AvatarFallback className="bg-linear-to-br text-xsm font-semibold text-foreground">
                   {member.user.firstName.charAt(0)}
                 </AvatarFallback>
               </Avatar>
-              <div className="space-y-1">
+              <div className="min-w-0 space-y-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="font-medium">{member.user.id === currentUserId ? "You" : `${formatName(member.user.firstName)} ${formatName(member.user.lastName)}`}</span>
                   <Badge variant="outline" className={cn("text-[10px] font-medium", roleConfig.className)}>
@@ -112,28 +117,27 @@ export function MembersList({ members, currentUserId, viewerRole }: MembersListP
                     </HoverCard>
                   )}
                 </div>
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <span className="inline-flex items-center gap-1.5">
-                    <Mail className="h-3 w-3" />
-                    {member.user.email}
+                <div className="flex flex-col gap-1 text-xs text-muted-foreground sm:flex-row sm:items-center sm:gap-2">
+                  <span className="inline-flex min-w-0 items-center gap-1.5">
+                    <Mail className="h-3 w-3 shrink-0" />
+                    <span className="truncate">{member.user.email}</span>
                   </span>
-                  <span className="text-border">•</span>
+                  <span className="hidden text-border sm:inline">•</span>
                   <span className="inline-flex items-center gap-1.5 tabular-nums">
-                    <Phone className="h-3 w-3" />
+                    <Phone className="h-3 w-3 shrink-0" />
                     {formatPhone(member.user.phoneNumber)}
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 tabular-nums sm:hidden">
+                    <CalendarDays className="h-3 w-3 shrink-0" />
+                    Joined {joinedDate}
                   </span>
                 </div>
               </div>
             </div>
 
             <div className="flex items-center gap-3">
-              <span className="whitespace-nowrap text-xs tabular-nums text-muted-foreground">
-                Joined{" "}
-                {new Date(member.user.createdAt).toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                  year: "numeric",
-                })}
+              <span className="hidden whitespace-nowrap text-xs tabular-nums text-muted-foreground sm:inline-block">
+                Joined {joinedDate}
               </span>
               {canManageMember || canManageVolunteerRoles ? (
                 <RoleAssignButtons
