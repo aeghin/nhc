@@ -91,6 +91,10 @@ model Organization {
   stripeCustomerId String?  @unique
   entitlements     String[] @default([])
 
+  // Smart scheduling — when enabled, declining an event invite auto-invites
+  // the next best available member for that role.
+  smartSchedulingEnabled Boolean @default(false)
+
   memberships Membership[]
   invitations Invitation[]
   serviceTypes ServiceType[]
@@ -210,6 +214,9 @@ model EventAssignment {
 
   role VolunteerRole
   status InvitationStatus @default(PENDING)
+
+  // True when this assignment was created by smart scheduling (auto-refill).
+  autoAssigned Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

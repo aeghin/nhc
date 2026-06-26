@@ -5,6 +5,7 @@ import { EditSettingsDialog } from "./edit-settings-dialog";
 import { DeleteOrgDialog } from "./delete-org-dialog";
 import { LeaveOrgDialog } from "./leave-org-dialog";
 import { ManageSubscriptionButton } from "./manage-subscription-button";
+import { SmartSchedulingToggle } from "./smart-scheduling-toggle";
 
 interface SettingsTabContentProps {
   organizationId: string;
@@ -79,6 +80,12 @@ export const SettingsTabContent = async ({
           </div>
         )}
       </div>
+      {canManage && (
+        <SmartSchedulingToggle
+          organizationId={organizationId}
+          enabled={org?.smartSchedulingEnabled ?? false}
+        />
+      )}
       {isOwner && (
         <section className="rounded-xl border border-border/40 bg-secondary/10 p-5">
           <h3 className="text-sm font-semibold">Billing</h3>

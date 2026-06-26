@@ -14,6 +14,11 @@ import {
 
 import EventAssignmentEmail from "@/components/email/event-email-template";
 
+import {
+  findBestReplacement,
+  getConflictingAssignments,
+} from "@/lib/services/scheduling";
+
 import { Resend } from "resend";
 import { revalidatePath, updateTag } from "next/cache";
 
@@ -63,53 +68,10 @@ export const checkMemberAvailability = async ({
     throw new Error("Unauthorized");
   }
 
-  const overlapConditions = dates.map(({ startTime, endTime }) => {
-    const newStart = new Date(startTime);
-    const newEnd = new Date(endTime);
-
-    return {
-      event: {
-        dates: {
-          some: {
-            startTime: { lt: newEnd },
-            endTime: { gt: newStart },
-          },
-        },
-      },
-    };
-  });
-
-  const conflictingAssignments = await prisma.eventAssignment.findMany({
-    where: {
-      organizationId,
-      AND: [
-        {
-          OR: [
-            { status: InvitationStatus.ACCEPTED },
-            {
-              status: InvitationStatus.PENDING,
-              expiresAt: { gt: new Date() },
-            },
-          ],
-        },
-        { OR: overlapConditions },
-      ],
-    },
-    select: {
-      userId: true,
-      event: {
-        select: {
-          name: true,
-          dates: {
-            select: {
-              startTime: true,
-              endTime: true,
-            },
-          },
-        },
-      },
-    },
-  });
+  const conflictingAssignments = await getConflictingAssignments(
+    organizationId,
+    dates,
+  );
 
   const conflicts: Record<string, MemberConflict> = {};
 
@@ -324,19 +286,27 @@ export const declineEventInvitation = async (organizationId: string, eventId: st
 
     if (!user) return { success: false, error: "Unauthorized" };
 
-    const event = await prisma.eventAssignment.findUnique({
+    const assignment = await prisma.eventAssignment.findUnique({
       where: {
         eventId_userId: { eventId: eventId, userId: user.id },
         organizationId,
         status: InvitationStatus.PENDING,
-      }
+      },
+      select: {
+        id: true,
+        role: true,
+        assignedById: true,
+        expiresAt: true,
+        event: { select: { name: true } },
+        organization: { select: { smartSchedulingEnabled: true, name: true } },
+      },
     });
 
-    if (!event) return { success: false, error: "Unable to find this event" };
+    if (!assignment) return { success: false, error: "Unable to find this event" };
 
     await prisma.eventAssignment.update({
       where: {
-        id: event.id,
+        id: assignment.id,
         organizationId,
       },
       data: {
@@ -346,6 +316,59 @@ export const declineEventInvitation = async (organizationId: string, eventId: st
 
     updateTag(`user-${user.id}-events-${organizationId}`);
     updateTag(`event-${eventId}-org-${organizationId}-details`);
+    updateTag(`org-${organizationId}-acceptance-stats`);
+
+    // Smart scheduling: auto-invite the next best available member into the
+    // role just vacated. Best-effort and isolated — if anything here fails, the
+    // decline the user already committed must still succeed.
+    if (assignment.organization.smartSchedulingEnabled) {
+      try {
+        const replacement = await findBestReplacement({
+          organizationId,
+          eventId,
+          declinedRole: assignment.role,
+        });
+
+        if (replacement) {
+          await prisma.eventAssignment.create({
+            data: {
+              eventId,
+              userId: replacement.userId,
+              role: assignment.role,
+              assignedById: assignment.assignedById,
+              organizationId,
+              status: InvitationStatus.PENDING,
+              autoAssigned: true,
+              // Keep the slot's original deadline; fall back to a fresh window
+              // only if that deadline has already passed.
+              expiresAt:
+                assignment.expiresAt > new Date()
+                  ? assignment.expiresAt
+                  : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+            },
+          });
+
+          updateTag(`user-${replacement.userId}-events-${organizationId}`);
+          updateTag(`event-${eventId}-org-${organizationId}-details`);
+
+          after(async () => {
+            await resend.emails.send({
+              from: "NHC <noreply@aeghin.com>",
+              to: replacement.email,
+              subject: `You've been assigned to ${assignment.event.name}`,
+              react: EventAssignmentEmail({
+                recipientName: replacement.firstName,
+                eventName: assignment.event.name,
+                organizationName: assignment.organization.name,
+                viewLink: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/organizations/${organizationId}`,
+              }),
+            });
+          });
+        }
+      } catch {
+        // Swallow: smart-fill is best-effort; the decline already committed.
+      }
+    }
 
     return { success: true };
 

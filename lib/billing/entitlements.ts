@@ -3,11 +3,7 @@ import "server-only";
 import prisma from "@/lib/prisma";
 import { cacheLife, cacheTag } from "next/cache";
 
-/**
- * Cached per-org read of the entitlement feature lookup_keys mirrored from
- * Stripe by the webhook (app/api/webhooks/stripe/route.ts). Reads our DB —
- * never calls the Stripe API on the hot path. Busted via updateTag on change.
- */
+
 async function getOrgEntitlements(orgId: string): Promise<string[]> {
   "use cache";
 
@@ -23,12 +19,6 @@ async function getOrgEntitlements(orgId: string): Promise<string[]> {
   return org?.entitlements ?? [];
 }
 
-/**
- * Premium gate for AI setlist generation.
- *
- * Signature is intentionally stable so call sites never change. `userId` is
- * accepted for future per-user checks; access is currently org-scoped.
- */
 export async function getAiSetlistAccess(params: {
   userId: string;
   orgId: string;

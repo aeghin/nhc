@@ -263,10 +263,11 @@ export const getOrganizationSettings = async (organizationId: string) => {
     },
     select: {
       name: true,
-      description: true
+      description: true,
+      smartSchedulingEnabled: true
     }
   });
 
   return details;
-  
+
 };
