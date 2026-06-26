@@ -17,9 +17,10 @@ interface PageProps {
 
 export default async function SetlistEditPage({ params }: PageProps) {
 
-  const { id: orgId, eventId } = await params;
-
-  const user = await currentUser();
+  const [{ id: orgId, eventId }, user] = await Promise.all([
+    params,
+    currentUser(),
+  ]);
 
   if (!user) notFound();
 

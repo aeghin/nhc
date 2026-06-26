@@ -25,9 +25,10 @@ export default async function EventDetailPage({
 }: {
   params: Promise<{ id: string; eventId: string }>
 }) {
-  const { id: orgId, eventId } = await params;
-
-  const user = await currentUser();
+  const [{ id: orgId, eventId }, user] = await Promise.all([
+    params,
+    currentUser(),
+  ]);
 
   if (!user) notFound();
 

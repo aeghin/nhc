@@ -14,9 +14,10 @@ export default async function CreateEventPage({
 }: {
   params: Promise<{ id: string }>
 }) {
-  const { id: orgId } = await params
-
-  const user = await currentUser();
+  const [{ id: orgId }, user] = await Promise.all([
+    params,
+    currentUser(),
+  ]);
 
   if (!user) redirect("/sign-in");
 

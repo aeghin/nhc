@@ -13,7 +13,7 @@ import {
   SlidersHorizontal,
   X
 } from "lucide-react";
-import { motion } from "motion/react";
+import { m } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -423,7 +423,7 @@ export function SongLibrary({ songs, orgId, orgName, canManage }: SongLibraryPro
 
           <ul className="divide-y divide-border/60">
             {filteredSongs.map((song, idx) => (
-              <motion.li
+              <m.li
                 key={song.id}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -540,7 +540,7 @@ export function SongLibrary({ songs, orgId, orgName, canManage }: SongLibraryPro
                   </div>
                 )}
                 </div>
-              </motion.li>
+              </m.li>
             ))}
           </ul>
         </Card>

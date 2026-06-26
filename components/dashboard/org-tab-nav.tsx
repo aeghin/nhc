@@ -42,6 +42,7 @@ export const OrgTabNav = ({ activeTab, canManage, counts }: OrgTabNavProps) => {
 
         return (
           <button
+            type="button"
             key={tab.value}
             onClick={() => handleTabChange(tab.value)}
             className={cn(

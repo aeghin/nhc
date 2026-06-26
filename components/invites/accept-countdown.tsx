@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { motion } from "motion/react";
+import { m } from "motion/react";
 import { CheckCircle2, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -39,25 +39,25 @@ export const AcceptedCountdown = ({ orgId, organizationName }: AcceptedCountdown
   return (
     <Card className="border-2 overflow-hidden text-center">
       <CardContent className="p-8">
-        <motion.div
+        <m.div
           initial={{ scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ type: "spring", duration: 0.5 }}
           className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary"
         >
           <CheckCircle2 className="h-8 w-8" />
-        </motion.div>
+        </m.div>
 
-        <motion.h1
+        <m.h1
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
           className="text-2xl font-bold tracking-tight mb-2"
         >
           Welcome Aboard
-        </motion.h1>
+        </m.h1>
 
-        <motion.p
+        <m.p
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
@@ -68,7 +68,7 @@ export const AcceptedCountdown = ({ orgId, organizationName }: AcceptedCountdown
             {organizationName}
           </span>
           .
-        </motion.p>
+        </m.p>
 
         {/* Countdown circle */}
         <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center relative">
@@ -82,7 +82,7 @@ export const AcceptedCountdown = ({ orgId, organizationName }: AcceptedCountdown
               strokeWidth="2"
               className="text-muted/30"
             />
-            <motion.circle
+            <m.circle
               cx="20"
               cy="20"
               r="18"
@@ -97,15 +97,15 @@ export const AcceptedCountdown = ({ orgId, organizationName }: AcceptedCountdown
             />
           </svg>
           {completed ? (
-            <motion.div
+            <m.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ type: "spring", duration: 0.4 }}
             >
               <Check className="h-5 w-5 text-primary" />
-            </motion.div>
+            </m.div>
           ) : (
-            <motion.span
+            <m.span
               key={countdown}
               initial={{ scale: 1.3, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -113,11 +113,11 @@ export const AcceptedCountdown = ({ orgId, organizationName }: AcceptedCountdown
               className="text-sm font-semibold text-primary"
             >
               {countdown}
-            </motion.span>
+            </m.span>
           )}
         </div>
 
-        <motion.p
+        <m.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4 }}
@@ -126,9 +126,9 @@ export const AcceptedCountdown = ({ orgId, organizationName }: AcceptedCountdown
           {completed
             ? "Redirecting now..."
             : `Redirecting in ${countdown} second${countdown !== 1 ? "s" : ""}...`}
-        </motion.p>
+        </m.p>
 
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
@@ -138,7 +138,7 @@ export const AcceptedCountdown = ({ orgId, organizationName }: AcceptedCountdown
               Go to Dashboard Now
             </Button>
           </Link>
-        </motion.div>
+        </m.div>
       </CardContent>
     </Card>
   );

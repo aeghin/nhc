@@ -74,6 +74,7 @@ export function EventChatPanel({
         <ScrollArea className="min-h-0 flex-1 pr-3">
           {hasMore && (
             <button
+              type="button"
               onClick={loadOlder}
               className="mx-auto mb-2 block text-xs text-muted-foreground hover:text-foreground"
             >

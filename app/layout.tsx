@@ -5,6 +5,7 @@ import "./globals.css";
 
 import { ClerkProvider } from "@clerk/nextjs";
 import { Toaster } from "@/components/ui/sonner";
+import { MotionProvider } from "@/components/providers/motion-provider";
 import { Suspense } from "react";
 
 const geistSans = Geist({
@@ -34,7 +35,7 @@ export default function RootLayout({
       >
         <Suspense>
           <ClerkProvider>
-            {children}
+            <MotionProvider>{children}</MotionProvider>
             <Toaster />
           </ClerkProvider>
         </Suspense>

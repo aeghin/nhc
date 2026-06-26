@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "motion/react";
+import { m } from "motion/react";
 import type { ReactNode } from "react";
 
 interface AnimatedInvitationRowProps {
@@ -13,13 +13,13 @@ export const AnimatedInvitationRow = ({
   index,
 }: AnimatedInvitationRowProps) => {
   return (
-    <motion.div
+    <m.div
       initial={{ opacity: 0, x: -10 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay: index * 0.05, duration: 0.3 }}
       className="group flex items-start justify-between gap-4 px-6 py-4 transition-colors hover:bg-accent/30 sm:items-center"
     >
       {children}
-    </motion.div>
+    </m.div>
   );
 };

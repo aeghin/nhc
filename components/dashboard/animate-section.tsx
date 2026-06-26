@@ -1,6 +1,6 @@
 "use client"
 
-import { motion, type HTMLMotionProps } from "motion/react"
+import { m, type HTMLMotionProps } from "motion/react"
 import type { ReactNode } from "react"
 
 interface AnimatedSectionProps extends HTMLMotionProps<"div"> {
@@ -15,7 +15,7 @@ export const AnimatedSection = ({
   className,
   ...motionProps
 }: AnimatedSectionProps) => (
-  <motion.div
+  <m.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.4, delay }}
@@ -23,7 +23,7 @@ export const AnimatedSection = ({
     {...motionProps}
   >
     {children}
-  </motion.div>
+  </m.div>
 )
 
 export const AnimatedListItem = ({
@@ -35,12 +35,12 @@ export const AnimatedListItem = ({
   index?: number
   className?: string
 }) => (
-  <motion.div
+  <m.div
     initial={{ opacity: 0, x: -10 }}
     animate={{ opacity: 1, x: 0 }}
     transition={{ delay: index * 0.05, duration: 0.3 }}
     className={className}
   >
     {children}
-  </motion.div>
+  </m.div>
 )

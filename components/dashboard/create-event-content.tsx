@@ -10,7 +10,7 @@ import {
 } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { motion, AnimatePresence } from "motion/react";
+import { m, AnimatePresence } from "motion/react";
 import { format, eachDayOfInterval, isBefore, startOfDay } from "date-fns";
 import type { DateRange } from "react-day-picker";
 import { useForm } from "react-hook-form";
@@ -527,7 +527,7 @@ export function CreateEventPageContent({
     return (
       <div className="flex min-h-screen flex-col bg-background">
         <div className="flex flex-1 items-center justify-center p-6">
-          <motion.div
+          <m.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             className="text-center"
@@ -542,7 +542,7 @@ export function CreateEventPageContent({
                 ` Invites sent to ${assignedCount} volunteer${assignedCount > 1 ? "s" : ""}.`}
             </p>
             <p className="mt-4 text-sm text-muted-foreground">Redirecting...</p>
-          </motion.div>
+          </m.div>
         </div>
       </div>
     );
@@ -594,7 +594,7 @@ export function CreateEventPageContent({
       </Dialog>
 
       {/* Header */}
-      <motion.div
+      <m.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         className="border-b bg-card"
@@ -671,14 +671,14 @@ export function CreateEventPageContent({
             </div>
           </div>
         </div>
-      </motion.div>
+      </m.div>
 
       {/* Main Content */}
       <div className="flex-1 lg:overflow-hidden">
         <div className="container max-w-5xl px-4 py-6 flex flex-col mx-auto lg:h-full">
           {/* Error Banner */}
           {error && (
-            <motion.div
+            <m.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               className="mb-6 flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-400"
@@ -705,7 +705,7 @@ export function CreateEventPageContent({
                   />
                 </svg>
               </button>
-            </motion.div>
+            </m.div>
           )}
 
           <form
@@ -714,7 +714,7 @@ export function CreateEventPageContent({
           >
             <AnimatePresence mode="wait">
               {step === 1 ? (
-                <motion.div
+                <m.div
                   key="step1"
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -1150,9 +1150,9 @@ export function CreateEventPageContent({
                       )}
                     </Button>
                   </div>
-                </motion.div>
+                </m.div>
               ) : (
-                <motion.div
+                <m.div
                   key="step2"
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -1372,7 +1372,7 @@ export function CreateEventPageContent({
                       )}
                     </Button>
                   </div>
-                </motion.div>
+                </m.div>
               )}
             </AnimatePresence>
           </form>

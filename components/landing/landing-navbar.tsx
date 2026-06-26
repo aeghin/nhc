@@ -82,6 +82,7 @@ export function LandingNavbar() {
           </div>
 
           <button
+            type="button"
             className="lg:hidden p-2 -mr-2"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >

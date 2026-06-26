@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect, useTransition } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { m, AnimatePresence } from "motion/react";
 import {
   Calendar,
   Clock,
@@ -492,7 +492,7 @@ export function MemberEventsDashboard({
   return (
     <div className="space-y-6">
       {/* Tabs */}
-      <motion.div
+      <m.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.05 }}
@@ -500,6 +500,7 @@ export function MemberEventsDashboard({
       >
         <div className="flex gap-8 border-b border-border">
           <button
+            type="button"
             onClick={() => setActiveTab("pending")}
             className={`relative flex items-center gap-2 pb-3 text-sm font-medium transition-colors cursor-pointer ${
               activeTab === "pending"
@@ -513,7 +514,7 @@ export function MemberEventsDashboard({
               {pendingCount}
             </span>
             {activeTab === "pending" && (
-              <motion.div
+              <m.div
                 layoutId="events-tab-indicator"
                 className="absolute bottom-0 left-0 right-0 h-0.5 bg-foreground"
                 transition={{ type: "spring", stiffness: 500, damping: 30 }}
@@ -521,6 +522,7 @@ export function MemberEventsDashboard({
             )}
           </button>
           <button
+            type="button"
             onClick={() => setActiveTab("schedule")}
             className={`relative flex items-center gap-2 pb-3 text-sm font-medium transition-colors cursor-pointer ${
               activeTab === "schedule"
@@ -534,7 +536,7 @@ export function MemberEventsDashboard({
               {scheduleCount}
             </span>
             {activeTab === "schedule" && (
-              <motion.div
+              <m.div
                 layoutId="events-tab-indicator"
                 className="absolute bottom-0 left-0 right-0 h-0.5 bg-foreground"
                 transition={{ type: "spring", stiffness: 500, damping: 30 }}
@@ -542,10 +544,10 @@ export function MemberEventsDashboard({
             )}
           </button>
         </div>
-      </motion.div>
+      </m.div>
 
       {/* Time Scope */}
-      <motion.div
+      <m.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
@@ -555,6 +557,7 @@ export function MemberEventsDashboard({
           {(["month", "week", "upcoming", "past"] as TimeScope[]).map(
             (scope) => (
               <button
+                type="button"
                 key={scope}
                 onClick={() => setTimeScope(scope)}
                 className={`relative rounded-md px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer ${
@@ -574,13 +577,14 @@ export function MemberEventsDashboard({
 
         <AnimatePresence>
           {(timeScope === "month" || timeScope === "past") && (
-            <motion.div
+            <m.div
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -10 }}
               className="flex items-center gap-1 text-sm"
             >
               <button
+                type="button"
                 onClick={() =>
                   setCurrentMonth((prev) => {
                     const newDate = new Date(prev);
@@ -596,6 +600,7 @@ export function MemberEventsDashboard({
                 {getMonthYear(currentMonth)}
               </span>
               <button
+                type="button"
                 onClick={() =>
                   setCurrentMonth((prev) => {
                     const newDate = new Date(prev);
@@ -607,20 +612,20 @@ export function MemberEventsDashboard({
               >
                 <ChevronRight className="h-4 w-4" />
               </button>
-            </motion.div>
+            </m.div>
           )}
         </AnimatePresence>
-      </motion.div>
+      </m.div>
 
       {/* Service Type Filters */}
-      <motion.div
+      <m.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.15 }}
         className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide snap-x snap-mandatory sm:snap-none"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
-        <motion.button
+        <m.button
           whileTap={{ scale: 0.97 }}
           onClick={() => setSelectedServiceType(null)}
           className={`flex shrink-0 snap-start items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all cursor-pointer ${
@@ -630,11 +635,11 @@ export function MemberEventsDashboard({
           }`}
         >
           All
-        </motion.button>
+        </m.button>
         {serviceTypes.map((service) => {
           const colors = getColorClasses(service.color);
           return (
-            <motion.button
+            <m.button
               key={service.id}
               whileTap={{ scale: 0.97 }}
               onClick={() =>
@@ -650,15 +655,15 @@ export function MemberEventsDashboard({
             >
               <span className={`h-2 w-2 rounded-full ${colors.dot}`} />
               {service.name}
-            </motion.button>
+            </m.button>
           );
         })}
-      </motion.div>
+      </m.div>
 
       {/* Content */}
       <AnimatePresence mode="wait">
         {activeTab === "pending" ? (
-          <motion.div
+          <m.div
             key="pending"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -666,7 +671,7 @@ export function MemberEventsDashboard({
             transition={{ duration: 0.2 }}
           >
             {filteredPendingEvents.length === 0 ? (
-              <motion.div
+              <m.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
@@ -681,7 +686,7 @@ export function MemberEventsDashboard({
                 <p className="mt-1 text-xs text-muted-foreground">
                   No pending invitations
                 </p>
-              </motion.div>
+              </m.div>
             ) : (
               <div className="space-y-3">
                 {filteredPendingEvents.map((event, index) => (
@@ -696,9 +701,9 @@ export function MemberEventsDashboard({
                 ))}
               </div>
             )}
-          </motion.div>
+          </m.div>
         ) : (
-          <motion.div
+          <m.div
             key="schedule"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -706,7 +711,7 @@ export function MemberEventsDashboard({
             transition={{ duration: 0.2 }}
           >
             {groupedAcceptedEvents.length === 0 ? (
-              <motion.div
+              <m.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
@@ -723,7 +728,7 @@ export function MemberEventsDashboard({
                     ? "No past events found"
                     : "Check back later for new assignments"}
                 </p>
-              </motion.div>
+              </m.div>
             ) : (
               <div className="space-y-6">
                 {groupedAcceptedEvents.map(
@@ -735,7 +740,7 @@ export function MemberEventsDashboard({
                     const isNextUpcoming = dateStr === nextUpcomingDate;
 
                     return (
-                      <motion.div
+                      <m.div
                         key={dateStr}
                         initial={isMounted ? { opacity: 0, y: 20 } : false}
                         animate={{ opacity: 1, y: 0 }}
@@ -775,7 +780,7 @@ export function MemberEventsDashboard({
                                 key={event.id}
                                 href={`/dashboard/organizations/${organizationId}/events/${event.id}`}
                               >
-                                <motion.div
+                                <m.div
                                   initial={
                                     isMounted ? { opacity: 0, x: -10 } : false
                                   }
@@ -833,18 +838,18 @@ export function MemberEventsDashboard({
                                         : formatTimeRange(event.dates)}
                                     </span>
                                   </div>
-                                </motion.div>
+                                </m.div>
                               </Link>
                             );
                           })}
                         </div>
-                      </motion.div>
+                      </m.div>
                     );
                   },
                 )}
               </div>
             )}
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
     </div>
@@ -892,7 +897,7 @@ function PendingEventCard({
   }
 
   return (
-    <motion.div
+    <m.div
       initial={isMounted ? { opacity: 0, y: 20 } : false}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: isMounted ? index * 0.05 : 0 }}
@@ -938,7 +943,7 @@ function PendingEventCard({
 
       <div className="border-t border-border" />
       <div className="flex gap-2 p-3 sm:gap-3">
-        <motion.div whileTap={{ scale: 0.97 }} className="flex-1">
+        <m.div whileTap={{ scale: 0.97 }} className="flex-1">
           <Button
             className="h-10 w-full bg-emerald-600 text-white hover:bg-emerald-700 cursor-pointer sm:h-11"
             onClick={handleAccept}
@@ -953,8 +958,8 @@ function PendingEventCard({
               </>
             )}
           </Button>
-        </motion.div>
-        <motion.div whileTap={{ scale: 0.97 }} className="flex-1">
+        </m.div>
+        <m.div whileTap={{ scale: 0.97 }} className="flex-1">
           <Button
             variant="outline"
             className="h-10 w-full border-destructive text-destructive hover:bg-destructive/10 cursor-pointer sm:h-11"
@@ -970,8 +975,8 @@ function PendingEventCard({
               </>
             )}
           </Button>
-        </motion.div>
+        </m.div>
       </div>
-    </motion.div>
+    </m.div>
   );
 }
