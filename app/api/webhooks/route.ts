@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
         data: updates,
       });
 
-      revalidateTag(`user-${id}`, "hours");
+      revalidateTag(`user-${id}`, { expire: 0 });
 
       const memberships = await prisma.membership.findMany({
         where: { user: { clerkId: id } },
@@ -79,7 +79,42 @@ export async function POST(req: NextRequest) {
       });
 
       for (const { organizationId } of memberships) {
-        revalidateTag(`org-${organizationId}-members-list`, "hours");
+        revalidateTag(`org-${organizationId}-members-list`, { expire: 0 });
+      }
+    }
+  }
+
+  if (event.type === "user.deleted") {
+    const clerkId = event.data.id;
+
+    const user = await prisma.user.findUnique({
+      where: { clerkId },
+      select: { id: true },
+    });
+
+    if (user) {
+      const memberships = await prisma.membership.findMany({
+        where: { userId: user.id },
+        select: { organizationId: true },
+      });
+
+      await prisma.$transaction([
+        prisma.membership.deleteMany({ where: { userId: user.id } }),
+        prisma.user.update({
+          where: { id: user.id },
+          data: {
+            email: `deleted-${clerkId}@deleted.invalid`,
+            firstName: "Deleted",
+            lastName: "User",
+            phoneNumber: "",
+            userImageUrl: null,
+          },
+        }),
+      ]);
+
+      for (const { organizationId } of memberships) {
+        revalidateTag(`org-${organizationId}-members-list`, { expire: 0 });
+        revalidateTag(`org-${organizationId}-member-count`, { expire: 0 });
       }
     }
   }
