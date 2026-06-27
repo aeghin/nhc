@@ -17,6 +17,7 @@ import {
 import { auth } from "@clerk/nextjs/server";
 import { verifyInvitationByToken } from "@/lib/services/invitation";
 import { InviteActions } from "@/components/invites/org-invite-buttons";
+import { AcceptedCountdown } from "@/components/invites/accept-countdown";
 import { InvitationStatus } from "@/generated/prisma/enums";
 
 const Header = () => (
@@ -77,6 +78,29 @@ const InvitePage = async ({
     );
   };
 
+  const { userId } = await auth();
+
+  const user = userId
+    ? await prisma.user.findUnique({ where: { clerkId: userId } })
+    : null;
+
+  // A successful accept refreshes this route; the invitee lands here with the
+  // invitation now ACCEPTED. Show the success/countdown screen instead of the
+  // "Invitation Unavailable" wall below.
+  if (
+    invitation.status === InvitationStatus.ACCEPTED &&
+    user?.email === invitation.email
+  ) {
+    return (
+      <PageWrapper>
+        <AcceptedCountdown
+          orgId={invitation.organizationId}
+          organizationName={invitation.organization.name}
+        />
+      </PageWrapper>
+    );
+  };
+
    if (invitation.status !== InvitationStatus.PENDING) {
     return (
       <PageWrapper>
@@ -130,8 +154,6 @@ const InvitePage = async ({
     );
   };
 
-  const { userId } = await auth();
-
   if (!userId) {
 
   return (
@@ -170,12 +192,6 @@ const InvitePage = async ({
   const invitedBy = invitation.invitedBy.firstName;
   const roles = invitation.volunteerRoles;
   const email = invitation.email;
-
-  const user = await prisma.user.findUnique({
-    where: {
-      clerkId: userId
-    }
-  });
 
   if (!user) {
   return (
