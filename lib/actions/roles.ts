@@ -102,6 +102,9 @@ export const removeMember = async (userId: string, organizationId: string): Prom
                     userId,
                     organizationId
                 }
+            },
+            include: {
+                user: { select: { email: true } }
             }
         });
 
@@ -142,6 +145,9 @@ export const removeMember = async (userId: string, organizationId: string): Prom
                     event: { dates: { some: { endTime: { gte: new Date() } } } },
                 },
             }),
+            prisma.invitation.deleteMany({
+                where: { organizationId, email: assignee.user.email },
+            }),
             prisma.membership.delete({
                 where: { userId_organizationId: { userId, organizationId } },
             }),
@@ -157,6 +163,7 @@ export const removeMember = async (userId: string, organizationId: string): Prom
         updateTag(`org-${organizationId}-member-count`);
         updateTag(`user-${userId}-org-${organizationId}-role`);
         updateTag(`user-${userId}-memberships`);
+        updateTag(`invitations-${organizationId}-list`);
 
         revalidatePath(`/dashboard/organizations/${organizationId}`);
 

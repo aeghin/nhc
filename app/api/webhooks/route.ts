@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
         data: updates,
       });
 
-      revalidateTag(`user-${id}`, "hours");
+      revalidateTag(`user-${id}`, { expire: 0 });
 
       const memberships = await prisma.membership.findMany({
         where: { user: { clerkId: id } },
@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
       });
 
       for (const { organizationId } of memberships) {
-        revalidateTag(`org-${organizationId}-members-list`, "hours");
+        revalidateTag(`org-${organizationId}-members-list`, { expire: 0 });
       }
     }
   }
