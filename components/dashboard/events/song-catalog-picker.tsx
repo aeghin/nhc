@@ -177,7 +177,7 @@ export function CatalogPicker({
                       key={theme}
                       checked={selectedThemes.has(theme)}
                       onCheckedChange={() => toggleTheme(theme)}
-                      className="text-xs"
+                      className="text-xs capitalize"
                     >
                       {theme}
                     </DropdownMenuCheckboxItem>
