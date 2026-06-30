@@ -2,16 +2,23 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { usePathname } from "next/navigation";
-import { Sparkles } from "lucide-react";
+import { ChevronDown, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
   getOrgPremiumStatus,
   startAiSetlistCheckout,
+  startAiSetlistProCheckout,
 } from "@/lib/actions/billing";
 
-type Status = { hasPremium: boolean; canSubscribe: boolean };
+type Status = { hasPremium: boolean; hasPro: boolean; canSubscribe: boolean };
 
 export function PremiumNav() {
   const pathname = usePathname();
@@ -43,6 +50,18 @@ export function PremiumNav() {
   // Render nothing until we know the status (also avoids SSR/CSR mismatch).
   if (!orgId || !status) return null;
 
+  if (status.hasPro) {
+    return (
+      <Badge
+        variant="secondary"
+        className="gap-1 border-violet-500/30 bg-violet-500/10 text-violet-600 dark:text-violet-400"
+      >
+        <Sparkles className="h-3 w-3" />
+        Pro
+      </Badge>
+    );
+  }
+
   if (status.hasPremium) {
     return (
       <Badge
@@ -58,9 +77,11 @@ export function PremiumNav() {
   
   if (!status.canSubscribe) return null;
 
-  const handleUpgrade = () => {
+  const subscribe = (plan: "premium" | "pro") => {
     startTransition(async () => {
-      const result = await startAiSetlistCheckout(orgId);
+      const start =
+        plan === "pro" ? startAiSetlistProCheckout : startAiSetlistCheckout;
+      const result = await start(orgId);
       if (result.success) {
         window.location.href = result.url;
       } else {
@@ -70,14 +91,34 @@ export function PremiumNav() {
   };
 
   return (
-    <Button
-      onClick={handleUpgrade}
-      disabled={isPending}
-      size="sm"
-      className="cursor-pointer"
-    >
-      <Sparkles className="mr-1.5 h-3.5 w-3.5" />
-      {isPending ? "Redirecting…" : "Get Premium"}
-    </Button>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button size="sm" disabled={isPending} className="cursor-pointer">
+          <Sparkles className="mr-1.5 h-3.5 w-3.5" />
+          {isPending ? "Redirecting…" : "Upgrade"}
+          <ChevronDown className="ml-1 h-3.5 w-3.5" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-56">
+        <DropdownMenuItem
+          onClick={() => subscribe("premium")}
+          className="flex-col items-start gap-0.5 cursor-pointer"
+        >
+          <span className="text-sm font-medium">Premium</span>
+          <span className="text-xs text-muted-foreground">
+            AI setlists from your catalog
+          </span>
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={() => subscribe("pro")}
+          className="flex-col items-start gap-0.5 cursor-pointer"
+        >
+          <span className="text-sm font-medium">Pro</span>
+          <span className="text-xs text-muted-foreground">
+            Smarter model + web search
+          </span>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

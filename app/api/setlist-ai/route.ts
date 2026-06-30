@@ -3,7 +3,7 @@ import { currentUser } from "@/lib/services/user";
 import { getUserMembershipRole } from "@/lib/services/organization";
 import { getEventDetailsById } from "@/lib/services/events";
 import { getOrganizationSongs } from "@/lib/services/songs";
-import { getAiSetlistAccess } from "@/lib/billing/entitlements";
+import { getAiSetlistAccess, getAiProAccess } from "@/lib/billing/entitlements";
 import { OrgRole } from "@/generated/prisma/enums";
 import { createSetlistAgent } from "@/lib/agents/setlist/agent";
 
@@ -19,9 +19,13 @@ export async function POST(req: Request) {
   const user = await currentUser();
   if (!user) return new Response("Unauthorized", { status: 401 });
 
-  
-  const allowed = await getAiSetlistAccess({ userId: user.id, orgId });
-  if (!allowed) return new Response("Upgrade required", { status: 403 });
+
+  const [hasPro, hasPremium] = await Promise.all([
+    getAiProAccess({ userId: user.id, orgId }),
+    getAiSetlistAccess({ userId: user.id, orgId })
+  ]);
+
+  if (!hasPro && !hasPremium) return new Response("Upgrade required", { status: 403 });
 
   // Authorize: must manage the org that owns this event.
   const [membership, event] = await Promise.all([
@@ -30,7 +34,10 @@ export async function POST(req: Request) {
   ]);
   const canManage =
     membership?.role === OrgRole.ADMIN || membership?.role === OrgRole.OWNER;
+    
   if (!event || !canManage) return new Response("Not found", { status: 404 });
+
+  const tier = hasPro ? "pro" : "premium";
 
   const catalog = await getOrganizationSongs(orgId);
   
@@ -39,6 +46,7 @@ export async function POST(req: Request) {
   }
 
   const agent = createSetlistAgent({
+    tier,
     orgName: event.organization.name,
     catalog: catalog.map((s) => ({
       id: s.id,

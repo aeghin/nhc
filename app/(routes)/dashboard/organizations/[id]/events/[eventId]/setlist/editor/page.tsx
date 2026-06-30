@@ -8,7 +8,7 @@ import { getEventDetailsById } from "@/lib/services/events";
 import { OrgRole } from "@/generated/prisma/enums";
 import type { SetlistSong } from "@/lib/types";
 import { getOrganizationSongs } from "@/lib/services/songs";
-import { getAiSetlistAccess } from "@/lib/billing/entitlements";
+import { getAiSetlistAccess, getAiProAccess } from "@/lib/billing/entitlements";
 
 
 interface PageProps {
@@ -37,7 +37,11 @@ export default async function SetlistEditPage({ params }: PageProps) {
 
   if (!event || !canManage) notFound();
 
-  const canUseAi = await getAiSetlistAccess({ userId: user.id, orgId });
+  const [hasPremium, hasPro] = await Promise.all([
+    getAiSetlistAccess({ userId: user.id, orgId }),
+    getAiProAccess({ userId: user.id, orgId }),
+  ]);
+  const canUseAi = hasPremium || hasPro;
 
   const backHref = `/dashboard/organizations/${orgId}/events/${eventId}`;
 
@@ -64,6 +68,7 @@ export default async function SetlistEditPage({ params }: PageProps) {
       initialSongs={initialSongs}
       catalog={catalog}
       canUseAi={canUseAi}
+      hasPro={hasPro}
       canSubscribe={canSubscribe}
     />
   )

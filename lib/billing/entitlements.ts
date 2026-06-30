@@ -7,7 +7,7 @@ import { cacheLife, cacheTag } from "next/cache";
 async function getOrgEntitlements(orgId: string): Promise<string[]> {
   "use cache";
 
-  cacheLife("hours");
+  cacheLife("minutes");
 
   cacheTag(`org-${orgId}-billing`);
 
@@ -25,4 +25,12 @@ export async function getAiSetlistAccess(params: {
 }): Promise<boolean> {
   const entitlements = await getOrgEntitlements(params.orgId);
   return entitlements.includes("ai_setlist");
-}
+};
+
+export async function getAiProAccess(params: {
+  userId: string;
+  orgId: string;
+}): Promise<boolean> {
+  const entitlements = await getOrgEntitlements(params.orgId);
+  return entitlements.includes("ai_pro");
+};

@@ -1,4 +1,4 @@
-import { ToolLoopAgent, tool, InferAgentUIMessage } from "ai";
+import { ToolLoopAgent, tool, InferAgentUIMessage, gateway } from "ai";
 import { Pitch, KeyQuality } from "@/generated/prisma/enums";
 import { proposeSetlistInputSchema } from "./schema";
 
@@ -30,7 +30,14 @@ export type ProposedSetlistSong = {
   reason: string;
 };
 
-function buildInstructions(orgName: string, catalog: AgentCatalogSong[]) {
+export type SetlistTier = "premium" | "pro";
+
+const TIER_MODEL: Record<SetlistTier, string> = {
+  premium: "anthropic/claude-haiku-4.5",
+  pro: "anthropic/claude-sonnet-5",
+};
+
+function buildInstructions(orgName: string, catalog: AgentCatalogSong[], tier: SetlistTier) {
   const rows = catalog
     .map(
       (s) =>
@@ -38,13 +45,23 @@ function buildInstructions(orgName: string, catalog: AgentCatalogSong[]) {
     )
     .join("\n");
 
-  return `You are a setlist assistant for "${orgName}". You help a worship/music leader build an event setlist using ONLY this organization's song catalog.
+  const scope =
+    tier === "pro"
+      ? `You are well versed in music theory, and you may use web search to research songs, artists, and what other worship teams play. You may recommend songs that are NOT in this catalog — but only in your chat explanation.`
+      : `You are well versed in music theory. Work strictly from this organization's song catalog — do not search the web or suggest songs outside it.`;
+
+  const idRule =
+    tier === "pro"
+      ? `- Only catalog songs can be added to the setlist, so the proposeSetlist call must contain ONLY ids from the catalog above. When you recommend a song that isn't in the catalog, keep it in chat and tell the user to add it to their catalog first if they want it in the setlist. Never put a non-catalog song in the tool call.`
+      : `- Choose songs strictly by their exact id from the catalog above. Never invent songs or ids.`;
+
+  return `You are a setlist assistant for "${orgName}". You help a worship/music leader build an event setlist. ${scope}
 
 CATALOG (id | title — artist | key | tempo | themes):
 ${rows}
 
 How to work:
-- Choose songs strictly by their exact id from the catalog above. Never invent songs or ids.
+${idRule}
 - Use each song's themes to match what the user asks for (e.g. "communion", "surrender", "Christmas").
 - Think about flow: key compatibility between adjacent songs, a sensible tempo/energy arc, and theme coherence.
 - Keep each song in its catalog key unless the user asks to transpose.
@@ -53,10 +70,11 @@ How to work:
 }
 
 export function createSetlistAgent(opts: {
+  tier: SetlistTier,
   orgName: string;
   catalog: AgentCatalogSong[];
 }) {
-  const { orgName, catalog } = opts;
+  const { tier, orgName, catalog } = opts;
   const byId = new Map(catalog.map((s) => [s.id, s]));
 
   const proposeSetlist = tool({
@@ -95,12 +113,23 @@ export function createSetlistAgent(opts: {
     },
   });
 
+
+  const tools = (
+    tier === "pro"
+      ? { proposeSetlist, web_search: gateway.tools.perplexitySearch() }
+      : { proposeSetlist }
+  ) as {
+    proposeSetlist: typeof proposeSetlist;
+    web_search: ReturnType<typeof gateway.tools.perplexitySearch>;
+  };
+
   return new ToolLoopAgent({
-    model: "anthropic/claude-haiku-4.5",
-    instructions: buildInstructions(orgName, catalog),
-    tools: { proposeSetlist },
+    model: TIER_MODEL[tier],
+    instructions: buildInstructions(orgName, catalog, tier),
+    tools,
   });
 }
+
 
 export type SetlistAgentUIMessage = InferAgentUIMessage<
   ReturnType<typeof createSetlistAgent>

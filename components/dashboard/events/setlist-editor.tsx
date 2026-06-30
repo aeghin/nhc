@@ -16,6 +16,7 @@ import { SetlistDraft } from "./setlist-draft";
 import { CatalogPicker } from "./song-catalog-picker";
 import { AiSetlistPanel } from "./ai-setlist-panel";
 import { AiSetlistUpgrade } from "./ai-setlist-upgrade";
+import { AiSetlistProUpsell } from "./ai-setlist-pro-upsell";
 import type { SetlistSong } from "@/lib/types";
 import { Song } from "@/generated/prisma/client";
 
@@ -27,6 +28,7 @@ interface SetlistEditorProps {
   initialSongs: SetlistSong[]
   catalog: Song[]
   canUseAi: boolean
+  hasPro: boolean
   canSubscribe: boolean
 }
 
@@ -38,6 +40,7 @@ export function SetlistEditor({
   initialSongs,
   catalog,
   canUseAi,
+  hasPro,
   canSubscribe
 }: SetlistEditorProps) {
   const router = useRouter();
@@ -123,13 +126,21 @@ export function SetlistEditor({
                 onAdd={addSongs}
               />
             </TabsContent>
-            <TabsContent value="ai" className="mt-3">
+            <TabsContent value="ai" className="mt-3 space-y-3">
               {canUseAi ? (
-                <AiSetlistPanel
-                  eventId={eventId}
-                  orgId={orgId}
-                  onApply={updateSongs}
-                />
+                <>
+                  {!hasPro && (
+                    <AiSetlistProUpsell
+                      orgId={orgId}
+                      canSubscribe={canSubscribe}
+                    />
+                  )}
+                  <AiSetlistPanel
+                    eventId={eventId}
+                    orgId={orgId}
+                    onApply={updateSongs}
+                  />
+                </>
               ) : (
                 <AiSetlistUpgrade orgId={orgId} canSubscribe={canSubscribe} />
               )}

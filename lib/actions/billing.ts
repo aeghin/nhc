@@ -4,7 +4,7 @@ import { stripe } from "@/lib/stripe";
 import prisma from "@/lib/prisma";
 import { currentUser } from "@/lib/services/user";
 import { getUserMembershipRole } from "@/lib/services/organization";
-import { getAiSetlistAccess } from "@/lib/billing/entitlements";
+import { getAiSetlistAccess, getAiProAccess } from "@/lib/billing/entitlements";
 import { OrgRole } from "@/generated/prisma/enums";
 
 type ActionResult =
@@ -66,6 +66,32 @@ export async function startAiSetlistCheckout(
     : { success: false, error: "Could not start checkout" };
 }
 
+/** Start a subscription Checkout Session for the AI setlist PRO plan. */
+export async function startAiSetlistProCheckout(
+  orgId: string,
+): Promise<ActionResult> {
+  if (!(await isOrgOwner(orgId))) {
+    return { success: false, error: "Forbidden" };
+  }
+
+  const customerId = await getOrCreateCustomer(orgId);
+
+  const session = await stripe.checkout.sessions.create({
+    mode: "subscription",
+    customer: customerId,
+    line_items: [
+      { price: process.env.STRIPE_AI_PRO_PRICE_ID!, quantity: 1 },
+    ],
+    client_reference_id: orgId,
+    success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/organizations/${orgId}?upgraded=1`,
+    cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/organizations/${orgId}`,
+  });
+
+  return session.url
+    ? { success: true, url: session.url }
+    : { success: false, error: "Could not start checkout" };
+}
+
 /** Open the Stripe Customer Portal for self-service subscription management. */
 export async function openBillingPortal(orgId: string): Promise<ActionResult> {
   if (!(await isOrgOwner(orgId))) {
@@ -91,14 +117,15 @@ export async function openBillingPortal(orgId: string): Promise<ActionResult> {
 /** Read-only org premium status for the navbar (badge + subscribe button). */
 export async function getOrgPremiumStatus(
   orgId: string,
-): Promise<{ hasPremium: boolean; canSubscribe: boolean }> {
+): Promise<{ hasPremium: boolean; hasPro: boolean; canSubscribe: boolean }> {
   const user = await currentUser();
-  if (!user) return { hasPremium: false, canSubscribe: false };
+  if (!user) return { hasPremium: false, hasPro: false, canSubscribe: false };
 
-  const [hasPremium, membership] = await Promise.all([
+  const [hasPremium, hasPro, membership] = await Promise.all([
     getAiSetlistAccess({ userId: user.id, orgId }),
+    getAiProAccess({ userId: user.id, orgId }),
     getUserMembershipRole(user.id, orgId),
   ]);
   const canSubscribe = membership?.role === OrgRole.OWNER;
-  return { hasPremium, canSubscribe };
+  return { hasPremium, hasPro, canSubscribe };
 }
