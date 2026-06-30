@@ -2,7 +2,7 @@
 
 import prisma from "@/lib/prisma";
 import { currentUser } from "@/lib/services/user";
-import { OrgRole } from "@/generated/prisma/enums";
+import { InvitationStatus, OrgRole, VolunteerRole } from "@/generated/prisma/enums";
 import { revalidatePath, updateTag } from "next/cache";
 import type { SetlistSong } from "@/lib/types";
 
@@ -60,20 +60,41 @@ export const saveSetlist = async (
     }
 
     await prisma.$transaction(async (tx) => {
-      await tx.setlistSong.deleteMany({ where: { eventId } });
+      const existing = await tx.setlistSong.findMany({
+        where: { eventId },
+        select: { id: true, songId: true },
+      });
 
-      if (songs.length > 0) {
-        await tx.setlistSong.createMany({
-          data: songs.map((s, idx) => ({
-            eventId,
-            songId: s.songId,
-            position: idx,
-            pitch: s.pitch,
-            keyQuality: s.keyQuality,
-            bpm: s.bpm,
-            timeSignature: s.timeSignature,
-          })),
-        });
+      const existingIdBySongId = new Map(existing.map((s) => [s.songId, s.id]));
+      const incomingSongIds = new Set(songs.map((s) => s.songId));
+
+      // Delete only songs removed from the setlist (cascades their assignments).
+      const removedIds = existing
+        .filter((s) => !incomingSongIds.has(s.songId))
+        .map((s) => s.id);
+      if (removedIds.length > 0) {
+        await tx.setlistSong.deleteMany({ where: { id: { in: removedIds } } });
+      }
+
+      // Upsert surviving + new songs, refreshing position/key/bpm. Surviving
+      // rows keep their id so per-song assignments are preserved across edits.
+      for (let idx = 0; idx < songs.length; idx++) {
+        const s = songs[idx];
+        const data = {
+          position: idx,
+          pitch: s.pitch,
+          keyQuality: s.keyQuality,
+          bpm: s.bpm,
+          timeSignature: s.timeSignature,
+        };
+        const existingId = existingIdBySongId.get(s.songId);
+        if (existingId) {
+          await tx.setlistSong.update({ where: { id: existingId }, data });
+        } else {
+          await tx.setlistSong.create({
+            data: { eventId, songId: s.songId, ...data },
+          });
+        }
       }
     });
 
@@ -84,5 +105,110 @@ export const saveSetlist = async (
     return { success: true };
   } catch {
     return { success: false, error: "Unable to save setlist" };
+  }
+};
+
+// Authorize the caller as OWNER/ADMIN of the org that owns this setlist song's
+// event. Returns the ids needed for cache revalidation, or null if not allowed.
+const authorizeSetlistSong = async (
+  userId: string,
+  setlistSongId: string,
+): Promise<{ eventId: string; organizationId: string } | null> => {
+  const setlistSong = await prisma.setlistSong.findFirst({
+    where: {
+      id: setlistSongId,
+      event: {
+        organization: {
+          memberships: {
+            some: { userId, role: { in: [OrgRole.OWNER, OrgRole.ADMIN] } },
+          },
+        },
+      },
+    },
+    select: {
+      eventId: true,
+      event: { select: { organizationId: true } },
+    },
+  });
+
+  if (!setlistSong) return null;
+
+  return {
+    eventId: setlistSong.eventId,
+    organizationId: setlistSong.event.organizationId,
+  };
+};
+
+export const assignSongVocalist = async (
+  setlistSongId: string,
+  userId: string,
+): Promise<ActionResponse> => {
+  try {
+    const user = await currentUser();
+    if (!user) return { success: false, error: "Unauthorized" };
+
+    const ids = await authorizeSetlistSong(user.id, setlistSongId);
+    if (!ids) return { success: false, error: "Unauthorized" };
+
+    const { eventId, organizationId } = ids;
+
+    // Only accepted Lead/BGV vocalists on this event may be assigned.
+    const vocalist = await prisma.eventAssignment.findFirst({
+      where: {
+        eventId,
+        userId,
+        status: InvitationStatus.ACCEPTED,
+        role: { in: [VolunteerRole.LEAD_VOCALIST, VolunteerRole.BGVS] },
+      },
+      select: { id: true },
+    });
+
+    if (!vocalist) {
+      return {
+        success: false,
+        error: "User is not an accepted vocalist for this event",
+      };
+    }
+
+    // Idempotent — @@unique([setlistSongId, userId]) makes re-assigning a no-op.
+    await prisma.setlistSongAssignment.upsert({
+      where: { setlistSongId_userId: { setlistSongId, userId } },
+      create: { setlistSongId, userId },
+      update: {},
+    });
+
+    updateTag(`event-${eventId}-org-${organizationId}-details`);
+    revalidatePath(`/dashboard/organizations/${organizationId}/events/${eventId}`);
+
+    return { success: true };
+  } catch {
+    return { success: false, error: "Unable to assign vocalist" };
+  }
+};
+
+export const unassignSongVocalist = async (
+  setlistSongId: string,
+  userId: string,
+): Promise<ActionResponse> => {
+  try {
+    const user = await currentUser();
+    if (!user) return { success: false, error: "Unauthorized" };
+
+    const ids = await authorizeSetlistSong(user.id, setlistSongId);
+    if (!ids) return { success: false, error: "Unauthorized" };
+
+    const { eventId, organizationId } = ids;
+
+    // deleteMany so removing an already-absent assignment is a no-op.
+    await prisma.setlistSongAssignment.deleteMany({
+      where: { setlistSongId, userId },
+    });
+
+    updateTag(`event-${eventId}-org-${organizationId}-details`);
+    revalidatePath(`/dashboard/organizations/${organizationId}/events/${eventId}`);
+
+    return { success: true };
+  } catch {
+    return { success: false, error: "Unable to unassign vocalist" };
   }
 };

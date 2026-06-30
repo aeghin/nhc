@@ -226,10 +226,12 @@ export async function createEvent(
   });
 };
 
+    updateTag(`org-${organizationId}-events`);
+
     revalidatePath(`/dashboard/organizations/${organizationId}`);
 
     return { success: true };
-    
+
   } catch {
     return { success: false, error: "Unable to create event" };
   }

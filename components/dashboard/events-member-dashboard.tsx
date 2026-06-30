@@ -347,10 +347,12 @@ function getAnchorDateInScope(
 // ─── Component types ────────────────────────────────────────────
 
 type TimeScope = "month" | "week" | "upcoming" | "past";
-type TabType = "pending" | "schedule";
+type TabType = "pending" | "schedule" | "all";
 
 interface MemberEventsDashboardProps {
   events: Event[];
+  /** All org events — only supplied for owners/admins; powers the "All Events" tab. */
+  allEvents?: Event[];
   serviceTypes: ServiceType[];
   organizationId: string;
   canManage: boolean;
@@ -360,6 +362,7 @@ interface MemberEventsDashboardProps {
 
 export function MemberEventsDashboard({
   events,
+  allEvents = [],
   serviceTypes,
   organizationId,
   canManage,
@@ -478,12 +481,70 @@ export function MemberEventsDashboard({
     );
   }, [filteredAcceptedEvents, timeScope, currentMonth, today]);
 
+  // ── All-events derivations (managers only) ──────────────────
+
+  const nonPastAllEvents = useMemo(
+    () => allEvents.filter((e) => !isEventPast(e.dates, today)),
+    [allEvents, today],
+  );
+
+  const filteredAllEvents = useMemo(() => {
+    return allEvents
+      .filter((event) => {
+        const inScope = isEventInTimeScope(
+          event.dates,
+          timeScope,
+          currentMonth,
+          today,
+        );
+        const matchesService =
+          !selectedServiceType || event.serviceTypeId === selectedServiceType;
+        const notPast =
+          timeScope === "past" || !isEventPast(event.dates, today);
+        return inScope && matchesService && notPast;
+      })
+      .sort(
+        (a, b) =>
+          getEarliestDate(a.dates).getTime() -
+          getEarliestDate(b.dates).getTime(),
+      );
+  }, [allEvents, timeScope, currentMonth, selectedServiceType, today]);
+
+  const groupedAllEvents = useMemo(() => {
+    const groups: Record<string, Event[]> = {};
+
+    filteredAllEvents.forEach((event) => {
+      const anchorDate = getAnchorDateInScope(
+        event.dates,
+        timeScope,
+        currentMonth,
+        today,
+      );
+      const key = anchorDate.toDateString();
+
+      if (!groups[key]) {
+        groups[key] = [];
+      }
+      groups[key].push(event);
+    });
+
+    return Object.entries(groups).sort(
+      ([a], [b]) => new Date(a).getTime() - new Date(b).getTime(),
+    );
+  }, [filteredAllEvents, timeScope, currentMonth, today]);
+
   // ── Helpers ─────────────────────────────────────────────────
 
   const pendingCount = nonPastPendingEvents.length;
   const scheduleCount = nonPastAcceptedEvents.length;
+  const allCount = nonPastAllEvents.length;
 
-  const nextUpcomingDate = groupedAcceptedEvents.find(
+  // "My Schedule" and "All Events" share the same grouped rendering; only the
+  // source set differs by active tab.
+  const groupedSchedule =
+    activeTab === "all" ? groupedAllEvents : groupedAcceptedEvents;
+
+  const nextUpcomingDate = groupedSchedule.find(
     ([dateStr]) => new Date(dateStr) >= today,
   )?.[0];
 
@@ -543,6 +604,30 @@ export function MemberEventsDashboard({
               />
             )}
           </button>
+          {canManage && (
+            <button
+              type="button"
+              onClick={() => setActiveTab("all")}
+              className={`relative flex items-center gap-2 pb-3 text-sm font-medium transition-colors cursor-pointer ${
+                activeTab === "all"
+                  ? "text-foreground"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <span className="h-2 w-2 rounded-full bg-blue-500" />
+              All Events
+              <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground">
+                {allCount}
+              </span>
+              {activeTab === "all" && (
+                <m.div
+                  layoutId="events-tab-indicator"
+                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-foreground"
+                  transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                />
+              )}
+            </button>
+          )}
         </div>
       </m.div>
 
@@ -704,13 +789,13 @@ export function MemberEventsDashboard({
           </m.div>
         ) : (
           <m.div
-            key="schedule"
+            key={activeTab}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
           >
-            {groupedAcceptedEvents.length === 0 ? (
+            {groupedSchedule.length === 0 ? (
               <m.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -721,17 +806,19 @@ export function MemberEventsDashboard({
                   <Calendar className="h-6 w-6 text-muted-foreground" />
                 </div>
                 <p className="text-sm font-medium text-foreground">
-                  No scheduled events
+                  {activeTab === "all" ? "No events" : "No scheduled events"}
                 </p>
                 <p className="mt-1 text-xs text-muted-foreground">
                   {timeScope === "past"
                     ? "No past events found"
-                    : "Check back later for new assignments"}
+                    : activeTab === "all"
+                      ? "No events in this period"
+                      : "Check back later for new assignments"}
                 </p>
               </m.div>
             ) : (
               <div className="space-y-6">
-                {groupedAcceptedEvents.map(
+                {groupedSchedule.map(
                   ([dateStr, dateEvents], groupIndex) => {
                     const groupDate = new Date(dateStr);
                     const allPast = dateEvents.every((e) =>
@@ -811,10 +898,11 @@ export function MemberEventsDashboard({
                                         </span>
                                       )}
                                     </span>
-                                    <span className="shrink-0 rounded-md bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground">
-                                      {role && roleEmojis[role]}{" "}
-                                      {role && roleNames[role]}
-                                    </span>
+                                    {role && (
+                                      <span className="shrink-0 rounded-md bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground">
+                                        {roleEmojis[role]} {roleNames[role]}
+                                      </span>
+                                    )}
                                   </div>
                                   {/* Mobile layout */}
                                   <div className="flex flex-col gap-2 sm:hidden">
@@ -824,10 +912,11 @@ export function MemberEventsDashboard({
                                       >
                                         {service?.name || "Event"}
                                       </span>
-                                      <span className="shrink-0 rounded-md bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground">
-                                        {role && roleEmojis[role]}{" "}
-                                        {role && roleNames[role]}
-                                      </span>
+                                      {role && (
+                                        <span className="shrink-0 rounded-md bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground">
+                                          {roleEmojis[role]} {roleNames[role]}
+                                        </span>
+                                      )}
                                     </div>
                                     <p className="text-sm font-medium text-foreground">
                                       {event.name}

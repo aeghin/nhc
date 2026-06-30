@@ -42,6 +42,14 @@ export type EventDetailsSetlistSong = {
     spotifyUrl: string | null
     attachments: SongAttachment[]
   }
+  setlistSongAssignment: {
+    userId: string
+    user: {
+      firstName: string
+      lastName: string
+      userImageUrl: string | null
+    }
+  }[]
 }
 
 export type SetlistSong = {

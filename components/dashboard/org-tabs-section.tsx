@@ -35,7 +35,7 @@ export const OrganizationTabsSection = async ({
     tab === "invitations" && !canManage ? "events" : tab;
  
     const [totalEventsCount, totalMembersCount] = await Promise.all([
-      userEventsTotalCount(userId, organizationId),
+      userEventsTotalCount(userId, organizationId, canManage),
       getOrgMemberCountById(organizationId)
     ]);
 

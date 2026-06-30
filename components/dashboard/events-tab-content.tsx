@@ -1,6 +1,6 @@
 import { MemberEventsDashboard } from "@/components/dashboard/events-member-dashboard";
 import { getOrgServiceTypes } from "@/lib/services/service-types";
-import { getUserEvents } from "@/lib/services/events";
+import { getUserEvents, getOrgEvents } from "@/lib/services/events";
 
 interface EventsTabContentProps {
   organizationId: string;
@@ -14,14 +14,16 @@ export const EventsTabContent = async ({
   canManage,
 }: EventsTabContentProps) => {
   
-  const [serviceTypes, events] = await Promise.all([
+  const [serviceTypes, events, allEvents] = await Promise.all([
     getOrgServiceTypes(organizationId),
-    getUserEvents(organizationId, userId)
+    getUserEvents(organizationId, userId),
+    canManage ? getOrgEvents(organizationId, userId) : Promise.resolve([]),
   ]);
 
   return (
     <MemberEventsDashboard
       events={events}
+      allEvents={allEvents}
       serviceTypes={serviceTypes}
       organizationId={organizationId}
       canManage={canManage}

@@ -5,6 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EditSetlistButton } from "./edit-setlist-button";
 import { formatKey } from "@/lib/constants/key";
+import { InvitationStatus, VolunteerRole } from "@/generated/prisma/enums";
+import { SongVocalistAssign } from "./song-vocalist-assign";
 import type { EventDetails, SetlistSong } from "@/lib/types";
 
 interface EventSetlistSectionProps {
@@ -33,6 +35,34 @@ export function EventSetlistSection({
     attachments: s.song.attachments,
   }));
   const editorHref = `/dashboard/organizations/${orgId}/events/${event.id}/setlist/editor`;
+
+  // Accepted Lead/BGV vocalists for this event — the pool you can assign to songs.
+  const vocalistCandidates = event.assignments
+    .filter(
+      (a) =>
+        a.status === InvitationStatus.ACCEPTED &&
+        (a.role === VolunteerRole.LEAD_VOCALIST || a.role === VolunteerRole.BGVS),
+    )
+    .map((a) => ({
+      userId: a.userId,
+      firstName: a.user.firstName,
+      lastName: a.user.lastName,
+      userImageUrl: a.user.userImageUrl,
+      role: a.role,
+    }));
+
+  // Current assignments per setlist song, keyed by SetlistSong id.
+  const assignedBySong = new Map(
+    event.setlistSongs.map((s) => [
+      s.id,
+      s.setlistSongAssignment.map((a) => ({
+        userId: a.userId,
+        firstName: a.user.firstName,
+        lastName: a.user.lastName,
+        userImageUrl: a.user.userImageUrl,
+      })),
+    ]),
+  );
 
   return (
     <Card>
@@ -128,6 +158,12 @@ export function EventSetlistSection({
                     </div>
                   )}
                 </div>
+                <SongVocalistAssign
+                  setlistSongId={song.id}
+                  candidates={vocalistCandidates}
+                  assigned={assignedBySong.get(song.id) ?? []}
+                  canManage={canManage}
+                />
                 <div className="flex items-center gap-2 shrink-0">
                   <Badge
                     variant="outline"
@@ -135,10 +171,9 @@ export function EventSetlistSection({
                   >
                     {formatKey(song.pitch, song.keyQuality)}
                   </Badge>
-                  <span className="text-[12px] text-muted-foreground font-mono w-12 text-right">
+                  <span className="text-[12px] text-muted-foreground font-mono w-14 text-right">
                     {song.bpm} bpm
                   </span>
-                  
                 </div>
               </div>
             ))}
