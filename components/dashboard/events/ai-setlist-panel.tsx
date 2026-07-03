@@ -128,6 +128,27 @@ export function AiSetlistPanel({
                     }
                   }
 
+                  if (part.type === "tool-web_search") {
+                    switch (part.state) {
+                      case "input-streaming":
+                      case "input-available":
+                        return (
+                          <BuildingIndicator key={i} label="Searching the web…" />
+                        );
+                      case "output-available":
+                        return (
+                          <p key={i} className="text-xs text-muted-foreground">
+                            Searched the web
+                            {typeof part.input?.query === "string"
+                              ? ` for “${part.input.query}”`
+                              : ""}
+                          </p>
+                        );
+                      case "output-error":
+                        return null;
+                    }
+                  }
+
                   return null;
                 })}
               </div>

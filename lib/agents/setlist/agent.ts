@@ -1,4 +1,5 @@
-import { ToolLoopAgent, tool, InferAgentUIMessage, gateway } from "ai";
+import { ToolLoopAgent, tool, InferAgentUIMessage } from "ai";
+import { anthropic } from "@ai-sdk/anthropic";
 import { Pitch, KeyQuality } from "@/generated/prisma/enums";
 import { proposeSetlistInputSchema } from "./schema";
 
@@ -116,11 +117,11 @@ export function createSetlistAgent(opts: {
 
   const tools = (
     tier === "pro"
-      ? { proposeSetlist, web_search: gateway.tools.perplexitySearch() }
+      ? { proposeSetlist, web_search: anthropic.tools.webSearch_20250305({ maxUses: 5 }) }
       : { proposeSetlist }
   ) as {
     proposeSetlist: typeof proposeSetlist;
-    web_search: ReturnType<typeof gateway.tools.perplexitySearch>;
+    web_search: ReturnType<typeof anthropic.tools.webSearch_20250305>;
   };
 
   return new ToolLoopAgent({
