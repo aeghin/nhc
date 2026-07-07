@@ -1,7 +1,20 @@
-import { Mail, Phone, ChevronRight, CalendarDays } from "lucide-react";
+"use client";
+
+import { useState } from "react";
+import { Mail, Phone, ChevronRight, CalendarDays, Search, SearchX } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 import { Badge } from "@/components/ui/badge";
+
+import { Input } from "@/components/ui/input";
+
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 import {
   HoverCard,
@@ -39,6 +52,9 @@ interface MembersListProps {
 
 export function MembersList({ members, currentUserId, viewerRole }: MembersListProps) {
 
+  const [search, setSearch] = useState("");
+  const [roleFilter, setRoleFilter] = useState<OrgRole | "ALL">("ALL");
+  const [volunteerFilter, setVolunteerFilter] = useState<VolunteerRole | "ALL">("ALL");
 
   const formatName = (name: string) =>
     name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
@@ -49,9 +65,69 @@ export function MembersList({ members, currentUserId, viewerRole }: MembersListP
     return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`;
   };
 
+  const query = search.trim().toLowerCase();
+
+  const filtered = members.filter((member) => {
+    const fullName = `${member.user.firstName} ${member.user.lastName}`.toLowerCase();
+
+    const matchesSearch =
+      query === "" ||
+      fullName.includes(query) ||
+      member.user.email.toLowerCase().includes(query);
+
+    const matchesRole = roleFilter === "ALL" || member.role === roleFilter;
+
+    const matchesVolunteer =
+      volunteerFilter === "ALL" || member.volunteerRoles.includes(volunteerFilter);
+
+    return matchesSearch && matchesRole && matchesVolunteer;
+  });
+
   return (
     <div className="divide-y divide-border/40">
-      {members.map((member) => {
+      <div className="flex flex-col gap-2 bg-secondary/10 px-6 py-3 sm:flex-row sm:items-center">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search by name or email..."
+            className="pl-9"
+          />
+        </div>
+        <Select value={roleFilter} onValueChange={(value) => setRoleFilter(value as OrgRole | "ALL")}>
+          <SelectTrigger className="w-full sm:w-36">
+            <SelectValue placeholder="Role" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="ALL">All roles</SelectItem>
+            {Object.values(OrgRole).map((role) => {
+              const roleConfig = getRoleConfig(role);
+              const RoleIcon = roleConfig.icon;
+              return (
+                <SelectItem key={role} value={role}>
+                  <RoleIcon />
+                  {roleConfig.label}
+                </SelectItem>
+              );
+            })}
+          </SelectContent>
+        </Select>
+        <Select value={volunteerFilter} onValueChange={(value) => setVolunteerFilter(value as VolunteerRole | "ALL")}>
+          <SelectTrigger className="w-full sm:w-44">
+            <SelectValue placeholder="Volunteer role" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="ALL">All volunteer roles</SelectItem>
+            {Object.entries(volunteerRoleConfig).map(([role, config]) => (
+              <SelectItem key={role} value={role}>
+                {config.icon} {config.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      {filtered.map((member) => {
         const roleConfig = getRoleConfig(member.role)
         const RoleIcon = roleConfig.icon
         const volunteerRoles = member.volunteerRoles.map((role) => volunteerRoleConfig[role])
@@ -60,7 +136,7 @@ export function MembersList({ members, currentUserId, viewerRole }: MembersListP
 
         const joinedDate = new Date(member.user.createdAt).toLocaleDateString(
           "en-US",
-          { month: "short", day: "numeric", year: "numeric" },
+          { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" },
         );
 
         const canManageMember =
@@ -162,6 +238,12 @@ export function MembersList({ members, currentUserId, viewerRole }: MembersListP
           </div>
         )
       })}
+      {filtered.length === 0 && (
+        <div className="flex h-40 flex-col items-center justify-center gap-2 text-muted-foreground">
+          <SearchX className="h-8 w-8 opacity-20" />
+          <p className="text-sm">No members match your filters</p>
+        </div>
+      )}
     </div>
   )
 }

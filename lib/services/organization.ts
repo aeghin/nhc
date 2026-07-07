@@ -131,6 +131,10 @@ export const organizationMembersList = async (organizationId: string) => {
     where: {
       organizationId,
     },
+    orderBy: [
+      { createdAt: "asc" },
+      { id: "asc" },
+    ],
     select: {
       organizationId: true,
       volunteerRoles: true,
