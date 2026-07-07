@@ -73,6 +73,11 @@ export function MembersList({ members, currentUserId, viewerRole }: MembersListP
           viewerRole !== OrgRole.MEMBER &&
           !(viewerRole === OrgRole.ADMIN && member.role === OrgRole.OWNER);
 
+        const canAssignOwner =
+          viewerRole === OrgRole.OWNER &&
+          !isSelf &&
+          member.role !== OrgRole.OWNER;
+
         return (
           <div
             key={member.user.id}
@@ -148,6 +153,7 @@ export function MembersList({ members, currentUserId, viewerRole }: MembersListP
                   currentVolunteerRoles={member.volunteerRoles}
                   canManageMember={canManageMember}
                   canManageVolunteerRoles={canManageVolunteerRoles}
+                  canAssignOwner={canAssignOwner}
                 />
               ) : (
                 <div className="h-8 w-8" aria-hidden />

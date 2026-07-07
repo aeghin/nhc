@@ -4,7 +4,7 @@ import { currentUser } from "@/lib/services/user";
 import prisma from "@/lib/prisma";
 import { OrgRole, VolunteerRole } from "@/generated/prisma/enums";
 import { revalidatePath, updateTag } from "next/cache";
-import { userRoleSchema, UserRoleInput } from "../validations/roles";
+import { userRoleSchema, UserRoleInput, assignOwnerSchema, AssignOwnerInput } from "../validations/roles";
 
 
 type ActionResponse = { success: true, role?: OrgRole } | 
@@ -22,7 +22,7 @@ export const updateUserRole = async (data: UserRoleInput): Promise<ActionRespons
 
         if (user.id === userId) return { success: false, error: "Unable to change your own role. Please reach out to the owner." };
 
-        if (role === OrgRole.OWNER) return { success: false, error: "Ownership cannot be assigned here. Use the transfer-ownership flow." };
+        if (role === OrgRole.OWNER) return { success: false, error: "Ownership cannot be assigned here. Only an owner can grant ownership." };
 
         const userMembership = await prisma.membership.findUnique({ 
             where: {
@@ -328,3 +328,63 @@ export const leaveOrganization = async (organizationId: string): Promise<ActionR
         return { success: false, error: "Something went wrong" }
     };
 };   
+
+export const assignOwnerRole = async (data: AssignOwnerInput): Promise<ActionResponse> => {
+    
+    try {
+
+        const user = await currentUser(); 
+
+        if (!user) return { success: false, error: "Unable to find user" };
+
+        const { organizationId, userId } = assignOwnerSchema.parse(data);
+
+        const userMembership = await prisma.membership.findUnique({
+            where: {
+                userId_organizationId:{
+                    userId: user.id,
+                    organizationId
+                }
+            }
+        });
+
+        if (!userMembership) return { success: false, error: "No membership found." };
+
+        if (userMembership.role !== OrgRole.OWNER) return { success: false, error: "Insufficient permissions. Please contact an owner." };
+
+        if (user.id === userId) return { success: false, error: "Unable to assign." };
+
+        const assignee = await prisma.membership.findUnique({
+            where: {
+                userId_organizationId: {
+                    userId,
+                    organizationId
+                }
+            }
+        });
+
+        if (!assignee) return { success: false, error: "No membership found for this user." };
+
+        await prisma.membership.update({
+            where: {
+                userId_organizationId: {
+                    userId,
+                    organizationId
+                }
+            },
+            data: {
+                role: OrgRole.OWNER
+            }
+        });
+
+        updateTag(`org-${organizationId}-members-list`);
+        updateTag(`user-${userId}-org-${organizationId}-role`);
+        updateTag(`user-${userId}-orgs`);
+        revalidatePath(`/dashboard/organizations/${organizationId}`);
+
+        return { success: true }
+
+    } catch (err) {
+        return { success: false, error: "Something went wrong. Please try again" }
+    }
+}

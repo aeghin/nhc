@@ -7,4 +7,10 @@ export const userRoleSchema = z.object({
     role: z.enum(OrgRole),
 });
 
+export const assignOwnerSchema = userRoleSchema.omit({ role: true });
+
+
+
 export type UserRoleInput = z.infer<typeof userRoleSchema>;
+
+export type AssignOwnerInput = z.infer<typeof assignOwnerSchema>;

@@ -17,7 +17,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 
-import { MoreVertical, Shield, Users, Trash2, Settings2 } from "lucide-react";
+import { MoreVertical, Shield, Users, Trash2, Settings2, Crown } from "lucide-react";
 
 import { OrgRole, VolunteerRole } from "@/generated/prisma/enums";
 import { volunteerRoleConfig } from "@/lib/config/roles";
@@ -27,6 +27,7 @@ import { useOptimistic, useState, useTransition } from "react";
 import { updateUserRole } from "@/lib/actions/roles";
 import { toast } from "sonner";
 import { ConfirmMemberDeleteModal } from "@/components/dashboard/confirm-member-delete-modal";
+import { ConfirmAssignOwnerModal } from "@/components/dashboard/confirm-assign-owner-modal";
 import { updateVolunteerRoles } from "@/lib/actions/roles";
 
 
@@ -38,13 +39,15 @@ interface RoleAssignButtonsProps {
     currentVolunteerRoles: VolunteerRole[];
     canManageMember: boolean;
     canManageVolunteerRoles: boolean;
+    canAssignOwner: boolean;
 }
 
-export const RoleAssignButtons = ({ currentRole, userId, organizationId, memberName, currentVolunteerRoles, canManageMember, canManageVolunteerRoles }: RoleAssignButtonsProps) => {
+export const RoleAssignButtons = ({ currentRole, userId, organizationId, memberName, currentVolunteerRoles, canManageMember, canManageVolunteerRoles, canAssignOwner }: RoleAssignButtonsProps) => {
 
 
     const [isPending, startTransition] = useTransition();
     const [removeMemberConfirm, setRemoveMemberConfirm] = useState(false);
+    const [assignOwnerConfirm, setAssignOwnerConfirm] = useState(false);
 
     const [optimisticRoles, toggleOptimistic] = useOptimistic<VolunteerRole[], VolunteerRole>(
         currentVolunteerRoles,
@@ -124,6 +127,12 @@ export const RoleAssignButtons = ({ currentRole, userId, organizationId, memberN
                                 Member
                             </DropdownMenuRadioItem>
                         </DropdownMenuRadioGroup>
+                        {canAssignOwner && (
+                            <DropdownMenuItem onClick={() => setAssignOwnerConfirm(true)} disabled={isPending} className="cursor-pointer text-amber-600 focus:text-amber-600">
+                                <Crown className="mr-2 h-4 w-4" />
+                                Make Owner
+                            </DropdownMenuItem>
+                        )}
                     </>
                 )}
                 {canManageMember && <DropdownMenuSeparator />}
@@ -173,6 +182,7 @@ export const RoleAssignButtons = ({ currentRole, userId, organizationId, memberN
             </DropdownMenuContent>
         </DropdownMenu>
         <ConfirmMemberDeleteModal open={removeMemberConfirm} onOpenChange={setRemoveMemberConfirm} userId={userId} organizationId={organizationId} memberName={memberName} />
+        <ConfirmAssignOwnerModal open={assignOwnerConfirm} onOpenChange={setAssignOwnerConfirm} userId={userId} organizationId={organizationId} memberName={memberName} />
     </>
     )
 
