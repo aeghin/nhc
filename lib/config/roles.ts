@@ -45,7 +45,7 @@ export const getRoleConfig = (role: OrgRole) => {
       case OrgRole.OWNER:
         return { icon: Crown, label: "Owner", className: "bg-amber-500/10 text-amber-600 border-amber-500/20" }
       case OrgRole.ADMIN:
-        return { icon: Shield, label: "Admin", className: "bg-primary/10 text-primary border-primary/20" }
+        return { icon: Shield, label: "Admin", className: "bg-blue-500/10 text-blue-600 border-blue-500/20" }
       default:
         return { icon: Users, label: "Member", className: "bg-muted text-muted-foreground border-border" }
     };

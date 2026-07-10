@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Mail, Phone, ChevronRight, CalendarDays, Search, SearchX } from "lucide-react";
+import Link from "next/link";
+import { Mail, Phone, ChevronRight, CalendarDays, Search, SearchX, ArrowUpRight } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 import { Input } from "@/components/ui/input";
 
@@ -220,6 +222,17 @@ export function MembersList({ members, currentUserId, viewerRole }: MembersListP
               <span className="hidden whitespace-nowrap text-xs tabular-nums text-muted-foreground sm:inline-block">
                 Joined {joinedDate}
               </span>
+              <Button
+                asChild
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-muted-foreground opacity-0 transition-opacity hover:text-foreground group-hover:opacity-100"
+                title={`View ${member.user.firstName}'s profile`}
+              >
+                <Link href={`/dashboard/organizations/${member.organizationId}/profile/${member.user.id}`}>
+                  <ArrowUpRight className="h-4 w-4" />
+                </Link>
+              </Button>
               {canManageMember || canManageVolunteerRoles ? (
                 <RoleAssignButtons
                   currentRole={member.role}

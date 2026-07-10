@@ -191,6 +191,17 @@ function formatConflictTime(iso: string): string {
   });
 }
 
+/** Format a raw "HH:mm" time-input value as 12-hour time (e.g. "14:30" -> "2:30 PM") */
+function formatDayTime(time: string): string {
+  if (!time) return "";
+  return new Date(`1970-01-01T${time}:00Z`).toLocaleTimeString("en-US", {
+    timeZone: "UTC",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+}
+
 interface CreateEventPageContentProps {
   organizationId: string;
   organizationName: string;
@@ -1209,7 +1220,8 @@ export function CreateEventPageContent({
                                   </span>
                                   <Clock className="h-3.5 w-3.5 text-muted-foreground" />
                                   <span className="text-muted-foreground">
-                                    {times.startTime} - {times.endTime}
+                                    {formatDayTime(times.startTime)} -{" "}
+                                    {formatDayTime(times.endTime)}
                                   </span>
                                 </>
                               )}

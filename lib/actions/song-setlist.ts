@@ -178,6 +178,7 @@ export const assignSongVocalist = async (
     });
 
     updateTag(`event-${eventId}-org-${organizationId}-details`);
+    updateTag(`user-${userId}-songs-${organizationId}`);
     revalidatePath(`/dashboard/organizations/${organizationId}/events/${eventId}`);
 
     return { success: true };
@@ -205,6 +206,7 @@ export const unassignSongVocalist = async (
     });
 
     updateTag(`event-${eventId}-org-${organizationId}-details`);
+    updateTag(`user-${userId}-songs-${organizationId}`);
     revalidatePath(`/dashboard/organizations/${organizationId}/events/${eventId}`);
 
     return { success: true };

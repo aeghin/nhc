@@ -269,6 +269,7 @@ export const acceptEventInvitation = async (organizationId: string, eventId: str
 
     updateTag(`user-${user.id}-events-${organizationId}`);
     updateTag(`event-${eventId}-org-${organizationId}-details`);
+    updateTag(`org-${organizationId}-acceptance-stats`);
 
     return { success: true };
 
