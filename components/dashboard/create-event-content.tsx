@@ -5,13 +5,15 @@ import {
   useState,
   useMemo,
   useCallback,
+  useEffect,
+  useRef,
   useTransition,
   useOptimistic,
 } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { m, AnimatePresence } from "motion/react";
-import { format, eachDayOfInterval, isBefore, startOfDay } from "date-fns";
+import { format, eachDayOfInterval, isBefore, startOfDay, addDays } from "date-fns";
 import type { DateRange } from "react-day-picker";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -70,10 +72,13 @@ import {
   Plus,
   X,
   TriangleAlert,
+  LayoutTemplate,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { VolunteerRole } from "@/generated/prisma/enums";
 import { volunteerRoleConfig } from "@/lib/config/roles";
+import { WEEKDAY_LABELS } from "@/lib/config/weekdays";
+import type { EventTemplateWithServiceType } from "@/lib/types";
 import {
   createEventSchema,
   type CreateEventFormData,
@@ -155,6 +160,47 @@ const getSelectedDates = (range: DateRange | undefined): Date[] => {
   return eachDayOfInterval({ start: range.from, end: range.to });
 };
 
+const EMPTY_EVENT_DEFAULTS = {
+  serviceTypeId: "",
+  name: "",
+  description: "",
+  dateRange: { from: undefined, to: undefined },
+  dayTimes: {},
+  location: "",
+  rolesNeeded: [],
+  expiresAt: 3,
+};
+
+/** Build form values from a template, targeting the next future occurrence of its first weekday */
+const templateToFormValues = (
+  template: EventTemplateWithServiceType,
+): CreateEventFormData => {
+  const today = startOfDay(new Date());
+  // Days until the template's first weekday — never 0, so "next Sunday" on a Sunday means in 7 days
+  const offset = ((template.dayOfWeek - today.getDay() + 7) % 7) || 7;
+  const firstDate = addDays(today, offset);
+
+  const dayTimes: CreateEventFormData["dayTimes"] = {};
+  for (const day of template.days) {
+    const key = format(addDays(firstDate, day.dayOffset), "yyyy-MM-dd");
+    dayTimes[key] = { startTime: day.startTime, endTime: day.endTime };
+  }
+
+  return {
+    serviceTypeId: template.serviceTypeId,
+    name: template.name,
+    description: template.description,
+    dateRange: {
+      from: firstDate,
+      to: addDays(firstDate, template.days.length - 1),
+    },
+    dayTimes,
+    location: template.location,
+    rolesNeeded: template.rolesNeeded,
+    expiresAt: template.expiresInDays,
+  };
+};
+
 export type Member = {
   id: string;
   userId: string;
@@ -207,13 +253,17 @@ interface CreateEventPageContentProps {
   organizationName: string;
   members: Member[];
   serviceTypes: ServiceType[];
+  templates: EventTemplateWithServiceType[];
+  initialTemplateId?: string;
 }
 
 export function CreateEventPageContent({
   organizationId,
   organizationName,
   members,
-  serviceTypes
+  serviceTypes,
+  templates,
+  initialTemplateId
 }: CreateEventPageContentProps) {
   const router = useRouter();
 
@@ -250,16 +300,7 @@ export function CreateEventPageContent({
   // React Hook Form
   const form = useForm<CreateEventFormData>({
     resolver: zodResolver(createEventSchema),
-    defaultValues: {
-      serviceTypeId: "",
-      name: "",
-      description: "",
-      dateRange: { from: undefined, to: undefined },
-      dayTimes: {},
-      location: "",
-      rolesNeeded: [],
-      expiresAt: 3,
-    },
+    defaultValues: EMPTY_EVENT_DEFAULTS,
   });
 
   const {
@@ -307,6 +348,45 @@ export function CreateEventPageContent({
 
   const [isPending, startTransition] = useTransition();
   const [isCreating, startCreateTransition] = useTransition();
+
+  const [selectedTemplateId, setSelectedTemplateId] = useState("");
+
+  const applyTemplate = useCallback(
+    (template: EventTemplateWithServiceType) => {
+      reset(templateToFormValues(template));
+      setSelectedTemplateId(template.id);
+      // People are never templated, and conflicts were computed for the old dates
+      setRoleAssignments({} as Record<VolunteerRole, string[]>);
+      setMemberConflicts({});
+      setError(null);
+    },
+    [reset],
+  );
+
+  // Apply ?templateId= once on mount. Client-only on purpose: the
+  // next-occurrence date math reads the clock, and running it during SSR
+  // could disagree with the browser and cause a hydration mismatch.
+  const appliedInitialTemplate = useRef(false);
+  useEffect(() => {
+    if (appliedInitialTemplate.current) return;
+    appliedInitialTemplate.current = true;
+    const template = templates.find((t) => t.id === initialTemplateId);
+    if (template) applyTemplate(template);
+  }, [templates, initialTemplateId, applyTemplate]);
+
+  const handleTemplateChange = (value: string) => {
+    if (value === "blank") {
+      reset(EMPTY_EVENT_DEFAULTS);
+      setSelectedTemplateId("");
+      setRoleAssignments({} as Record<VolunteerRole, string[]>);
+      setMemberConflicts({});
+      setError(null);
+      return;
+    }
+
+    const template = templates.find((t) => t.id === value);
+    if (template) applyTemplate(template);
+  };
 
   const handleDateRangeChange = useCallback(
     (range: DateRange | undefined) => {
@@ -733,6 +813,46 @@ export function CreateEventPageContent({
                   transition={{ duration: 0.2 }}
                   className="flex-1 flex flex-col min-h-0"
                 >
+                  {/* Start from template */}
+                  {templates.length > 0 && (
+                    <div className="mb-4 flex items-center gap-3 rounded-xl border border-border/40 bg-secondary/20 p-3">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                        <LayoutTemplate className="h-4 w-4 text-primary" />
+                      </div>
+                      <div className="min-w-0">
+                        <Label className="text-sm">Start from template</Label>
+                        <p className="hidden text-xs text-muted-foreground sm:block">
+                          Pre-fills everything — you just pick the people
+                        </p>
+                      </div>
+                      <Select
+                        value={selectedTemplateId}
+                        onValueChange={handleTemplateChange}
+                      >
+                        <SelectTrigger className="ml-auto w-44 sm:w-56">
+                          <SelectValue placeholder="Choose a template..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {templates.map((template) => (
+                            <SelectItem key={template.id} value={template.id}>
+                              <div className="flex flex-col items-start">
+                                <span>{template.name}</span>
+                                <span className="text-xs text-muted-foreground">
+                                  Every {WEEKDAY_LABELS[template.dayOfWeek]}
+                                  {template.days.length > 1 &&
+                                    ` – ${WEEKDAY_LABELS[(template.dayOfWeek + template.days.length - 1) % 7]}`}
+                                </span>
+                              </div>
+                            </SelectItem>
+                          ))}
+                          {selectedTemplateId && (
+                            <SelectItem value="blank">Start blank</SelectItem>
+                          )}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+
                   <div className="flex-1 grid gap-6 lg:grid-cols-2 min-h-0 lg:overflow-hidden">
                     {/* Left Column - Basic Info */}
                     <div className="space-y-6 lg:overflow-y-auto lg:pr-2">

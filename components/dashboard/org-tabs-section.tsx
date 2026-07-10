@@ -4,6 +4,8 @@ import { MembersTabContent } from "@/components/dashboard/members-tab-content";
 import { InvitationsTabContent } from "@/components/dashboard/invitations-tab-content";
 import { SettingsTabContent } from "@/components/dashboard/settings-tab-content";
 import { SettingsTabSkeleton } from "@/components/dashboard/settings-tab-skeleton";
+import { TemplatesTabContent } from "@/components/dashboard/templates-tab-content";
+import { TemplatesTabSkeleton } from "@/components/dashboard/templates-tab-skeleton";
 import { OrgTabNav } from "./org-tab-nav";
 import { EventsTabSkeleton } from "@/components/dashboard/events-tab-skeleton";
 import { MembersTabSkeleton } from "@/components/dashboard/members-tab-skeleton";
@@ -27,12 +29,12 @@ export const OrganizationTabsSection = async ({
   userId,
   activeTab,
 }: OrganizationTabsSectionProps) => {
-  const validTabs = ["events", "members", "invitations", "settings"];
+  const validTabs = ["events", "members", "invitations", "templates", "settings"];
   const tab = validTabs.includes(activeTab) ? activeTab : "events";
- 
-  
+
+
   const effectiveTab =
-    tab === "invitations" && !canManage ? "events" : tab;
+    (tab === "invitations" || tab === "templates") && !canManage ? "events" : tab;
  
     const [totalEventsCount, totalMembersCount] = await Promise.all([
       userEventsTotalCount(userId, organizationId, canManage),
@@ -75,6 +77,14 @@ export const OrganizationTabsSection = async ({
         {effectiveTab === "invitations" && canManage && (
           <Suspense fallback={<InvitationsTabSkeleton />}>
             <InvitationsTabContent
+              organizationId={organizationId}
+            />
+          </Suspense>
+        )}
+
+        {effectiveTab === "templates" && canManage && (
+          <Suspense fallback={<TemplatesTabSkeleton />}>
+            <TemplatesTabContent
               organizationId={organizationId}
             />
           </Suspense>

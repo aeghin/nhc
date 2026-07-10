@@ -122,3 +122,26 @@ export type SongAttachment = {
   songId: string
   createdAt: Date
 }
+
+export type EventTemplateDay = {
+  dayOffset: number
+  startTime: string
+  endTime: string
+}
+
+export type EventTemplateWithServiceType = {
+  id: string
+  name: string
+  description: string
+  location: string
+  dayOfWeek: number
+  days: EventTemplateDay[]
+  rolesNeeded: VolunteerRole[]
+  expiresInDays: number
+  serviceTypeId: string
+  serviceType: {
+    id: string
+    name: string
+    color: string
+  }
+}

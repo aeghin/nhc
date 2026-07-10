@@ -101,6 +101,7 @@ model Organization {
   invitations Invitation[]
   serviceTypes ServiceType[]
   events Event[]
+  eventTemplates EventTemplate[]
   eventAssignments EventAssignment[]
   songs Song[]
   messages Message[]
@@ -158,7 +159,8 @@ model ServiceType {
   name String
   color String
 
-  events Event[] 
+  events Event[]
+  eventTemplates EventTemplate[]
 
   organizationId String
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
@@ -167,6 +169,47 @@ model ServiceType {
   updatedAt DateTime @updatedAt
   
   @@unique([name, organizationId])
+}
+
+
+model EventTemplate {
+  id          String @id @default(uuid())
+  name        String
+  description String
+  location    String
+
+  dayOfWeek Int
+
+  days EventTemplateDay[]
+
+  rolesNeeded   VolunteerRole[]
+  expiresInDays Int             @default(3)
+
+  serviceTypeId String
+  serviceType   ServiceType @relation(fields: [serviceTypeId], references: [id])
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([name, organizationId])
+  @@index([organizationId])
+  @@index([serviceTypeId])
+}
+
+model EventTemplateDay {
+  id        String @id @default(uuid())
+  dayOffset Int
+  startTime String
+  endTime   String
+
+  templateId String
+  template   EventTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  @@unique([templateId, dayOffset])
+  @@index([templateId])
 }
 
 model Event {
