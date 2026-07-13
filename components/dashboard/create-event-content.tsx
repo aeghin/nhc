@@ -874,11 +874,12 @@ export function CreateEventPageContent({
                               <div className="flex gap-2">
                                 <Select
                                   value={watchedServiceTypeId}
-                                  onValueChange={(val) =>
+                                  onValueChange={(val) => {
+                                    if (!val) return;
                                     setValue("serviceTypeId", val, {
                                       shouldValidate: true,
-                                    })
-                                  }
+                                    });
+                                  }}
                                 >
                                   <SelectTrigger className="flex-1">
                                     <SelectValue placeholder="Select a service type..." />
