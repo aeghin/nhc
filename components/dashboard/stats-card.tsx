@@ -18,12 +18,12 @@ export function StatsCard({ title, value, icon: Icon, description, trend }: Stat
   return (
     <Card className="group relative overflow-hidden border-border/40 bg-linear-to-br from-card to-card/80 transition-all duration-300 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5">
       <div className="absolute inset-0 bg-linear-to-br from-transparent via-transparent to-primary/10 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-      <CardContent className="relative p-6">
-        <div className="flex items-start justify-between">
-          <div className="space-y-3">
+      <CardContent className="relative p-4 sm:p-6">
+        <div className="flex items-start justify-between gap-2">
+          <div className="space-y-2 sm:space-y-3">
             <p className="text-sm font-medium text-muted-foreground">{title}</p>
             <div className="flex items-baseline gap-2">
-              <p className="text-3xl font-bold tracking-tight">{value}</p>
+              <p className="text-2xl font-bold tracking-tight sm:text-3xl">{value}</p>
               {trend && (
                 <span
                   className={cn(
@@ -38,8 +38,8 @@ export function StatsCard({ title, value, icon: Icon, description, trend }: Stat
             </div>
             {description && <p className="text-xs text-muted-foreground">{description}</p>}
           </div>
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 transition-transform duration-200 group-hover:scale-110">
-            <Icon className="h-6 w-6 text-primary" />
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 transition-transform duration-200 group-hover:scale-110 sm:size-12">
+            <Icon className="h-5 w-5 text-primary sm:h-6 sm:w-6" />
           </div>
         </div>
       </CardContent>

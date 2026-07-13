@@ -29,36 +29,49 @@ interface EventDetailsCardProps {
 export function EventDetailsCard({ event, serviceType }: EventDetailsCardProps) {
   const serviceColors = colorClasses[serviceType.color];
 
-  const start = event.dates[0].startTime;
-  const end = event.dates[0].endTime;
+  // Sort locally too, so display order never depends on the caller's query
+  const dates = [...event.dates].sort(
+    (a, b) => a.startTime.getTime() - b.startTime.getTime(),
+  );
+  const first = dates[0];
+  const last = dates[dates.length - 1];
+  const isMultiDay = dates.length > 1;
+
+  const formatTime = (d: Date) =>
+    d.toLocaleTimeString("en-US", {
+      timeZone: "UTC",
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
+
+  const formatShortDate = (d: Date) =>
+    d.toLocaleDateString("en-US", {
+      timeZone: "UTC",
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+    });
 
   const rows = [
     {
       icon: Calendar,
       label: "Date",
-      value: start.toLocaleDateString("en-US", {
-        timeZone: "UTC",
-        weekday: "long",
-        month: "long",
-        day: "numeric",
-        year: "numeric",
-      }),
+      value: isMultiDay
+        ? `${formatShortDate(first.startTime)} – ${formatShortDate(last.startTime)}, ${last.startTime.getUTCFullYear()}`
+        : first.startTime.toLocaleDateString("en-US", {
+            timeZone: "UTC",
+            weekday: "long",
+            month: "long",
+            day: "numeric",
+            year: "numeric",
+          }),
     },
-    {
+    ...dates.map((date) => ({
       icon: Clock,
-      label: "Time",
-      value: `${start.toLocaleTimeString("en-US", {
-        timeZone: "UTC",
-        hour: "numeric",
-        minute: "2-digit",
-        hour12: true,
-      })} – ${end.toLocaleTimeString("en-US", {
-        timeZone: "UTC",
-        hour: "numeric",
-        minute: "2-digit",
-        hour12: true,
-      })}`,
-    },
+      label: isMultiDay ? formatShortDate(date.startTime) : "Time",
+      value: `${formatTime(date.startTime)} – ${formatTime(date.endTime)}`,
+    })),
     {
       icon: MapPin,
       label: "Where",

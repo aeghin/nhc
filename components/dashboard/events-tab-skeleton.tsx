@@ -1,5 +1,14 @@
 export const EventsTabSkeleton = () => (
-  <div className="space-y-6">
+  <div className="flex flex-col gap-6">
+    {/* Up Next banner */}
+    <div className="flex items-center gap-4 rounded-xl border border-border/40 bg-card p-4 sm:p-5">
+      <div className="size-10 shrink-0 animate-pulse rounded-xl bg-muted" />
+      <div className="flex-1 space-y-2">
+        <div className="h-4 w-40 animate-pulse rounded-md bg-muted" />
+        <div className="h-3 w-56 animate-pulse rounded-md bg-muted" />
+      </div>
+    </div>
+
     {/* Pending / Schedule tabs */}
     <div className="flex gap-8 border-b border-border">
       {Array.from({ length: 2 }).map((_, i) => (

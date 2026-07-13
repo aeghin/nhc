@@ -1,11 +1,10 @@
 import { AnimatedSection } from "@/components/dashboard/animate-section";
 import { BackLink } from "@/components/dashboard/back-link-button";
 import { OrganizationHero } from "@/components/dashboard/organization-hero";
-import { UserRolesSection } from "@/components/dashboard/user-roles-section";
 import { OrganizationStatsGrid } from "@/components/dashboard/org-stats-grid";
 import { OrganizationTabsSection } from "@/components/dashboard/org-tabs-section";
+import { NeedsResponseSection } from "@/components/dashboard/needs-response-section";
 import { StatsGridSkeleton } from "@/components/dashboard/org-stats-skeleton";
-import { UserRolesSkeleton } from "@/components/dashboard/user-roles-skeleton";
 import { TabsSkeleton } from "@/components/dashboard/org-tabs-skeleton";
 
 import { notFound } from "next/navigation";
@@ -14,7 +13,7 @@ import { Suspense } from "react";
 import { getOrganizationDetailsById } from "@/lib/services/organization";
 import { redirect } from "next/navigation";
 import { OrgRole } from "@/generated/prisma/enums";
-import { currentUser } from "@/lib/services/user";
+import { currentUser, userRoles } from "@/lib/services/user";
 
 
 export default async function OrganizationPage({
@@ -39,7 +38,10 @@ export default async function OrganizationPage({
 
   const { id: userId } = user;
 
-  const organization = await getOrganizationDetailsById(orgId, userId);
+  const [organization, roles] = await Promise.all([
+    getOrganizationDetailsById(orgId, userId),
+    userRoles(userId, orgId),
+  ]);
 
   if (!organization) notFound();
 
@@ -60,18 +62,20 @@ export default async function OrganizationPage({
         <AnimatedSection delay={0.1}>
           <OrganizationHero
             organization={organization}
+            volunteerRoles={roles?.volunteerRoles ?? []}
           />
         </AnimatedSection>
- 
-        <Suspense fallback={<UserRolesSkeleton />}>
-          <UserRolesSection
-            organizationId={organization.id}
-            userId={userId}
-          />
-        </Suspense>
- 
+
         <Suspense fallback={<StatsGridSkeleton />}>
           <OrganizationStatsGrid
+            organizationId={organization.id}
+            userId={userId}
+            canManage={canManage}
+          />
+        </Suspense>
+
+        <Suspense fallback={null}>
+          <NeedsResponseSection
             organizationId={organization.id}
             userId={userId}
           />

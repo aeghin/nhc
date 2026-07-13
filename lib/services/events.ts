@@ -161,7 +161,7 @@ export const getEventDetailsById = async (eventId: string, organizationId: strin
             name: true
           }
         },
-        dates: true,
+        dates: { orderBy: { startTime: "asc" } },
         serviceType: true,
         assignments: {
           include: {

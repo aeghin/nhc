@@ -2,9 +2,9 @@ import { Building2, CalendarPlus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "../ui/button";
 import { cn } from "@/lib/utils";
-import { getRoleConfig } from "@/lib/config/roles";
+import { getRoleConfig, volunteerRoleConfig } from "@/lib/config/roles";
 import { InviteMemberButton } from "./invite-person-button";
-import { OrgRole } from "@/generated/prisma/enums";
+import { OrgRole, VolunteerRole } from "@/generated/prisma/enums";
 import Link from "next/link";
 
 type Organization = {
@@ -20,10 +20,12 @@ type Organization = {
 
 interface OrganizationHeroProps {
   organization: Organization;
+  volunteerRoles: VolunteerRole[];
 }
 
 export const OrganizationHero = async ({
   organization: { id, name, description, memberships },
+  volunteerRoles,
 }: OrganizationHeroProps) => {
   const userRole = memberships[0].role;
 
@@ -54,6 +56,28 @@ export const OrganizationHero = async ({
               </Badge>
             </div>
             <p className="max-w-lg text-muted-foreground">{description}</p>
+
+            {volunteerRoles.length > 0 ? (
+              <div className="flex flex-wrap items-center gap-1.5">
+                {volunteerRoles.map((role) => {
+                  const { label, icon } = volunteerRoleConfig[role];
+                  return (
+                    <Badge
+                      key={role}
+                      variant="secondary"
+                      className="gap-1 px-2.5 py-1 text-xs font-medium"
+                    >
+                      <span>{icon}</span>
+                      {label}
+                    </Badge>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="text-xs text-muted-foreground">
+                No volunteer roles assigned yet
+              </p>
+            )}
           </div>
         </div>
 
