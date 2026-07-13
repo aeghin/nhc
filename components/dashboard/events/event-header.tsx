@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge";
+import { EventDeleteMenu } from "./event-delete-menu";
 import { cn } from "@/lib/utils";
-// import { EditEventButton } from "./edit-event-button";
 import { colorClasses } from "@/lib/config/service-types-config";
 
 type Event = {
@@ -27,11 +27,13 @@ interface EventHeaderProps {
     organizationId: string;
     color: string;
   }
+  canManage: boolean
 }
 
 export function EventHeader({
   event,
   serviceType,
+  canManage,
 }: EventHeaderProps) {
   const serviceColors = colorClasses[serviceType.color];
 
@@ -65,6 +67,15 @@ export function EventHeader({
           serviceColors.blurStrong,
         )}
       />
+
+      {
+        canManage &&
+        <EventDeleteMenu
+        eventId={event.id}
+        organizationId={serviceType.organizationId}
+        eventName={event.name}
+        />
+      }
 
       <div className="relative flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex items-start gap-5">

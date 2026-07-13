@@ -69,6 +69,7 @@ export default async function EventDetailPage({
           <EventHeader
             event={event}
             serviceType={event.serviceType}
+            canManage={canManage}
           />
         </AnimatedSection>
 

@@ -430,3 +430,75 @@ export const cancelUserEventAssignment = async (userId: string, organizationId: 
 
   };
 }
+
+
+export const deleteEvent = async (organizationId: string, eventId: string): Promise<ActionResponse> => {
+
+  try {
+
+
+    const user = await currentUser();
+
+    if (!user) return { success: false, error: "Unable to find user." };
+
+    if (!organizationId || !eventId) return { success: false, error: "No data provided." };
+
+    const userMembership = await prisma.membership.findUnique({
+      where: {
+        userId_organizationId: {
+          userId: user.id,
+          organizationId
+        }
+      },
+      select: {
+        role: true
+      }
+    });
+
+    if (!userMembership) return { success: false, error: "No user membership found with this organization" };
+
+    if (userMembership.role === OrgRole.MEMBER) return { success: false, error: "Insufficient permissions." };
+
+    const event = await prisma.event.findFirst({
+      where: {
+        id: eventId,
+        organizationId,
+      },
+      select: {
+        assignments: {
+          select: { userId: true, status: true },
+        },
+      },
+    });
+
+    if (!event) return { success: false, error: "Unable to locate event" };
+
+    await prisma.event.delete({
+      where: {
+        id: eventId
+      }
+    });
+
+    updateTag(`org-${organizationId}-events`);
+    updateTag(`event-${eventId}-org-${organizationId}-details`);
+
+    for (const { userId } of event.assignments) {
+      updateTag(`user-${userId}-events-${organizationId}`);
+    };
+
+    const affectsAcceptanceStats = event.assignments.some(
+      (assignment) =>
+        assignment.status === InvitationStatus.ACCEPTED ||
+        assignment.status === InvitationStatus.DECLINED,
+    );
+
+    if (affectsAcceptanceStats) {
+      updateTag(`org-${organizationId}-acceptance-stats`);
+    };
+
+    return { success: true };
+
+  } catch {
+    return { success: false, error: "Something went wrong. Try again." };
+  }
+}
