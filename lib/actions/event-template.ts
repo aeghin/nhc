@@ -39,7 +39,8 @@ export const createEventTemplate = async (input: EventTemplateInput): Promise<Ac
         const serviceType = await prisma.serviceType.findFirst({
             where: {
                 id: serviceTypeId,
-                organizationId
+                organizationId,
+                deletedAt: null
             }
         });
 
@@ -117,7 +118,8 @@ export const updateEventTemplate = async (templateId: string, input: EventTempla
             prisma.serviceType.findFirst({
                 where: {
                     id: serviceTypeId,
-                    organizationId
+                    organizationId,
+                    deletedAt: null
                 }
             })
         ]);

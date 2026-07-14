@@ -130,7 +130,7 @@ export async function createEvent(
         include: { organization: { select: { name: true } } },
       }),
       prisma.serviceType.findFirst({
-        where: { id: serviceTypeId, organizationId },
+        where: { id: serviceTypeId, organizationId, deletedAt: null },
       }),
     ]);
 

@@ -6,6 +6,7 @@ import { DeleteOrgDialog } from "./delete-org-dialog";
 import { LeaveOrgDialog } from "./leave-org-dialog";
 import { ManageSubscriptionButton } from "./manage-subscription-button";
 import { SmartSchedulingToggle } from "./smart-scheduling-toggle";
+import { ServiceTypesSettings } from "./service-types-settings";
 
 interface SettingsTabContentProps {
   organizationId: string;
@@ -85,6 +86,9 @@ export const SettingsTabContent = async ({
           organizationId={organizationId}
           enabled={org?.smartSchedulingEnabled ?? false}
         />
+      )}
+      {canManage && (
+        <ServiceTypesSettings organizationId={organizationId} serviceTypes={org?.serviceTypes ?? []} />
       )}
       {isOwner && (
         <section className="rounded-xl border border-border/40 bg-secondary/10 p-5">

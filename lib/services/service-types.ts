@@ -12,7 +12,8 @@ export const getOrgServiceTypes = async (organizationId: string) => {
 
 const serviceTypes = await prisma.serviceType.findMany({
     where: {
-      organizationId
+      organizationId,
+      deletedAt: null
     },
     select: {
       id: true,

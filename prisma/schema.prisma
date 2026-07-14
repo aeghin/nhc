@@ -165,10 +165,12 @@ model ServiceType {
   organizationId String
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
+  deletedAt DateTime?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   @@unique([name, organizationId])
+  @@index([organizationId, deletedAt])
 }
 
 

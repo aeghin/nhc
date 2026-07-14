@@ -260,6 +260,7 @@ export const getOrganizationSettings = async (organizationId: string) => {
   cacheLife("hours");
 
   cacheTag(`org-${organizationId}-setting-details`);
+  cacheTag(`org-${organizationId}-st`);
 
   const details = await prisma.organization.findUnique({
     where: {
@@ -268,7 +269,10 @@ export const getOrganizationSettings = async (organizationId: string) => {
     select: {
       name: true,
       description: true,
-      smartSchedulingEnabled: true
+      smartSchedulingEnabled: true,
+      serviceTypes: {
+        where: { deletedAt: null }
+      }
     }
   });
 

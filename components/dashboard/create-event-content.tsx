@@ -446,8 +446,10 @@ export function CreateEventPageContent({
       );
 
       if (result.success) {
-        addOptimisticServiceType(result.serviceType);
-        setValue("serviceTypeId", result.serviceType.id);
+        if (result.serviceType) {
+          addOptimisticServiceType(result.serviceType);
+          setValue("serviceTypeId", result.serviceType.id);
+        }
         setIsCreatingNewType(false);
         setNewTypeName("");
         setNewTypeColor("indigo");
