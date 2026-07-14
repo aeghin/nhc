@@ -1,12 +1,13 @@
 "use client";
 
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { Calendar, Users, Mail, LayoutTemplate, Settings } from "lucide-react";
+import { Calendar, CalendarOff, Users, Mail, LayoutTemplate, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const tabs = [
   { value: "events", label: "Events", icon: Calendar, adminOnly: false },
   { value: "members", label: "Members", icon: Users, adminOnly: false },
+  { value: "blockouts", label: "Blockouts", icon: CalendarOff, adminOnly: false },
   { value: "invitations", label: "Invitations", icon: Mail, adminOnly: true },
   { value: "templates", label: "Templates", icon: LayoutTemplate, adminOnly: true },
   { value: "settings", label: "Settings", icon: Settings, adminOnly: false },

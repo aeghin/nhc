@@ -80,6 +80,8 @@ model User {
 
   setlistSongAssignment SetlistSongAssignment[]
 
+  blockoutDates BlockoutDate[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -105,6 +107,7 @@ model Organization {
   eventAssignments EventAssignment[]
   songs Song[]
   messages Message[]
+  blockoutDates BlockoutDate[]
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -286,6 +289,24 @@ model EventDate {
   event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
 
   @@index([eventId])
+}
+
+model BlockoutDate {
+  id        String   @id @default(uuid())
+  startDate DateTime
+  endDate   DateTime
+
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  organizationId String
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([organizationId, endDate])
+  @@index([userId, organizationId])
 }
 
 model Message {

@@ -3,6 +3,7 @@ import "server-only";
 import prisma from "@/lib/prisma";
 import { InvitationStatus, VolunteerRole } from "@/generated/prisma/enums";
 import { cacheLife, cacheTag } from "next/cache";
+import { getBlockedUserIds } from "@/lib/services/blockouts";
 
 type DateRange = { startTime: Date | string; endTime: Date | string };
 
@@ -109,8 +110,9 @@ export async function findBestReplacement(params: {
     ...existing.map((e) => e.userId),
   ]);
 
-  const [conflicting, candidates] = await Promise.all([
+  const [conflicting, blocked, candidates] = await Promise.all([
     getConflictingUserIds(organizationId, event.dates),
+    getBlockedUserIds(organizationId, event.dates),
     prisma.membership.findMany({
       where: {
         organizationId,
@@ -124,7 +126,10 @@ export async function findBestReplacement(params: {
   ]);
 
   const eligible = candidates.filter(
-    (m) => !excluded.has(m.user.id) && !conflicting.has(m.user.id),
+    (m) =>
+      !excluded.has(m.user.id) &&
+      !conflicting.has(m.user.id) &&
+      !blocked.has(m.user.id),
   );
   if (eligible.length === 0) return null;
 

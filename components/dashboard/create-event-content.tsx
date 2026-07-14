@@ -56,6 +56,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 import {
+  CalendarOff,
   CalendarPlus,
   Loader2,
   Check,
@@ -152,7 +153,7 @@ const volunteerRoleEntries = Object.entries(volunteerRoleConfig) as [
   { label: string; icon: string },
 ][];
 
-/** Get all dates in a range (or single date) as an array */
+
 const getSelectedDates = (range: DateRange | undefined): Date[] => {
   if (!range?.from) return [];
   if (!range.to || range.from.getTime() === range.to.getTime())
@@ -171,7 +172,7 @@ const EMPTY_EVENT_DEFAULTS = {
   expiresAt: 3,
 };
 
-/** Build form values from a template, targeting the next future occurrence of its first weekday */
+
 const templateToFormValues = (
   template: EventTemplateWithServiceType,
 ): CreateEventFormData => {
@@ -228,12 +229,26 @@ export type MemberConflict = {
   endTime: string;
 };
 
+export type MemberBlockout = {
+  startDate: string;
+  endDate: string;
+};
+
 function formatConflictTime(iso: string): string {
   return new Date(iso).toLocaleTimeString("en-US", {
     timeZone: "UTC",
     hour: "numeric",
     minute: "2-digit",
     hour12: true,
+  });
+}
+
+/** Blockout days are stored as UTC midnight, so they render with timeZone: "UTC" */
+function formatBlockoutDate(iso: string): string {
+  return new Date(iso).toLocaleDateString("en-US", {
+    timeZone: "UTC",
+    month: "short",
+    day: "numeric",
   });
 }
 
@@ -287,6 +302,10 @@ export function CreateEventPageContent({
 
   const [memberConflicts, setMemberConflicts] = useState<
     Record<string, MemberConflict>
+  >({});
+
+  const [memberBlockouts, setMemberBlockouts] = useState<
+    Record<string, MemberBlockout>
   >({});
 
   // Warning modal state for assigning a conflicting member
@@ -358,6 +377,7 @@ export function CreateEventPageContent({
       // People are never templated, and conflicts were computed for the old dates
       setRoleAssignments({} as Record<VolunteerRole, string[]>);
       setMemberConflicts({});
+      setMemberBlockouts({});
       setError(null);
     },
     [reset],
@@ -380,6 +400,7 @@ export function CreateEventPageContent({
       setSelectedTemplateId("");
       setRoleAssignments({} as Record<VolunteerRole, string[]>);
       setMemberConflicts({});
+      setMemberBlockouts({});
       setError(null);
       return;
     }
@@ -466,6 +487,7 @@ export function CreateEventPageContent({
     setIsSuccess(false);
     setRoleAssignments({} as Record<VolunteerRole, string[]>);
     setMemberConflicts({});
+    setMemberBlockouts({});
     router.replace(`/dashboard/organizations/${organizationId}`);
   };
 
@@ -482,6 +504,9 @@ export function CreateEventPageContent({
     memberId: string,
     checked: boolean,
   ) => {
+    // Blockouts are a hard block — never assignable, no override
+    if (checked && memberBlockouts[memberId]) return;
+
     // If checking a conflicting member, show the warning modal instead of assigning directly
     if (checked && memberConflicts[memberId]) {
       const member = members.find((m) => m.userId === memberId);
@@ -532,7 +557,7 @@ export function CreateEventPageContent({
     setError(null);
 
     try {
-      const conflicts = await checkMemberAvailability({
+      const { conflicts, blockouts } = await checkMemberAvailability({
         organizationId,
         dates: selectedDates.map((d) => {
           const key = format(d, "yyyy-MM-dd");
@@ -545,6 +570,19 @@ export function CreateEventPageContent({
         }),
       });
       setMemberConflicts(conflicts);
+      setMemberBlockouts(blockouts);
+
+      // Picks persist when going Back to change dates — drop anyone whose
+      // blockout covers the new dates, since blockouts can't be overridden.
+      setRoleAssignments((prev) => {
+        const pruned = {} as Record<VolunteerRole, string[]>;
+        for (const [role, userIds] of Object.entries(prev)) {
+          pruned[role as VolunteerRole] = userIds.filter(
+            (id) => !blockouts[id],
+          );
+        }
+        return pruned;
+      });
 
       setStep(2);
     } catch (err) {
@@ -1415,21 +1453,26 @@ export function CreateEventPageContent({
                                     );
                                     const conflict =
                                       memberConflicts[member.userId];
+                                    const blockout =
+                                      memberBlockouts[member.userId];
 
                                     return (
                                       <label
                                         key={member.id}
                                         className={cn(
-                                          "flex items-center gap-3 rounded-lg border p-3 cursor-pointer transition-all",
-                                          isAssigned
-                                            ? "border-primary bg-primary/5"
-                                            : conflict
-                                              ? "border-amber-200 bg-amber-50/50 dark:border-amber-500/20 dark:bg-amber-500/5"
-                                              : "border-border hover:bg-muted/50",
+                                          "flex items-center gap-3 rounded-lg border p-3 transition-all",
+                                          blockout
+                                            ? "cursor-not-allowed border-border bg-muted/40 opacity-70"
+                                            : isAssigned
+                                              ? "cursor-pointer border-primary bg-primary/5"
+                                              : conflict
+                                                ? "cursor-pointer border-amber-200 bg-amber-50/50 dark:border-amber-500/20 dark:bg-amber-500/5"
+                                                : "cursor-pointer border-border hover:bg-muted/50",
                                         )}
                                       >
                                         <Checkbox
                                           checked={isAssigned}
+                                          disabled={!!blockout}
                                           onCheckedChange={(checked) =>
                                             handleAssignMember(
                                               role,
@@ -1456,14 +1499,23 @@ export function CreateEventPageContent({
                                             <p className="text-xs text-muted-foreground truncate">
                                               {member.user.email}
                                             </p>
-                                            {conflict && (
+                                            {blockout ? (
+                                              <p className="text-xs text-red-600 dark:text-red-400 flex items-center gap-1 mt-0.5">
+                                                <CalendarOff className="h-3 w-3 shrink-0" />
+                                                Blocked out ·{" "}
+                                                {formatBlockoutDate(blockout.startDate)}
+                                                {blockout.endDate !== blockout.startDate && (
+                                                  <> – {formatBlockoutDate(blockout.endDate)}</>
+                                                )}
+                                              </p>
+                                            ) : conflict ? (
                                               <p className="text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1 mt-0.5">
                                                 <TriangleAlert className="h-3 w-3 shrink-0" />
                                                 {conflict.eventName} ·{" "}
                                                 {formatConflictTime(conflict.startTime)} -{" "}
                                                 {formatConflictTime(conflict.endTime)}
                                               </p>
-                                            )}
+                                            ) : null}
                                           </div>
                                         </div>
                                       </label>

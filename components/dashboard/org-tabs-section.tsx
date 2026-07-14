@@ -10,6 +10,8 @@ import { OrgTabNav } from "./org-tab-nav";
 import { EventsTabSkeleton } from "@/components/dashboard/events-tab-skeleton";
 import { MembersTabSkeleton } from "@/components/dashboard/members-tab-skeleton";
 import { InvitationsTabSkeleton } from "@/components/dashboard//invitations-tab-skeleton";
+import { BlockoutsTabContent } from "@/components/dashboard/blockouts-tab-content";
+import { BlockoutsTabSkeleton } from "@/components/dashboard/blockouts-tab-skeleton";
 
 import { getOrgMemberCountById } from "@/lib/services/organization";
 import { userEventsTotalCount } from "@/lib/services/events";
@@ -29,7 +31,7 @@ export const OrganizationTabsSection = async ({
   userId,
   activeTab,
 }: OrganizationTabsSectionProps) => {
-  const validTabs = ["events", "members", "invitations", "templates", "settings"];
+  const validTabs = ["events", "members", "blockouts", "invitations", "templates", "settings"];
   const tab = validTabs.includes(activeTab) ? activeTab : "events";
 
 
@@ -74,6 +76,15 @@ export const OrganizationTabsSection = async ({
           </Suspense>
         )}
  
+        {effectiveTab === "blockouts" && (
+          <Suspense fallback={<BlockoutsTabSkeleton />}>
+            <BlockoutsTabContent
+              organizationId={organizationId}
+              userId={userId}
+            />
+          </Suspense>
+        )}
+
         {effectiveTab === "invitations" && canManage && (
           <Suspense fallback={<InvitationsTabSkeleton />}>
             <InvitationsTabContent

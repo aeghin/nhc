@@ -145,6 +145,9 @@ export const removeMember = async (userId: string, organizationId: string): Prom
                     event: { dates: { some: { endTime: { gte: new Date() } } } },
                 },
             }),
+            prisma.blockoutDate.deleteMany({
+                where: { userId, organizationId },
+            }),
             prisma.invitation.deleteMany({
                 where: { organizationId, email: assignee.user.email },
             }),
@@ -159,6 +162,7 @@ export const removeMember = async (userId: string, organizationId: string): Prom
         updateTag(`user-${userId}-roles`);
         updateTag(`user-${userId}-orgs`);
         updateTag(`user-${userId}-events-${organizationId}`);
+        updateTag(`user-${userId}-blockouts-${organizationId}`);
         updateTag(`org-${organizationId}-members-list`);
         updateTag(`org-${organizationId}-member-count`);
         updateTag(`user-${userId}-org-${organizationId}-role`);
@@ -304,6 +308,9 @@ export const leaveOrganization = async (organizationId: string): Promise<ActionR
               event: { dates: { some: { endTime: { gte: new Date() } } } },
           },
       }),
+      prisma.blockoutDate.deleteMany({
+          where: { userId: user.id, organizationId },
+      }),
       prisma.membership.delete({
           where: { userId_organizationId: { userId: user.id, organizationId } },
         }),
@@ -315,6 +322,7 @@ export const leaveOrganization = async (organizationId: string): Promise<ActionR
           updateTag(`user-${user.id}-roles`);
           updateTag(`user-${user.id}-orgs`);
           updateTag(`user-${user.id}-events-${organizationId}`);
+          updateTag(`user-${user.id}-blockouts-${organizationId}`);
           updateTag(`org-${organizationId}-members-list`);
           updateTag(`org-${organizationId}-member-count`);
           updateTag(`user-${user.id}-org-${organizationId}-role`);

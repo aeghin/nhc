@@ -19,6 +19,8 @@ import {
   getConflictingAssignments,
 } from "@/lib/services/scheduling";
 
+import { getBlockoutsForDates } from "@/lib/services/blockouts";
+
 import { Resend } from "resend";
 import { revalidatePath, updateTag } from "next/cache";
 
@@ -43,12 +45,22 @@ export type MemberConflict = {
   endTime: string;
 };
 
+export type MemberBlockout = {
+  startDate: string;
+  endDate: string;
+};
+
+export type MemberAvailability = {
+  conflicts: Record<string, MemberConflict>;
+  blockouts: Record<string, MemberBlockout>;
+};
+
 type ActionResponse = { success: true } | { success: false; error: string };
 
 export const checkMemberAvailability = async ({
   organizationId,
   dates,
-}: CheckMemberAvailabilityInput): Promise<Record<string, MemberConflict>> => {
+}: CheckMemberAvailabilityInput): Promise<MemberAvailability> => {
   
   const user = await currentUser();
 
@@ -68,10 +80,10 @@ export const checkMemberAvailability = async ({
     throw new Error("Unauthorized");
   }
 
-  const conflictingAssignments = await getConflictingAssignments(
-    organizationId,
-    dates,
-  );
+  const [conflictingAssignments, blockoutRows] = await Promise.all([
+    getConflictingAssignments(organizationId, dates),
+    getBlockoutsForDates(organizationId, dates),
+  ]);
 
   const conflicts: Record<string, MemberConflict> = {};
 
@@ -95,7 +107,18 @@ export const checkMemberAvailability = async ({
     }
   }
 
-  return conflicts;
+  const blockouts: Record<string, MemberBlockout> = {};
+
+  for (const blockout of blockoutRows) {
+    if (!blockouts[blockout.userId]) {
+      blockouts[blockout.userId] = {
+        startDate: blockout.startDate.toISOString(),
+        endDate: blockout.endDate.toISOString(),
+      };
+    }
+  }
+
+  return { conflicts, blockouts };
 };
 
 export async function createEvent(
@@ -159,6 +182,37 @@ export async function createEvent(
 
       if (validMemberships !== new Set(assignedUserIds).size) {
         return { success: false, error: "One or more assigned users are not members of this organization" };
+      }
+
+      // Hard block: members with a blockout on any event day can't be assigned.
+      const blockoutRows = await getBlockoutsForDates(
+        organizationId,
+        Object.values(dayTimes).map((times) => ({
+          startTime: times.startTime,
+          endTime: times.endTime,
+        })),
+      );
+
+      const blockedIds = new Set(
+        blockoutRows
+          .map((b) => b.userId)
+          .filter((uid) => assignedUserIds.includes(uid)),
+      );
+
+      if (blockedIds.size > 0) {
+        const blockedUsers = await prisma.user.findMany({
+          where: { id: { in: [...blockedIds] } },
+          select: { firstName: true, lastName: true },
+        });
+
+        const names = blockedUsers
+          .map((u) => `${u.firstName} ${u.lastName}`)
+          .join(", ");
+
+        return {
+          success: false,
+          error: `Unable to assign ${names} — they have blockout dates during this event`,
+        };
       }
     }
 
