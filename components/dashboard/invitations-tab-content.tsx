@@ -1,24 +1,8 @@
-import {
-  Mail,
-  CheckCircle2,
-  Clock,
-  XCircle,
-  MoreHorizontal,
-  RefreshCw,
-  Send,
-  Trash2,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Mail, CheckCircle2, Clock, XCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { AnimatedInvitationRow } from "@/components/dashboard/animated-invitation-row";
+import { InvitationActionsMenu } from "@/components/dashboard/invitation-actions-menu";
 import { cn } from "@/lib/utils";
 import { organizationInvitations } from "@/lib/services/invitation";
 import { InvitationStatus } from "@/generated/prisma/enums";
@@ -148,41 +132,11 @@ export const InvitationsTabContent = async ({
                     <span className="hidden text-xs text-muted-foreground sm:inline-block">
                       {`${statusConfig.label} on ${statusDate}`}
                     </span>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 cursor-pointer opacity-100 transition-opacity group-hover:opacity-100 sm:opacity-0"
-                        >
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-48">
-                        {invitation.status === "PENDING" && (
-                          <>
-                            <DropdownMenuItem className="cursor-pointer">
-                              <RefreshCw className="mr-2 h-4 w-4" />
-                              Resend Invitation
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                          </>
-                        )}
-                        {invitation.status === "CANCELED" && (
-                          <>
-                            <DropdownMenuItem className="cursor-pointer">
-                              <Send className="mr-2 h-4 w-4" />
-                              Send New Invitation
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                          </>
-                        )}
-                        <DropdownMenuItem className="cursor-pointer text-destructive focus:text-destructive">
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          Remove
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    <InvitationActionsMenu
+                      organizationId={organizationId}
+                      email={invitation.email}
+                      status={invitation.status}
+                    />
                   </div>
                 </AnimatedInvitationRow>
               );

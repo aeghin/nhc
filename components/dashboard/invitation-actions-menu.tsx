@@ -1,0 +1,84 @@
+"use client";
+
+import { useTransition } from "react";
+import { toast } from "sonner";
+import { MoreHorizontal, RefreshCw, Send, Trash2, Ban } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { cancelOrgInvite } from "@/lib/actions/invitation";
+import { InvitationStatus } from "@/generated/prisma/enums";
+
+interface InvitationActionsMenuProps {
+  organizationId: string;
+  email: string;
+  status: InvitationStatus;
+}
+
+export const InvitationActionsMenu = ({
+  organizationId,
+  email,
+  status,
+}: InvitationActionsMenuProps) => {
+  const [isCanceling, startCancel] = useTransition();
+
+  const handleCancel = () => {
+    startCancel(async () => {
+      const result = await cancelOrgInvite(organizationId, email);
+      result.success
+        ? toast.success("Invitation Canceled", { position: "top-center" })
+        : toast.error(`${result.error}`, { position: "top-center" });
+    });
+  };
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 cursor-pointer opacity-100 transition-opacity group-hover:opacity-100 sm:opacity-0"
+        >
+          <MoreHorizontal className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-48">
+        {status === InvitationStatus.PENDING && (
+          <>
+            <DropdownMenuItem className="cursor-pointer">
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Resend Invitation
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              className="cursor-pointer"
+              disabled={isCanceling}
+              onSelect={handleCancel}
+            >
+              <Ban className="mr-2 h-4 w-4" />
+              Cancel Invitation
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+          </>
+        )}
+        {status === InvitationStatus.CANCELED && (
+          <>
+            <DropdownMenuItem className="cursor-pointer">
+              <Send className="mr-2 h-4 w-4" />
+              Send New Invitation
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+          </>
+        )}
+        <DropdownMenuItem className="cursor-pointer text-destructive focus:text-destructive">
+          <Trash2 className="mr-2 h-4 w-4" />
+          Remove
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
