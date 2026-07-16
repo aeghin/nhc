@@ -26,13 +26,6 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -64,10 +57,8 @@ import {
   Clock,
   ArrowLeft,
   ArrowRight,
-  Users,
   Send,
   Calendar,
-  FileText,
   CheckCircle2,
   AlertCircle,
   Plus,
@@ -656,8 +647,7 @@ export function CreateEventPageContent({
   // Success state
   if (isSuccess) {
     return (
-      <div className="flex min-h-screen flex-col bg-background">
-        <div className="flex flex-1 items-center justify-center p-6">
+      <div className="flex min-h-[calc(100dvh-3.5rem)] items-center justify-center px-6">
           <m.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -674,13 +664,12 @@ export function CreateEventPageContent({
             </p>
             <p className="mt-4 text-sm text-muted-foreground">Redirecting...</p>
           </m.div>
-        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-[calc(100dvh-3.5rem)] flex-col bg-background lg:h-[calc(100dvh-3.5rem)] lg:overflow-hidden">
+    <div className="flex min-h-[calc(100dvh-3.5rem)] flex-col">
       {/* Conflict Warning Modal */}
       <Dialog
         open={!!conflictWarning}
@@ -728,91 +717,77 @@ export function CreateEventPageContent({
       <m.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="border-b bg-card"
       >
-        <div className="container max-w-5xl px-4 py-6">
-          <div className="flex items-center gap-4">
-            <Button
-              onClick={handleClose}
-              variant="ghost"
-              size="icon"
-              asChild
-              className="shrink-0"
-            >
-              <Link href={`/dashboard/organizations/${organizationId}`}>
-                <ArrowLeft className="h-5 w-5" />
-              </Link>
-            </Button>
-            <div className="flex-1">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                  <CalendarPlus className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <h1 className="text-xl font-bold">Create Event</h1>
-                  <p className="text-sm text-muted-foreground">
-                    {organizationName}
-                  </p>
-                </div>
+        <div className="mx-auto flex w-full max-w-screen-2xl flex-col gap-6 px-4 pt-6 sm:px-6 sm:pt-8">
+          <Link
+            href={`/dashboard/organizations/${organizationId}`}
+            onClick={handleClose}
+            className="group inline-flex w-fit items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
+            Back to {organizationName}
+          </Link>
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-linear-to-br from-primary/20 to-primary/10 text-primary shadow-lg shadow-primary/10">
+                <CalendarPlus className="h-6 w-6" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
+                  Create Event
+                </h1>
+                <p className="text-sm text-muted-foreground">
+                  {organizationName}
+                </p>
               </div>
             </div>
             {/* Step indicator */}
-            <div className="hidden items-center gap-2 sm:flex">
-              <div
-                className={cn(
-                  "flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold transition-colors",
-                  step === 1
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-emerald-500 text-white",
-                )}
-              >
-                {step === 1 ? "1" : <Check className="h-4 w-4" />}
+            <div className="flex items-center">
+              <p className="text-xs font-medium text-muted-foreground sm:hidden">
+                Step {step} of 2
+              </p>
+              <div className="hidden items-center gap-1 rounded-full border border-border/40 bg-card p-1 sm:flex">
+                <div
+                  className={cn(
+                    "flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm transition-colors",
+                    step === 1
+                      ? "bg-primary font-medium text-primary-foreground"
+                      : "text-muted-foreground",
+                  )}
+                >
+                  {step === 1 ? (
+                    <span className="text-xs font-semibold">1</span>
+                  ) : (
+                    <Check className="h-3.5 w-3.5 text-emerald-500" />
+                  )}
+                  Event Details
+                </div>
+                <div
+                  className={cn(
+                    "flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm transition-colors",
+                    step === 2
+                      ? "bg-primary font-medium text-primary-foreground"
+                      : "text-muted-foreground",
+                  )}
+                >
+                  <span className="text-xs font-semibold">2</span>
+                  Invite Volunteers
+                </div>
               </div>
-              <span
-                className={cn(
-                  "text-sm",
-                  step === 1
-                    ? "text-foreground font-medium"
-                    : "text-muted-foreground",
-                )}
-              >
-                Event Details
-              </span>
-              <div className="h-px w-8 bg-border" />
-              <div
-                className={cn(
-                  "flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold transition-colors",
-                  step === 2
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted text-muted-foreground",
-                )}
-              >
-                2
-              </div>
-              <span
-                className={cn(
-                  "text-sm",
-                  step === 2
-                    ? "text-foreground font-medium"
-                    : "text-muted-foreground",
-                )}
-              >
-                Invite Volunteers
-              </span>
             </div>
           </div>
         </div>
       </m.div>
 
       {/* Main Content */}
-      <div className="flex-1 lg:overflow-hidden">
-        <div className="container max-w-5xl px-4 py-6 flex flex-col mx-auto lg:h-full">
+      <form onSubmit={handleFormSubmit} className="flex flex-1 flex-col">
+        <div className="mx-auto w-full max-w-screen-2xl flex-1 px-4 py-6 sm:px-6">
           {/* Error Banner */}
           {error && (
             <m.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mb-6 flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-400"
+              className="mb-6 flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-400"
             >
               <AlertCircle className="h-5 w-5 shrink-0" />
               <p>{error}</p>
@@ -822,28 +797,12 @@ export function CreateEventPageContent({
                 className="ml-auto shrink-0 rounded-md p-1 hover:bg-red-100 dark:hover:bg-red-500/20"
               >
                 <span className="sr-only">Dismiss</span>
-                <svg
-                  className="h-4 w-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
+                <X className="h-4 w-4" />
               </button>
             </m.div>
           )}
 
-          <form
-            onSubmit={handleFormSubmit}
-            className="flex-1 flex flex-col min-h-0"
-          >
-            <AnimatePresence mode="wait">
+          <AnimatePresence mode="wait">
               {step === 1 ? (
                 <m.div
                   key="step1"
@@ -851,25 +810,26 @@ export function CreateEventPageContent({
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 20 }}
                   transition={{ duration: 0.2 }}
-                  className="flex-1 flex flex-col min-h-0"
                 >
                   {/* Start from template */}
                   {templates.length > 0 && (
-                    <div className="mb-4 flex items-center gap-3 rounded-xl border border-border/40 bg-secondary/20 p-3">
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                        <LayoutTemplate className="h-4 w-4 text-primary" />
-                      </div>
-                      <div className="min-w-0">
-                        <Label className="text-sm">Start from template</Label>
-                        <p className="hidden text-xs text-muted-foreground sm:block">
-                          Pre-fills everything — you just pick the people
-                        </p>
+                    <div className="mb-2 flex flex-col gap-3 rounded-2xl border border-border/40 bg-linear-to-br from-card via-card to-primary/5 p-4 sm:flex-row sm:items-center">
+                      <div className="flex min-w-0 flex-1 items-center gap-3">
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                          <LayoutTemplate className="h-4 w-4 text-primary" />
+                        </div>
+                        <div className="min-w-0">
+                          <Label className="text-sm">Start from template</Label>
+                          <p className="text-xs text-muted-foreground">
+                            Pre-fills everything — you just pick the people
+                          </p>
+                        </div>
                       </div>
                       <Select
                         value={selectedTemplateId}
                         onValueChange={handleTemplateChange}
                       >
-                        <SelectTrigger className="ml-auto w-44 sm:w-56">
+                        <SelectTrigger className="w-full sm:ml-auto sm:w-64">
                           <SelectValue placeholder="Choose a template..." />
                         </SelectTrigger>
                         <SelectContent>
@@ -893,20 +853,22 @@ export function CreateEventPageContent({
                     </div>
                   )}
 
-                  <div className="flex-1 grid gap-6 lg:grid-cols-2 min-h-0 lg:overflow-hidden">
-                    {/* Left Column - Basic Info */}
-                    <div className="space-y-6 lg:overflow-y-auto lg:pr-2">
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="flex items-center gap-2 text-lg">
-                            <FileText className="h-5 w-5 text-muted-foreground" />
-                            Basic Information
-                          </CardTitle>
-                          <CardDescription>
-                            Enter the event details
-                          </CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
+                  {/* Section 01 — Basic information */}
+                  <section className="pb-8 pt-4 sm:pb-10">
+                    <div className="mb-6 flex items-start gap-4">
+                      <span className="pt-1 font-mono text-sm font-semibold tracking-widest text-primary/70">
+                        01
+                      </span>
+                      <div className="flex flex-col gap-0.5">
+                        <h2 className="text-lg font-semibold tracking-tight">
+                          Basic information
+                        </h2>
+                        <p className="text-sm text-muted-foreground">
+                          Name the event and give it a service type
+                        </p>
+                      </div>
+                    </div>
+                    <div className="grid gap-6 md:grid-cols-2">
                           {/* Service Type */}
                           <div className="space-y-2">
                             <Label>Service Type</Label>
@@ -1047,7 +1009,7 @@ export function CreateEventPageContent({
                           </div>
 
                           {/* Description */}
-                          <div className="space-y-2">
+                          <div className="space-y-2 md:col-span-2">
                             <Label htmlFor="description">Description</Label>
                             <Textarea
                               id="description"
@@ -1059,21 +1021,25 @@ export function CreateEventPageContent({
                               rows={3}
                             />
                           </div>
-                        </CardContent>
-                      </Card>
+                    </div>
+                  </section>
 
-                      {/* Date & Time Card */}
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="flex items-center gap-2 text-lg">
-                            <Calendar className="h-5 w-5 text-muted-foreground" />
-                            Date & Time
-                          </CardTitle>
-                          <CardDescription>
-                            Select a date or date range for your event
-                          </CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
+                  {/* Section 02 — Schedule & location */}
+                  <section className="border-t border-border/40 py-8 sm:py-10">
+                    <div className="mb-6 flex items-start gap-4">
+                      <span className="pt-1 font-mono text-sm font-semibold tracking-widest text-primary/70">
+                        02
+                      </span>
+                      <div className="flex flex-col gap-0.5">
+                        <h2 className="text-lg font-semibold tracking-tight">
+                          Schedule & location
+                        </h2>
+                        <p className="text-sm text-muted-foreground">
+                          Pick the dates, times, and where it happens
+                        </p>
+                      </div>
+                    </div>
+                    <div className="grid gap-6 md:grid-cols-2">
                           {/* Date Range Picker */}
                           <div className="space-y-2">
                             <Label>Event Date(s) *</Label>
@@ -1136,11 +1102,36 @@ export function CreateEventPageContent({
                             )}
                           </div>
 
+                          {/* Location */}
+                          <div className="space-y-2">
+                            <Label htmlFor="location">Location *</Label>
+                            <div className="relative">
+                              <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                              <Input
+                                id="location"
+                                className="pl-10"
+                                placeholder="e.g., Main Sanctuary"
+                                value={watchedLocation}
+                                onChange={(e) =>
+                                  setValue("location", e.target.value, {
+                                    shouldValidate: true,
+                                  })
+                                }
+                              />
+                            </div>
+                            {errors.location && (
+                              <p className="text-xs text-red-500">
+                                {errors.location.message}
+                              </p>
+                            )}
+                          </div>
+                    </div>
+
                           {/* Per-day start/end time inputs */}
                           {selectedDates.length > 0 && (
-                            <div className="space-y-3">
+                            <div className="mt-6 flex flex-col gap-3">
                               <Label>Start & End Times *</Label>
-                              <div className="space-y-2">
+                              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                                 {selectedDates.map((date) => {
                                   const key = format(date, "yyyy-MM-dd");
                                   const dayLabel = format(date, "EEEE, MMM d");
@@ -1157,7 +1148,7 @@ export function CreateEventPageContent({
                                   return (
                                     <div
                                       key={key}
-                                      className="rounded-lg border p-3 space-y-2"
+                                      className="flex flex-col gap-2 rounded-xl border border-border/40 bg-card/50 p-3"
                                     >
                                       <p className="text-sm font-medium">
                                         {dayLabel}
@@ -1208,51 +1199,29 @@ export function CreateEventPageContent({
                             </div>
                           )}
 
-                          {/* Location */}
-                          <div className="space-y-2">
-                            <Label htmlFor="location">Location *</Label>
-                            <div className="relative">
-                              <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                              <Input
-                                id="location"
-                                className="pl-10"
-                                placeholder="e.g., Main Sanctuary"
-                                value={watchedLocation}
-                                onChange={(e) =>
-                                  setValue("location", e.target.value, {
-                                    shouldValidate: true,
-                                  })
-                                }
-                              />
-                            </div>
-                            {errors.location && (
-                              <p className="text-xs text-red-500">
-                                {errors.location.message}
-                              </p>
-                            )}
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </div>
+                  </section>
 
-                    {/* Right Column - Roles */}
-                    <Card className="lg:min-h-0 lg:overflow-hidden">
-                      <CardHeader className="shrink-0">
-                        <CardTitle className="flex items-center gap-2 text-lg">
-                          <Users className="h-5 w-5 text-muted-foreground" />
-                          Volunteer Roles Needed
-                        </CardTitle>
-                        <CardDescription>
+                  {/* Section 03 — Volunteer roles */}
+                  <section className="border-t border-border/40 py-8 sm:py-10">
+                    <div className="mb-6 flex items-start gap-4">
+                      <span className="pt-1 font-mono text-sm font-semibold tracking-widest text-primary/70">
+                        03
+                      </span>
+                      <div className="flex flex-col gap-0.5">
+                        <h2 className="text-lg font-semibold tracking-tight">
+                          Volunteer roles
+                        </h2>
+                        <p className="text-sm text-muted-foreground">
                           Select the roles required for this event
-                        </CardDescription>
+                        </p>
                         {errors.rolesNeeded && (
                           <p className="text-xs text-red-500">
                             {errors.rolesNeeded.message}
                           </p>
                         )}
-                      </CardHeader>
-                      <CardContent className="flex-1 lg:overflow-y-auto min-h-0">
-                        <div className="grid gap-2">
+                      </div>
+                    </div>
+                        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
                           {volunteerRoleEntries.map(([role, config]) => {
                             const isSelected =
                               watchedRolesNeeded.includes(role);
@@ -1264,10 +1233,10 @@ export function CreateEventPageContent({
                                 type="button"
                                 onClick={() => handleRoleToggle(role)}
                                 className={cn(
-                                  "flex items-center gap-3 rounded-lg border p-3 text-left transition-all",
+                                  "flex items-center gap-3 rounded-xl border p-4 text-left transition-all",
                                   isSelected
                                     ? "border-primary bg-primary/5 ring-1 ring-primary"
-                                    : "border-border hover:border-primary/50 hover:bg-muted/50",
+                                    : "border-border/60 bg-card/50 hover:border-primary/50 hover:bg-muted/50",
                                 )}
                               >
                                 <span className="text-xl">{config.icon}</span>
@@ -1276,7 +1245,7 @@ export function CreateEventPageContent({
                                     {config.label}
                                   </p>
                                   <p className="text-xs text-muted-foreground">
-                                    {availableCount}
+                                    {availableCount} available
                                   </p>
                                 </div>
                                 <div
@@ -1293,35 +1262,7 @@ export function CreateEventPageContent({
                             );
                           })}
                         </div>
-                      </CardContent>
-                    </Card>
-                  </div>
-
-                  {/* Footer - Fixed at bottom */}
-                  <div className="shrink-0 flex justify-end gap-3 pt-4 mt-4 border-t bg-background">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={handleClose}
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      type="submit"
-                      disabled={!canProceedToStep2 || isCheckingAvailability}
-                    >
-                      {isCheckingAvailability ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        </>
-                      ) : (
-                        <>
-                          Next: Invite Volunteers
-                          <ArrowRight className="ml-2 h-4 w-4" />
-                        </>
-                      )}
-                    </Button>
-                  </div>
+                  </section>
                 </m.div>
               ) : (
                 <m.div
@@ -1330,12 +1271,11 @@ export function CreateEventPageContent({
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -20 }}
                   transition={{ duration: 0.2 }}
-                  className="flex-1 flex flex-col min-h-0"
                 >
                   {/* Event Summary */}
-                  <Card className="shrink-0">
-                    <CardContent className="p-4">
-                      <div className="flex flex-wrap items-center gap-4">
+                  <div className="relative overflow-hidden rounded-2xl border border-border/40 bg-linear-to-br from-card via-card to-primary/5 p-5 sm:p-6">
+                    <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-primary/5 blur-3xl" />
+                      <div className="relative flex flex-wrap items-center gap-x-4 gap-y-2">
                         {serviceColors && (
                           <Badge
                             className={cn(
@@ -1353,7 +1293,9 @@ export function CreateEventPageContent({
                             {selectedServiceType?.name}
                           </Badge>
                         )}
-                        <h2 className="text-lg font-semibold">{watchedName}</h2>
+                        <h2 className="text-xl font-bold tracking-tight sm:text-2xl">
+                          {watchedName}
+                        </h2>
                         <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
                           <MapPin className="h-4 w-4" />
                           {watchedLocation}
@@ -1361,14 +1303,14 @@ export function CreateEventPageContent({
                       </div>
 
                       {/* Per-day schedule summary */}
-                      <div className="mt-3 flex flex-wrap gap-2">
+                      <div className="relative mt-4 flex flex-wrap gap-2">
                         {selectedDates.map((date) => {
                           const key = format(date, "yyyy-MM-dd");
                           const times = watchedDayTimes[key];
                           return (
                             <div
                               key={key}
-                              className="flex items-center gap-2 rounded-md border bg-muted/50 px-3 py-1.5 text-sm"
+                              className="flex items-center gap-2 rounded-lg border border-border/40 bg-background/60 px-3 py-1.5 text-sm"
                             >
                               <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
                               <span className="font-medium">
@@ -1390,12 +1332,10 @@ export function CreateEventPageContent({
                           );
                         })}
                       </div>
-                    </CardContent>
-                  </Card>
+                  </div>
 
                   {/* Invitation Expiry */}
-                  <Card className="shrink-0 mt-4">
-                    <CardContent className="flex items-center justify-between p-4">
+                  <div className="mt-4 flex flex-col gap-3 rounded-2xl border border-border/40 bg-card/50 p-4 sm:flex-row sm:items-center sm:justify-between">
                       <div className="flex items-center gap-2">
                         <Clock className="h-4 w-4 text-muted-foreground" />
                         <div>
@@ -1411,7 +1351,7 @@ export function CreateEventPageContent({
                           setValue("expiresAt", Number(val), { shouldValidate: true })
                         }
                       >
-                        <SelectTrigger className="w-32">
+                        <SelectTrigger className="w-full sm:w-32">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -1420,33 +1360,30 @@ export function CreateEventPageContent({
                           <SelectItem value="7">7 days</SelectItem>
                         </SelectContent>
                       </Select>
-                    </CardContent>
-                  </Card>
+                  </div>
 
                   {/* Role Assignments */}
-                  <div className="flex-1 grid gap-4 lg:grid-cols-2 mt-4 lg:overflow-y-auto min-h-0 content-start">
+                  <div className="mt-8 flex flex-col gap-8">
                     {watchedRolesNeeded.map((role) => {
                       const config = volunteerRoleConfig[role];
                       const availableMembers = membersByRole[role] || [];
                       const assignedToRole = roleAssignments[role] || [];
 
                       return (
-                        <Card key={role}>
-                          <CardHeader className="pb-3">
-                            <CardTitle className="flex items-center gap-2 text-base">
+                        <div key={role} className="flex flex-col gap-4">
+                            <div className="flex items-center gap-2">
                               <span className="text-lg">{config.icon}</span>
-                              {config.label}
+                              <h3 className="text-base font-semibold tracking-tight">
+                                {config.label}
+                              </h3>
                               {assignedToRole.length > 0 && (
-                                <Badge variant="secondary" className="ml-auto">
+                                <Badge variant="secondary">
                                   {assignedToRole.length} assigned
                                 </Badge>
                               )}
-                            </CardTitle>
-                          </CardHeader>
-                          <CardContent className="p-0">
+                            </div>
                             {availableMembers.length > 0 ? (
-                              <div className="lg:max-h-64 lg:overflow-y-auto p-4">
-                                <div className="space-y-2">
+                                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                                   {availableMembers.map((member) => {
                                     const isAssigned = assignedToRole.includes(
                                       member.userId,
@@ -1460,7 +1397,7 @@ export function CreateEventPageContent({
                                       <label
                                         key={member.id}
                                         className={cn(
-                                          "flex items-center gap-3 rounded-lg border p-3 transition-all",
+                                          "flex items-center gap-3 rounded-xl border p-3 transition-all",
                                           blockout
                                             ? "cursor-not-allowed border-border bg-muted/40 opacity-70"
                                             : isAssigned
@@ -1522,49 +1459,71 @@ export function CreateEventPageContent({
                                     );
                                   })}
                                 </div>
-                              </div>
                             ) : (
-                              <p className="text-sm text-muted-foreground py-4 text-center">
+                              <p className="rounded-xl border border-dashed border-border/60 px-4 py-6 text-center text-sm text-muted-foreground">
                                 No members available for this role
                               </p>
                             )}
-                          </CardContent>
-                        </Card>
+                        </div>
                       );
                     })}
                   </div>
-
-                  {/* Footer - Fixed at bottom */}
-                  <div className="shrink-0 flex justify-between gap-3 pt-4 mt-4 border-t bg-background">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setStep(1)}
-                    >
-                      <ArrowLeft className="mr-2 h-4 w-4" />
-                      Back
-                    </Button>
-                    <Button type="submit" disabled={isCreating}>
-                      {isCreating ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Creating...
-                        </>
-                      ) : (
-                        <>
-                          <Send className="mr-2 h-4 w-4" />
-                          Create & Send Invites
-                          {assignedCount > 0 && ` (${assignedCount})`}
-                        </>
-                      )}
-                    </Button>
-                  </div>
                 </m.div>
               )}
-            </AnimatePresence>
-          </form>
+          </AnimatePresence>
         </div>
-      </div>
+
+        {/* Sticky action bar */}
+        <div className="sticky bottom-0 z-10 border-t border-border/40 bg-background/80 backdrop-blur-md">
+          <div className="mx-auto flex w-full max-w-screen-2xl items-center justify-between gap-3 px-4 py-4 sm:px-6">
+            {step === 1 ? (
+              <>
+                <Button type="button" variant="outline" onClick={handleClose}>
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={!canProceedToStep2 || isCheckingAvailability}
+                >
+                  {isCheckingAvailability ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <>
+                      Next: Invite Volunteers
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </>
+                  )}
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setStep(1)}
+                >
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Back
+                </Button>
+                <Button type="submit" disabled={isCreating}>
+                  {isCreating ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Creating...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="mr-2 h-4 w-4" />
+                      Create & Send Invites
+                      {assignedCount > 0 && ` (${assignedCount})`}
+                    </>
+                  )}
+                </Button>
+              </>
+            )}
+          </div>
+        </div>
+      </form>
     </div>
   );
 }

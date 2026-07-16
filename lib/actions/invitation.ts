@@ -11,6 +11,7 @@ import { verifyInvitationByToken } from "../services/invitation";
 
 import { after } from "next/server";
 import { updateTag } from "next/cache";
+import { currentUser } from "../services/user";
 
 // import twilio from 'twilio';
 
@@ -222,3 +223,61 @@ export async function declineOrgInvite(token: string): Promise<ActionResponse> {
     };
 };
 
+export const cancelOrgInvite = async (organizationId: string, userEmail: string): Promise<ActionResponse> => {
+
+    try {
+
+        const user = await currentUser();
+
+        if (!user) return { success: false, error: "Unable to find user" };
+
+        if (!organizationId || !userEmail) return { success: false, error: "Insufficient data" };
+
+        const membership = await prisma.membership.findUnique({
+            where: {
+                userId_organizationId: {
+                    userId: user.id,
+                    organizationId
+                }
+            }
+        });
+
+        if (!membership) return { success: false, error: "Unable to find membership" };
+
+        if (membership.role === OrgRole.MEMBER) return { success: false, error: "Unable to process request." };
+
+        const invitation = await prisma.invitation.findUnique({
+            where: {
+                email_organizationId: {
+                    email: userEmail,
+                    organizationId
+                }
+            }
+        });
+
+        if (!invitation) return { success: false, error: "Invitation doesn't exist." };
+
+        if (invitation.status !== InvitationStatus.PENDING) return { success: false, error: "This invitation has either been accepted, declined or canceled already" };
+
+        await prisma.invitation.update({
+            where: {
+                email_organizationId: {
+                    email: userEmail,
+                    organizationId
+                }
+            },
+            data: {
+                status: InvitationStatus.CANCELED
+            }
+        });
+
+        updateTag(`invitations-${organizationId}-list`);
+
+        return { success: true };
+
+    } catch {
+
+        return { success: false, error: "Something went wrong, please try again" };
+
+    }
+}
