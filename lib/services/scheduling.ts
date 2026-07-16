@@ -2,7 +2,6 @@ import "server-only";
 
 import prisma from "@/lib/prisma";
 import { InvitationStatus, VolunteerRole } from "@/generated/prisma/enums";
-import { cacheLife, cacheTag } from "next/cache";
 import { getBlockedUserIds } from "@/lib/services/blockouts";
 
 type DateRange = { startTime: Date | string; endTime: Date | string };
@@ -154,27 +153,4 @@ export async function findBestReplacement(params: {
 
   const best = ranked[0].member.user;
   return { userId: best.id, email: best.email, firstName: best.firstName };
-}
-
-export async function getMemberAcceptanceStats(organizationId: string) {
-  "use cache";
-
-  cacheLife("minutes");
-  cacheTag(`org-${organizationId}-acceptance-stats`);
-
-  const counts = await getAcceptanceCounts(organizationId);
-
-  const stats: Record<
-    string,
-    { accepted: number; declined: number; rate: number }
-  > = {};
-  for (const [userId, { accepted, declined }] of counts) {
-    const total = accepted + declined;
-    stats[userId] = {
-      accepted,
-      declined,
-      rate: total === 0 ? 0 : accepted / total,
-    };
-  }
-  return stats;
 }

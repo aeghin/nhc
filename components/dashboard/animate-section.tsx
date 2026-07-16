@@ -25,22 +25,3 @@ export const AnimatedSection = ({
     {children}
   </m.div>
 )
-
-export const AnimatedListItem = ({
-  children,
-  index = 0,
-  className,
-}: {
-  children: ReactNode
-  index?: number
-  className?: string
-}) => (
-  <m.div
-    initial={{ opacity: 0, x: -10 }}
-    animate={{ opacity: 1, x: 0 }}
-    transition={{ delay: index * 0.05, duration: 0.3 }}
-    className={className}
-  >
-    {children}
-  </m.div>
-)

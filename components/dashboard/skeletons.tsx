@@ -21,31 +21,6 @@ export function DashboardStatsSkeleton() {
   )
 }
 
-export function UpcomingEventsSkeleton() {
-  return (
-    <div className="space-y-5">
-      <div>
-        <Skeleton className="h-6 w-48" />
-        <Skeleton className="mt-1 h-4 w-56" />
-      </div>
-      <div className="grid gap-3">
-        {[1, 2, 3].map((i) => (
-          <div
-            key={i}
-            className="flex items-center gap-4 rounded-lg border border-border/40 bg-linear-to-br from-card to-card/80 p-4"
-          >
-            <Skeleton className="h-14 w-14 rounded-xl shrink-0" />
-            <div className="flex-1 space-y-2">
-              <Skeleton className="h-5 w-40" />
-              <Skeleton className="h-3 w-32" />
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
-
 export function OrganizationsGridSkeleton() {
   return (
     <div className="space-y-5">
