@@ -25,9 +25,9 @@ export default function SetupPage() {
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
           <Link href="/" className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-linear-to-br from-primary to-primary/70 shadow-lg shadow-primary/25 group-hover:shadow-primary/40 transition-shadow text-primary-foreground font-bold text-sm">
-              N
+              A
             </div>
-            <span className="text-lg font-semibold">NHW</span>
+            <span className="text-lg font-semibold">Aeghin</span>
           </Link>
           <UserButton />
         </div>
@@ -37,7 +37,7 @@ export default function SetupPage() {
       <main className="flex flex-1 items-center justify-center px-6 py-12">
         <div className="w-full max-w-2xl">
           <div className="mb-10 text-center">
-            <h1 className="mb-3 text-3xl font-bold tracking-tight">Welcome to NHW</h1>
+            <h1 className="mb-3 text-3xl font-bold tracking-tight">Welcome to Aeghin</h1>
             <p className="text-lg text-muted-foreground">
               Get started by creating a new organization or joining an existing one.
             </p>

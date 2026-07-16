@@ -25,9 +25,9 @@ const Header = () => (
     <div className="mx-auto flex h-16 max-w-7xl items-center px-6">
       <Link href="/" className="flex items-center gap-2">
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-linear-to-br from-primary to-primary/70 shadow-lg shadow-primary/25 text-primary-foreground font-bold text-sm">
-          N
+          A
         </div>
-        <span className="text-lg font-semibold">NHW</span>
+        <span className="text-lg font-semibold">Aeghin</span>
       </Link>
     </div>
   </header>

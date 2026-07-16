@@ -88,7 +88,7 @@ export async function inviteMember(data: OrgInvitationInput): Promise<ActionResp
         updateTag(`invitations-${orgId}-list`);
 
         after(async () => {await resend.emails.send({
-            from: `${membership.organization.name} <no-reply@aeghin.com>`,
+            from: `${membership.organization.name} <support@aeghin.com>`,
             to: email,
             subject: `You've been invited to join ${membership.organization.name}`,
             react: InvitationEmail({ 

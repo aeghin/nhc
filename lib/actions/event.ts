@@ -271,7 +271,7 @@ export async function createEvent(
       after(async () => {await Promise.allSettled(
         assignedUsers.map((user) =>
           resend.emails.send({
-            from: "NHC <noreply@aeghin.com>",
+            from: "Aeghin <support@aeghin.com>",
             to: user.email,
             subject: `You've been assigned to ${name}`,
             react: EventAssignmentEmail({
@@ -416,7 +416,7 @@ export const declineEventInvitation = async (organizationId: string, eventId: st
 
           after(async () => {
             await resend.emails.send({
-              from: "NHC <noreply@aeghin.com>",
+              from: "Aeghin <support@aeghin.com>",
               to: replacement.email,
               subject: `You've been assigned to ${assignment.event.name}`,
               react: EventAssignmentEmail({
@@ -629,7 +629,7 @@ export const emailAcceptedVolunteers = async (
     const viewLink = `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/organizations/${organizationId}/events/${eventId}`;
 
     const emails = recipients.map(({ user: recipient }) => ({
-      from: `${organizationName} <no-reply@aeghin.com>`,
+      from: `${organizationName} <support@aeghin.com>`,
       to: recipient.email,
       replyTo: user.email,
       subject,

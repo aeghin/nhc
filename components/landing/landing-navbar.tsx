@@ -30,10 +30,10 @@ export function LandingNavbar() {
             <Link href="/" className="flex items-center gap-3 group">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-br from-primary to-primary/70 shadow-lg shadow-primary/25 group-hover:shadow-primary/40 transition-shadow">
                 <span className="text-lg font-bold text-primary-foreground">
-                  N
+                  A
                 </span>
               </div>
-              <span className="text-2xl font-bold tracking-tight">NHW</span>
+              <span className="text-2xl font-bold tracking-tight">Aeghin</span>
             </Link>
 
             <div className="hidden lg:flex items-center gap-8">

@@ -13,7 +13,7 @@ export function Navbar() {
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-linear-to-br from-primary to-primary/80 shadow-lg shadow-primary/20 transition-transform duration-200 group-hover:scale-105">
               <Command className="h-4.5 w-4.5 text-primary-foreground" />
             </div>
-            <span className="text-sm font-semibold tracking-tight">NHC</span>
+            <span className="text-sm font-semibold tracking-tight">Aeghin</span>
           </Link>
           <NavLinks />
         </div>

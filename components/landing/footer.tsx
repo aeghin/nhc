@@ -24,8 +24,8 @@ const footerLinks = {
     { label: "Webinars", href: "#" },
   ],
   legal: [
-    { label: "Privacy Policy", href: "#" },
-    { label: "Terms of Service", href: "#" },
+    { label: "Privacy Policy", href: "/privacy" },
+    { label: "Terms & Conditions", href: "/terms" },
     { label: "Security", href: "#" },
     { label: "GDPR", href: "#" },
   ],
@@ -39,9 +39,9 @@ export function Footer() {
           <div className="col-span-2">
             <Link href="/landing" className="flex items-center gap-3 mb-6">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/70 shadow-lg shadow-primary/25">
-                <span className="text-lg font-bold text-primary-foreground">N</span>
+                <span className="text-lg font-bold text-primary-foreground">A</span>
               </div>
-              <span className="text-2xl font-bold tracking-tight">NHC</span>
+              <span className="text-2xl font-bold tracking-tight">Aeghin</span>
             </Link>
             <p className="text-sm text-muted-foreground max-w-xs leading-relaxed">
               The modern platform for volunteer coordination. Built for worship teams, churches, and community
