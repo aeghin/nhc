@@ -27,6 +27,7 @@ import {
   RoleCategory,
 } from "@/lib/config/roles";
 import { EventVolunteerRowMenu } from "./event-volunteer-row-menu";
+import { EmailTeamDialog } from "./email-team-dialog";
 
 interface EventAssignmentsCardProps {
   event: EventDetails;
@@ -132,9 +133,19 @@ export function EventAssignmentsCard({
             <Users className="h-4 w-4 text-muted-foreground" />
             Team
           </CardTitle>
-          <span className="text-xs text-muted-foreground tabular-nums">
-            {acceptedCount}/{total} confirmed
-          </span>
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-muted-foreground tabular-nums">
+              {acceptedCount}/{total} confirmed
+            </span>
+            {canManage && acceptedCount > 0 && (
+              <EmailTeamDialog
+                organizationId={event.organizationId}
+                eventId={event.id}
+                eventName={event.name}
+                recipientCount={acceptedCount}
+              />
+            )}
+          </div>
         </div>
       </CardHeader>
 

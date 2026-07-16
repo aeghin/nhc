@@ -12,7 +12,13 @@ import {
   createEventInputSchema,
 } from "@/lib/validations/event";
 
+import {
+  EventEmailInput,
+  eventEmailSchema,
+} from "@/lib/validations/event-email";
+
 import EventAssignmentEmail from "@/components/email/event-email-template";
+import EventMessageEmail from "@/components/email/event-message-template";
 
 import {
   findBestReplacement,
@@ -556,3 +562,102 @@ export const deleteEvent = async (organizationId: string, eventId: string): Prom
     return { success: false, error: "Something went wrong. Try again." };
   }
 }
+
+type EmailTeamResult =
+  | { success: true; sentCount: number }
+  | { success: false; error: string };
+
+export const emailAcceptedVolunteers = async (
+  organizationId: string,
+  eventId: string,
+  input: EventEmailInput,
+): Promise<EmailTeamResult> => {
+
+  try {
+
+    const user = await currentUser();
+
+    if (!user) return { success: false, error: "Unauthorized" };
+
+    const parsed = eventEmailSchema.safeParse(input);
+
+    if (!parsed.success) return { success: false, error: parsed.error.message };
+
+    const { subject, body } = parsed.data;
+
+    const membership = await prisma.membership.findUnique({
+      where: {
+        userId_organizationId: { userId: user.id, organizationId },
+      },
+      include: { organization: { select: { name: true } } },
+    });
+
+    if (!membership) return { success: false, error: "Unable to find membership" };
+
+    if (membership.role !== OrgRole.OWNER && membership.role !== OrgRole.ADMIN) {
+      return {
+        success: false,
+        error: "Unauthorized, please reach out to your Admin",
+      };
+    }
+
+    const event = await prisma.event.findFirst({
+      where: { id: eventId, organizationId },
+      select: {
+        name: true,
+        assignments: {
+          where: {
+            status: InvitationStatus.ACCEPTED,
+          },
+          select: {
+            user: { select: { email: true, firstName: true } },
+          },
+        },
+      },
+    });
+
+    if (!event) return { success: false, error: "Unable to locate event" };
+
+    const recipients = event.assignments;
+
+    if (recipients.length === 0) {
+      return { success: false, error: "No accepted volunteers to email" };
+    }
+
+    const organizationName = membership.organization.name;
+    const senderName = `${user.firstName} ${user.lastName}`;
+    const viewLink = `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/organizations/${organizationId}/events/${eventId}`;
+
+    const emails = recipients.map(({ user: recipient }) => ({
+      from: `${organizationName} <no-reply@aeghin.com>`,
+      to: recipient.email,
+      replyTo: user.email,
+      subject,
+      react: EventMessageEmail({
+        recipientName: recipient.firstName,
+        senderName,
+        organizationName,
+        eventName: event.name,
+        body,
+        viewLink,
+      }),
+    }));
+
+    // Sent in the request (not after()) so the sender gets a real
+    // delivered/failed answer. batch.send caps at 100 emails per call.
+    for (let i = 0; i < emails.length; i += 100) {
+      const { error } = await resend.batch.send(emails.slice(i, i + 100));
+
+      if (error) {
+        return { success: false, error: "Unable to send message, please try again" };
+      }
+    }
+
+    return { success: true, sentCount: recipients.length };
+
+  } catch {
+
+    return { success: false, error: "Something went wrong, please try again" };
+
+  };
+};
