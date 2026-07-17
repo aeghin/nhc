@@ -1,5 +1,5 @@
 import { generateReactHelpers } from "@uploadthing/react";
 
-import type { SongFileRouter } from "@/app/api/uploadthing/core";
+import type { AppFileRouter } from "@/app/api/uploadthing/core";
 
-export const { useUploadThing } = generateReactHelpers<SongFileRouter>();
+export const { useUploadThing } = generateReactHelpers<AppFileRouter>();

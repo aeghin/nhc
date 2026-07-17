@@ -90,6 +90,8 @@ model Organization {
   id          String   @id @default(uuid())
   name        String
   description String
+  logoUrl     String?
+  logoKey     String?
 
   // Stripe billing — mirror of entitlement feature lookup_keys from Stripe
   stripeCustomerId String?  @unique

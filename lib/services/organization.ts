@@ -69,6 +69,7 @@ if (!user) return [];
       id: m.organization.id,
       name: m.organization.name,
       description: m.organization.description,
+      logoUrl: m.organization.logoUrl,
       role: m.role,
       memberCount: m.organization._count.memberships,
       invitationCount: m.organization._count.invitations,
@@ -269,6 +270,7 @@ export const getOrganizationSettings = async (organizationId: string) => {
     select: {
       name: true,
       description: true,
+      logoUrl: true,
       smartSchedulingEnabled: true,
       serviceTypes: {
         where: { deletedAt: null }

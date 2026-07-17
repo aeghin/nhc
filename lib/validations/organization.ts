@@ -7,3 +7,10 @@ export const organizationSchema = z.object({
 
 export type OrganizationInput = z.infer<typeof organizationSchema>;
 
+export const organizationLogoSchema = z.object({
+  url: z.url("Logo URL required"),
+  key: z.string().min(1, "File key required"),
+});
+
+export type OrganizationLogoInput = z.infer<typeof organizationLogoSchema>;
+

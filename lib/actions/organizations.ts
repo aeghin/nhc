@@ -2,10 +2,11 @@
 
 import { auth } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
-import { organizationSchema, OrganizationInput } from "@/lib/validations/organization";
+import { organizationSchema, OrganizationInput, organizationLogoSchema, OrganizationLogoInput } from "@/lib/validations/organization";
 import { revalidatePath, updateTag } from "next/cache";
 import { OrgRole } from "@/generated/prisma/enums";
 import { redirect } from "next/navigation";
+import { UTApi } from "uploadthing/server";
 
 
 type ActionResponse =
@@ -126,6 +127,138 @@ export const updateOrganizationDetails = async (organizationId: string, values: 
         return { success: true };
 
     } catch (err) {
+        return { success: false, error: "Something went wrong, please try again." }
+    }
+}
+
+
+export const updateOrganizationLogo = async (organizationId: string, logo: OrganizationLogoInput): Promise<ActionResponse> => {
+
+    try {
+
+        const { userId } = await auth();
+
+        if (!userId) return { success: false, error: "Unauthorized" };
+
+        const { url, key } = organizationLogoSchema.parse(logo);
+
+        const user = await prisma.user.findUnique({
+            where: {
+                clerkId: userId
+            },
+        });
+
+        if (!user) return { success: false, error: "Unable to find the user" };
+
+        const currentUser = await prisma.membership.findFirst({
+            where: {
+                userId: user.id,
+                organizationId,
+                role: OrgRole.OWNER
+            },
+        });
+
+        if (!currentUser) return { success: false, error: "Unable to make edits. Please reach out to an owner." };
+
+        const organization = await prisma.organization.findUnique({
+            where: { id: organizationId },
+            select: { logoKey: true }
+        });
+
+        if (!organization) return { success: false, error: "Organization not found" };
+
+        await prisma.organization.update({
+            where: {
+                id: organizationId
+            },
+            data: {
+                logoUrl: url,
+                logoKey: key
+            }
+        });
+
+        if (organization.logoKey && organization.logoKey !== key) {
+            try {
+                const utapi = new UTApi();
+                await utapi.deleteFiles(organization.logoKey);
+            } catch (err) {
+                console.error('updateOrganizationLogo file cleanup error:', err);
+            }
+        }
+
+        updateTag(`org-${organizationId}-details`);
+        updateTag(`org-${organizationId}-setting-details`);
+        updateTag(`org-${organizationId}-list-entry`);
+
+        return { success: true };
+
+    } catch (err) {
+        console.error('updateOrganizationLogo error:', err);
+        return { success: false, error: "Something went wrong, please try again." }
+    }
+}
+
+
+export const removeOrganizationLogo = async (organizationId: string): Promise<ActionResponse> => {
+
+    try {
+
+        const { userId } = await auth();
+
+        if (!userId) return { success: false, error: "Unauthorized" };
+
+        const user = await prisma.user.findUnique({
+            where: {
+                clerkId: userId
+            },
+        });
+
+        if (!user) return { success: false, error: "Unable to find the user" };
+
+        const currentUser = await prisma.membership.findFirst({
+            where: {
+                userId: user.id,
+                organizationId,
+                role: OrgRole.OWNER
+            },
+        });
+
+        if (!currentUser) return { success: false, error: "Unable to make edits. Please reach out to an owner." };
+
+        const organization = await prisma.organization.findUnique({
+            where: { id: organizationId },
+            select: { logoKey: true }
+        });
+
+        if (!organization) return { success: false, error: "Organization not found" };
+
+        await prisma.organization.update({
+            where: {
+                id: organizationId
+            },
+            data: {
+                logoUrl: null,
+                logoKey: null
+            }
+        });
+
+        if (organization.logoKey) {
+            try {
+                const utapi = new UTApi();
+                await utapi.deleteFiles(organization.logoKey);
+            } catch (err) {
+                console.error('removeOrganizationLogo file cleanup error:', err);
+            }
+        }
+
+        updateTag(`org-${organizationId}-details`);
+        updateTag(`org-${organizationId}-setting-details`);
+        updateTag(`org-${organizationId}-list-entry`);
+
+        return { success: true };
+
+    } catch (err) {
+        console.error('removeOrganizationLogo error:', err);
         return { success: false, error: "Something went wrong, please try again." }
     }
 }

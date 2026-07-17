@@ -10,6 +10,7 @@ interface OrganizationCardProps {
     id: string
     name: string
     description: string
+    logoUrl: string | null
     role: OrgRole
     memberCount: number
     invitationCount: number
@@ -51,11 +52,19 @@ export function OrganizationCard({ organization, upcomingEvents }: OrganizationC
               <div className="flex items-center gap-3">
                 <div
                   className={cn(
-                    "flex h-11 w-11 items-center justify-center rounded-xl text-lg font-bold transition-transform duration-200 group-hover:scale-105",
+                    "flex h-11 w-11 items-center justify-center overflow-hidden rounded-xl text-lg font-bold transition-transform duration-200 group-hover:scale-105",
                     "bg-primary/10 text-primary",
                   )}
                 >
-                  {organization.name.charAt(0)}
+                  {organization.logoUrl ? (
+                    <img
+                      src={organization.logoUrl}
+                      alt={`${organization.name} logo`}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    organization.name.charAt(0)
+                  )}
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors truncate">

@@ -7,6 +7,7 @@ import { LeaveOrgDialog } from "./leave-org-dialog";
 import { ManageSubscriptionButton } from "./manage-subscription-button";
 import { SmartSchedulingToggle } from "./smart-scheduling-toggle";
 import { ServiceTypesSettings } from "./service-types-settings";
+import { OrgLogoUploader } from "./org-logo-uploader";
 
 interface SettingsTabContentProps {
   organizationId: string;
@@ -81,6 +82,11 @@ export const SettingsTabContent = async ({
           </div>
         )}
       </div>
+      <OrgLogoUploader
+        organizationId={organizationId}
+        logoUrl={org?.logoUrl ?? null}
+        isOwner={isOwner}
+      />
       {canManage && (
         <SmartSchedulingToggle
           organizationId={organizationId}

@@ -47,6 +47,37 @@ export const fileRouter = {
         .onUploadComplete(async ({ metadata, file }) => {
             console.log(`Upload complete for song ${metadata.songId}: ${file.key}`);
         }),
+    orgLogo: f({
+        image: { maxFileSize: "4MB", maxFileCount: 1 },
+    })
+        .input(z.object({ organizationId: z.uuid() }))
+        .middleware(async ({ input }) => {
+            const { userId: clerkId } = await auth();
+
+            if (!clerkId) throw new UploadThingError("Unauthorized");
+
+            const user = await prisma.user.findUnique({ where: { clerkId } });
+
+            if (!user) throw new UploadThingError("Unauthorized");
+
+            const membership = await prisma.membership.findUnique({
+                where: {
+                    userId_organizationId: {
+                        userId: user.id,
+                        organizationId: input.organizationId,
+                    },
+                },
+            });
+
+            if (!membership || membership.role !== OrgRole.OWNER) {
+                throw new UploadThingError("Unauthorized");
+            }
+
+            return { organizationId: input.organizationId };
+        })
+        .onUploadComplete(async ({ metadata, file }) => {
+            console.log(`Logo upload complete for org ${metadata.organizationId}: ${file.key}`);
+        }),
 } satisfies FileRouter;
 
-export type SongFileRouter = typeof fileRouter;
+export type AppFileRouter = typeof fileRouter;

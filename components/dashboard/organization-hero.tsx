@@ -14,6 +14,7 @@ type Organization = {
   id: string;
   name: string;
   description: string;
+  logoUrl: string | null;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -24,7 +25,7 @@ interface OrganizationHeroProps {
 }
 
 export const OrganizationHero = async ({
-  organization: { id, name, description, memberships },
+  organization: { id, name, description, logoUrl, memberships },
   volunteerRoles,
 }: OrganizationHeroProps) => {
   const userRole = memberships[0].role;
@@ -41,8 +42,16 @@ export const OrganizationHero = async ({
 
       <div className="relative flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex items-start gap-5">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-linear-to-br from-primary/20 to-primary/10 text-primary shadow-lg shadow-primary/10 transition-transform hover:scale-105">
-            <Building2 className="h-8 w-8" />
+          <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl bg-linear-to-br from-primary/20 to-primary/10 text-primary shadow-lg shadow-primary/10 transition-transform hover:scale-105">
+            {logoUrl ? (
+              <img
+                src={logoUrl}
+                alt={`${name} logo`}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <Building2 className="h-8 w-8" />
+            )}
           </div>
           <div className="space-y-3">
             <div className="flex flex-wrap items-center gap-3">
