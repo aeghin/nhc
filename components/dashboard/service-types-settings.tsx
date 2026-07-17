@@ -137,7 +137,7 @@ export const ServiceTypesSettings = ({
             <DialogTitle className="text-center text-xl text-red-600">
               Delete Service Type
             </DialogTitle>
-            <DialogDescription className="text-center text-gray-600">
+            <DialogDescription className="text-center">
               {"Deleting "}
               <span className="text-red-600">{typeToDelete?.name}</span>
               {

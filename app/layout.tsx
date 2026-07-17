@@ -6,6 +6,7 @@ import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Toaster } from "@/components/ui/sonner";
 import { MotionProvider } from "@/components/providers/motion-provider";
+import { ThemeProvider } from "@/components/providers/theme-provider";
 import { Suspense } from "react";
 
 const geistSans = Geist({
@@ -29,16 +30,23 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Suspense>
-          <ClerkProvider>
-            <MotionProvider>{children}</MotionProvider>
-            <Toaster />
-          </ClerkProvider>
-        </Suspense>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem={false}
+          disableTransitionOnChange
+        >
+          <Suspense>
+            <ClerkProvider>
+              <MotionProvider>{children}</MotionProvider>
+              <Toaster />
+            </ClerkProvider>
+          </Suspense>
+        </ThemeProvider>
       </body>
     </html>
   );

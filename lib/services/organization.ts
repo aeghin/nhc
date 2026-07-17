@@ -2,6 +2,7 @@ import "server-only";
 
 import prisma from "../prisma";
 import { cacheLife, cacheTag } from 'next/cache';
+import { InvitationStatus } from "@/generated/prisma/enums";
 
 export const getOrganizationDetailsById = async (id: string, userId: string) => {
     "use cache";
@@ -53,7 +54,14 @@ export const getUserOrganizations = async (userId: string) => {
         organization: {
           include: {
             _count: {
-              select: { memberships: true, invitations: true },
+              select: {
+                invitations: {
+                  where: {
+                    status: InvitationStatus.PENDING
+                  },
+                },
+                memberships: true
+              }
             },
           },
         },

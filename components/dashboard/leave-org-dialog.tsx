@@ -63,7 +63,7 @@ export const LeaveOrgDialog = ({ organizationId, name, isOwner }: LeaveOrgDialog
           <DialogTitle className="text-center text-xl">
             Leave Organization
           </DialogTitle>
-          <DialogDescription className="text-center text-gray-600">
+          <DialogDescription className="text-center">
             {isOwner ? (
               <>
                 {"You're about to leave "}

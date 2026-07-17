@@ -67,7 +67,7 @@ export const DeleteOrgDialog = ({ organizationId, name }: DeleteOrgDialogProps) 
           <DialogTitle className="text-center text-xl text-red-600">
             Delete Organization
           </DialogTitle>
-          <DialogDescription className="text-center text-gray-600">
+          <DialogDescription className="text-center">
             {"Deleting "}
             <span className="text-red-600">{name}</span>
             {" cannot be undone once completed. All data will be erased."}

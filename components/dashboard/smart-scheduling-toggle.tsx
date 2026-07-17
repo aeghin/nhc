@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { CalendarClock } from "lucide-react";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
+import { Switch } from "@/components/ui/switch";
 import { setSmartScheduling } from "@/lib/actions/organizations";
 
 interface SmartSchedulingToggleProps {
@@ -51,25 +51,14 @@ export const SmartSchedulingToggle = ({
           </p>
         </div>
 
-        <button
-          type="button"
-          role="switch"
-          aria-checked={on}
-          aria-label="Toggle smart scheduling"
-          onClick={toggle}
+        <Switch
+          size="lg"
+          checked={on}
+          onCheckedChange={toggle}
           disabled={isPending}
-          className={cn(
-            "relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50",
-            on ? "bg-primary" : "bg-input",
-          )}
-        >
-          <span
-            className={cn(
-              "inline-block h-4 w-4 rounded-full bg-background shadow transition-transform",
-              on ? "translate-x-4" : "translate-x-0.5",
-            )}
-          />
-        </button>
+          aria-label="Toggle smart scheduling"
+          className="cursor-pointer"
+        />
       </div>
     </section>
   );
