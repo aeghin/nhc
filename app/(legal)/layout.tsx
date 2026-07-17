@@ -11,9 +11,11 @@ export default function LegalLayout({
       <header className="border-b border-border">
         <div className="mx-auto w-full max-w-3xl px-6 py-4">
           <Link href="/" className="flex w-fit items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-linear-to-br from-primary to-primary/70 shadow-lg shadow-primary/25">
-              <span className="text-sm font-bold text-primary-foreground">A</span>
-            </div>
+            <img
+              src="/aeghin-icon.svg"
+              alt=""
+              className="h-8 w-8 rounded-lg shadow-lg shadow-primary/25"
+            />
             <span className="text-lg font-bold tracking-tight">Aeghin</span>
           </Link>
         </div>

@@ -24,9 +24,11 @@ export default function SetupPage() {
       <header className="border-b bg-card">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
           <Link href="/" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-linear-to-br from-primary to-primary/70 shadow-lg shadow-primary/25 group-hover:shadow-primary/40 transition-shadow text-primary-foreground font-bold text-sm">
-              A
-            </div>
+            <img
+              src="/aeghin-icon.svg"
+              alt=""
+              className="h-8 w-8 rounded-lg shadow-lg shadow-primary/25"
+            />
             <span className="text-lg font-semibold">Aeghin</span>
           </Link>
           <UserButton />

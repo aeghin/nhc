@@ -38,9 +38,11 @@ export function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-6 gap-8 lg:gap-12">
           <div className="col-span-2">
             <Link href="/landing" className="flex items-center gap-3 mb-6">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/70 shadow-lg shadow-primary/25">
-                <span className="text-lg font-bold text-primary-foreground">A</span>
-              </div>
+              <img
+                src="/aeghin-icon.svg"
+                alt=""
+                className="h-10 w-10 rounded-xl shadow-lg shadow-primary/25"
+              />
               <span className="text-2xl font-bold tracking-tight">Aeghin</span>
             </Link>
             <p className="text-sm text-muted-foreground max-w-xs leading-relaxed">
