@@ -18,7 +18,7 @@ export function NavLinks() {
   const active = pathname.startsWith(songsHref);
 
   return (
-    <nav className="hidden items-center gap-1 md:flex mr-2">
+    <nav className="flex items-center gap-1 mr-2">
       <Link
         href={songsHref}
         className={cn(
