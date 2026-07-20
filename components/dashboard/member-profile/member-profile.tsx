@@ -82,20 +82,20 @@ export default function MemberProfile({
   
 
   return (
-    <div className="min-h-screen bg-white text-[#1A1915] bg-[radial-gradient(1100px_480px_at_50%_-8%,rgba(255,255,255,0.9),rgba(255,255,255,0)_62%)]">
-      <header className="sticky top-0 z-20 flex flex-wrap items-center justify-between gap-3.5 border-b border-[#E7E4DB] bg-[#FFFFFFD9] px-[clamp(20px,5vw,56px)] py-3.5 backdrop-blur-[10px]">
+    <div className="min-h-screen bg-background text-foreground bg-[radial-gradient(1100px_480px_at_50%_-8%,rgba(255,255,255,0.9),rgba(255,255,255,0)_62%)] dark:bg-none">
+      <header className="sticky top-0 z-20 flex flex-wrap items-center justify-between gap-3.5 border-b border-border bg-background/85 px-[clamp(20px,5vw,56px)] py-3.5 backdrop-blur-[10px]">
         <div className="flex items-center gap-2.5">
           <span className="block size-2.5 rounded-full bg-primary" />
           <span className="text-base font-bold tracking-[-0.01em]">
             {organizationName}
           </span>
         </div>
-        <nav className="flex items-center gap-2 text-sm text-[#6E6A5E]">
-          <Link href="/members" className="transition-colors hover:text-[#1A1915]">
+        <nav className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Link href="/members" className="transition-colors hover:text-foreground">
             Members
           </Link>
-          <span className="text-[#C9C5B8]">/</span>
-          <span className="font-medium text-[#1A1915]">{fullName}</span>
+          <span className="text-muted-foreground/50">/</span>
+          <span className="font-medium text-foreground">{fullName}</span>
         </nav>
       </header>
 
@@ -106,10 +106,10 @@ export default function MemberProfile({
           transition={{ duration: 0.55, ease: [0.25, 0.1, 0.25, 1] }}
           className="flex flex-wrap items-center gap-[clamp(24px,4vw,44px)]"
         >
-          <div className="aspect-square w-[clamp(110px,15vw,152px)] flex-none rounded-full border border-[#E7E4DB] bg-white p-1.75 shadow-[0_12px_32px_rgba(26,25,21,0.09)]">
+          <div className="aspect-square w-[clamp(110px,15vw,152px)] flex-none rounded-full border border-border bg-card p-1.75 shadow-[0_12px_32px_rgba(26,25,21,0.09)]">
             <Avatar className="size-full">
               <AvatarImage src={userImageUrl} alt={fullName} />
-              <AvatarFallback className="bg-[#EFEDE4] text-2xl font-bold text-[#8A8677]">
+              <AvatarFallback className="bg-muted text-2xl font-bold text-muted-foreground">
                 {nameInitial}
               </AvatarFallback>
             </Avatar>
@@ -132,14 +132,14 @@ export default function MemberProfile({
                 return (
                   <Badge
                     key={role}
-                    className="gap-1 rounded-full border border-[#E7E4DB] bg-white px-4 py-2 text-sm font-semibold text-[#1A1915] hover:bg-white"
+                    className="gap-1 rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground hover:bg-card"
                   >
                     <span aria-hidden>{config.icon}</span>
                     {config.label}
                   </Badge>
                 );
               })}
-              <span className="px-1 py-2 text-sm text-[#8A8677]">
+              <span className="px-1 py-2 text-sm text-muted-foreground">
                 Member since {joinedDate}
               </span>
             </div>
@@ -150,23 +150,23 @@ export default function MemberProfile({
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1, ease: [0.25, 0.1, 0.25, 1] }}
-            className="flex flex-col rounded-[24px] border border-[#E7E4DB] bg-white p-[clamp(22px,3vw,32px)] shadow-[0_1px_2px_rgba(26,25,21,0.04)]"
+            className="flex flex-col rounded-[24px] border border-border bg-card p-[clamp(22px,3vw,32px)] shadow-[0_1px_2px_rgba(26,25,21,0.04)]"
           >
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <h2 className="text-xs font-semibold uppercase tracking-[0.12em] text-[#6E6A5E]">
+              <h2 className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                 Event acceptance
               </h2>
               <Tabs value={range} onValueChange={(v) => setRange(v as RangeKey)}>
-                <TabsList className="h-auto rounded-full bg-[#EFEDE4] p-0.75">
+                <TabsList className="h-auto rounded-full bg-muted p-0.75">
                   <TabsTrigger
                     value="all"
-                    className="rounded-full px-3.5 py-1.5 text-[13px] font-semibold text-[#6E6A5E] data-[state=active]:bg-white data-[state=active]:text-[#1A1915] data-[state=active]:shadow-[0_1px_3px_rgba(26,25,21,0.14)]"
+                    className="rounded-full px-3.5 py-1.5 text-[13px] font-semibold text-muted-foreground data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-[0_1px_3px_rgba(26,25,21,0.14)]"
                   >
                     All time
                   </TabsTrigger>
                   <TabsTrigger
                     value="year"
-                    className="rounded-full px-3.5 py-1.5 text-[13px] font-semibold text-[#6E6A5E] data-[state=active]:bg-white data-[state=active]:text-[#1A1915] data-[state=active]:shadow-[0_1px_3px_rgba(26,25,21,0.14)]"
+                    className="rounded-full px-3.5 py-1.5 text-[13px] font-semibold text-muted-foreground data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-[0_1px_3px_rgba(26,25,21,0.14)]"
                   >
                     This year
                   </TabsTrigger>
@@ -177,7 +177,7 @@ export default function MemberProfile({
             <div className="mt-6 flex flex-1 items-center justify-center">
               <div className="relative aspect-square w-[min(190px,52vw)]">
                 <svg viewBox="0 0 120 120" className="block size-full">
-                  <circle cx="60" cy="60" r="52" fill="none" stroke="#EFEDE4" strokeWidth="9" />
+                  <circle cx="60" cy="60" r="52" fill="none" strokeWidth="9" className="stroke-muted" />
                   <m.circle
                     cx="60"
                     cy="60"
@@ -196,34 +196,31 @@ export default function MemberProfile({
                 <div className="absolute inset-0 flex flex-col items-center justify-center gap-0.5">
                   <div className="text-[clamp(34px,9vw,44px)] font-bold leading-none tracking-[-0.03em]">
                     <m.span>{pct}</m.span>
-                    <span className="text-[0.5em] font-semibold text-[#6E6A5E]">%</span>
+                    <span className="text-[0.5em] font-semibold text-muted-foreground">%</span>
                   </div>
-                  <div className="text-xs tracking-[0.04em] text-[#6E6A5E]">accepted</div>
+                  <div className="text-xs tracking-[0.04em] text-muted-foreground">accepted</div>
                 </div>
               </div>
             </div>
 
-            <div className="mt-5.5 grid grid-cols-3 gap-3 border-t border-[#F0EEE6] pt-5">
+            <div className="mt-5.5 grid grid-cols-3 gap-3 border-t border-border pt-5">
               {(
                 [
-                  { label: "Invited", value: active.invited, dot: "#1A1915" },
-                  { label: "Accepted", value: active.accepted, dot: "var(--primary)" },
-                  { label: "Declined", value: active.declined, dot: "#D8D3C4" },
+                  { label: "Invited", value: active.invited, dot: "bg-foreground" },
+                  { label: "Accepted", value: active.accepted, dot: "bg-primary" },
+                  { label: "Declined", value: active.declined, dot: "bg-muted-foreground/40" },
                 ] as const
               ).map((s) => (
                 <div key={s.label} className="flex flex-col gap-1">
-                  <span className="flex items-center gap-1.5 text-xs text-[#6E6A5E]">
-                    <span
-                      className="block size-1.75 rounded-full"
-                      style={{ backgroundColor: s.dot }}
-                    />
+                  <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <span className={`block size-1.75 rounded-full ${s.dot}`} />
                     {s.label}
                   </span>
                   <span className="text-[22px] font-bold">{s.value}</span>
                 </div>
               ))}
             </div>
-            <div className="mt-3.5 text-[12.5px] text-[#8A8677]">{caption}</div>
+            <div className="mt-3.5 text-[12.5px] text-muted-foreground">{caption}</div>
           </m.section>
 
           {/* ----------------------- Top 5 songs */}
@@ -231,41 +228,41 @@ export default function MemberProfile({
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.18, ease: [0.25, 0.1, 0.25, 1] }}
-            className="flex flex-col rounded-[24px] border border-[#E7E4DB] bg-white p-[clamp(22px,3vw,32px)] shadow-[0_1px_2px_rgba(26,25,21,0.04)]"
+            className="flex flex-col rounded-[24px] border border-border bg-card p-[clamp(22px,3vw,32px)] shadow-[0_1px_2px_rgba(26,25,21,0.04)]"
           >
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <h2 className="text-xs font-semibold uppercase tracking-[0.12em] text-[#6E6A5E]">
+              <h2 className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                 Top 5 songs
               </h2>
-              <span className="text-[13px] text-[#8A8677]">All time</span>
+              <span className="text-[13px] text-muted-foreground">All time</span>
             </div>
 
             <div className="mt-2.5 flex flex-col">
               {songs.length === 0 ? (
-                <p className="py-8 text-center text-[13.5px] text-[#8A8677]">
+                <p className="py-8 text-center text-[13.5px] text-muted-foreground">
                   No songs performed yet.
                 </p>
               ) : (
                 songs.map((song, i) => (
                   <div key={`${song.title}-${song.artist}`} className="py-3.25">
                     <div className="grid grid-cols-[30px_1fr_auto] items-center gap-3.5">
-                      <span className="text-[15px] font-bold text-[#C9C5B8]">
+                      <span className="text-[15px] font-bold text-muted-foreground/50">
                         {String(i + 1).padStart(2, "0")}
                       </span>
                       <div className="min-w-0">
                         <div className="truncate text-[15.5px] font-semibold tracking-[-0.005em]">
                           {song.title}
                         </div>
-                        <div className="mt-0.5 text-[13.5px] text-[#6E6A5E]">{song.artist}</div>
+                        <div className="mt-0.5 text-[13.5px] text-muted-foreground">{song.artist}</div>
                       </div>
                       <div className="text-[19px] font-bold tracking-[-0.01em]">
                         {song.count}
-                        <span className="text-xs font-medium text-[#8A8677]">×</span>
+                        <span className="text-xs font-medium text-muted-foreground">×</span>
                       </div>
                     </div>
 
                     {/* Play-count bar */}
-                    <div className="ml-11 mt-2.5 h-1.25 overflow-hidden rounded-full bg-[#F0EEE6]">
+                    <div className="ml-11 mt-2.5 h-1.25 overflow-hidden rounded-full bg-muted">
                       <m.div
                         className="h-full rounded-full bg-primary"
                         initial={{ width: 0 }}

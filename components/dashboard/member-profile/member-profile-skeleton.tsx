@@ -2,11 +2,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export function MemberProfileSkeleton() {
   return (
-    <div className="min-h-screen bg-white text-[#1A1915]">
+    <div className="min-h-screen bg-background text-foreground">
       {/* Top bar */}
-      <header className="sticky top-0 z-20 flex flex-wrap items-center justify-between gap-3.5 border-b border-[#E7E4DB] bg-[#FFFFFFD9] px-[clamp(20px,5vw,56px)] py-3.5 backdrop-blur-[10px]">
+      <header className="sticky top-0 z-20 flex flex-wrap items-center justify-between gap-3.5 border-b border-border bg-background/85 px-[clamp(20px,5vw,56px)] py-3.5 backdrop-blur-[10px]">
         <div className="flex items-center gap-2.5">
-          <span className="block size-2.5 rounded-full bg-[#E7E4DB]" />
+          <span className="block size-2.5 rounded-full bg-muted" />
           <Skeleton className="h-4 w-28" />
         </div>
         <Skeleton className="h-4 w-40" />
@@ -29,7 +29,7 @@ export function MemberProfileSkeleton() {
         {/* Cards */}
         <div className="mt-[clamp(36px,5vw,56px)] grid grid-cols-[repeat(auto-fit,minmax(min(100%,350px),1fr))] items-stretch gap-[clamp(16px,2.5vw,24px)]">
           {/* Event acceptance */}
-          <div className="flex flex-col rounded-[24px] border border-[#E7E4DB] bg-white p-[clamp(22px,3vw,32px)]">
+          <div className="flex flex-col rounded-[24px] border border-border bg-card p-[clamp(22px,3vw,32px)]">
             <div className="flex items-center justify-between gap-3">
               <Skeleton className="h-3.5 w-32" />
               <Skeleton className="h-8 w-40 rounded-full" />
@@ -37,7 +37,7 @@ export function MemberProfileSkeleton() {
             <div className="mt-6 flex flex-1 items-center justify-center">
               <Skeleton className="aspect-square w-[min(190px,52vw)] rounded-full" />
             </div>
-            <div className="mt-5.5 grid grid-cols-3 gap-3 border-t border-[#F0EEE6] pt-5">
+            <div className="mt-5.5 grid grid-cols-3 gap-3 border-t border-border pt-5">
               {Array.from({ length: 3 }).map((_, i) => (
                 <div key={i} className="flex flex-col gap-2">
                   <Skeleton className="h-3 w-16" />
@@ -49,7 +49,7 @@ export function MemberProfileSkeleton() {
           </div>
 
           {/* Top 5 songs */}
-          <div className="flex flex-col rounded-[24px] border border-[#E7E4DB] bg-white p-[clamp(22px,3vw,32px)]">
+          <div className="flex flex-col rounded-[24px] border border-border bg-card p-[clamp(22px,3vw,32px)]">
             <div className="flex items-center justify-between gap-3">
               <Skeleton className="h-3.5 w-28" />
               <Skeleton className="h-3.5 w-16" />
