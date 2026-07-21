@@ -17,7 +17,7 @@ export function HeroSection() {
           {/* Badge */}
           <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-5 py-2 mb-8">
             <Sparkles className="h-4 w-4 text-primary" />
-            <span className="text-sm font-medium text-foreground">Now with smart scheduling</span>
+            <span className="text-sm font-medium text-foreground">Now with AI setlist generation</span>
           </div>
 
           {/* Headline */}
@@ -52,22 +52,9 @@ export function HeroSection() {
             </Link>
           </div>
 
-          {/* Social proof */}
-          <div className="mt-16 flex flex-col items-center gap-4">
-            <div className="flex -space-x-3">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <div
-                  key={i}
-                  className="h-10 w-10 rounded-full border-2 border-background bg-gradient-to-br from-secondary to-muted flex items-center justify-center"
-                >
-                  <span className="text-xs font-medium text-muted-foreground">{String.fromCharCode(64 + i)}</span>
-                </div>
-              ))}
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Trusted by <span className="font-semibold text-foreground">2,500+</span> teams worldwide
-            </p>
-          </div>
+          <p className="mt-8 text-sm text-muted-foreground">
+            Free to use. No credit card required.
+          </p>
         </div>
 
         {/* Feature preview cards */}
@@ -77,21 +64,21 @@ export function HeroSection() {
               <Users className="h-6 w-6" />
             </div>
             <h3 className="text-lg font-semibold mb-1">Team Management</h3>
-            <p className="text-sm text-muted-foreground">Organize volunteers across multiple organizations</p>
+            <p className="text-sm text-muted-foreground">Invite members and assign the roles they play</p>
           </div>
           <div className="group relative rounded-2xl border border-border bg-card/50 backdrop-blur-sm p-6 hover:border-primary/50 hover:bg-card transition-all duration-300">
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary mb-4 group-hover:scale-110 transition-transform">
               <Calendar className="h-6 w-6" />
             </div>
             <h3 className="text-lg font-semibold mb-1">Event Scheduling</h3>
-            <p className="text-sm text-muted-foreground">Plan services and assign roles effortlessly</p>
+            <p className="text-sm text-muted-foreground">Templates, blockout dates, and automatic refills</p>
           </div>
           <div className="group relative rounded-2xl border border-border bg-card/50 backdrop-blur-sm p-6 hover:border-primary/50 hover:bg-card transition-all duration-300">
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary mb-4 group-hover:scale-110 transition-transform">
               <Music className="h-6 w-6" />
             </div>
-            <h3 className="text-lg font-semibold mb-1">Role Assignment</h3>
-            <p className="text-sm text-muted-foreground">Match guitarists, vocalists, and more to events</p>
+            <h3 className="text-lg font-semibold mb-1">Songs & Setlists</h3>
+            <p className="text-sm text-muted-foreground">Build setlists from your catalog, or let AI draft them</p>
           </div>
         </div>
       </div>

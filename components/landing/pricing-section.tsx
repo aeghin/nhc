@@ -4,52 +4,51 @@ import Link from "next/link"
 
 const plans = [
   {
-    name: "Starter",
+    name: "Free",
     price: "$0",
     period: "forever",
-    description: "Perfect for small teams getting started",
+    description: "The whole platform, for every team",
     features: [
-      "1 organization",
-      "Up to 15 volunteers",
-      "Basic event scheduling",
-      "Email notifications",
-      "Mobile access",
+      "Unlimited organizations, members, and events",
+      "Event templates & service types",
+      "Blockout dates & smart scheduling",
+      "Song library with charts and audio",
+      "Setlists & per-song assignments",
+      "Event chat and email notifications",
     ],
     cta: "Get started free",
     popular: false,
   },
   {
-    name: "Pro",
-    price: "$29",
+    name: "AI Setlist Premium",
+    price: "$29.99",
     period: "/month",
-    description: "For growing churches and organizations",
+    description: "Let AI build the setlist from your catalog",
     features: [
-      "Unlimited organizations",
-      "Unlimited volunteers",
-      "Advanced scheduling & recurring events",
-      "Role management & permissions",
-      "SMS & push notifications",
-      "Analytics dashboard",
-      "Priority support",
+      "Everything in Free",
+      "AI setlist generation",
+      "Matches themes, keys, and tempo arc",
+      "Works strictly from your song catalog",
+      "Apply proposals straight into the editor",
+      "Billed per organization",
     ],
-    cta: "Start 14-day free trial",
+    cta: "Get started free",
     popular: true,
   },
   {
-    name: "Enterprise",
-    price: "Custom",
-    period: "",
-    description: "For large organizations with custom needs",
+    name: "AI Setlist Pro",
+    price: "$39.99",
+    period: "/month",
+    description: "A stronger model that can research beyond your catalog",
     features: [
-      "Everything in Pro",
-      "Custom integrations",
-      "Dedicated account manager",
-      "On-premise deployment option",
-      "SLA guarantee",
-      "Training & onboarding",
-      "API access",
+      "Everything in Premium",
+      "Upgraded, more capable AI model",
+      "Web search for songs and artists",
+      "Suggests songs you don't own yet",
+      "Deeper music-theory reasoning",
+      "Billed per organization",
     ],
-    cta: "Contact sales",
+    cta: "Get started free",
     popular: false,
   },
 ]
@@ -61,7 +60,9 @@ export function PricingSection() {
         <div className="mx-auto max-w-2xl text-center mb-20">
           <p className="text-sm font-semibold text-primary mb-4 tracking-wide uppercase">Pricing</p>
           <h2 className="text-4xl font-bold tracking-tight sm:text-5xl text-balance">Simple, transparent pricing</h2>
-          <p className="mt-6 text-lg text-muted-foreground">Start free and scale as your team grows. No hidden fees.</p>
+          <p className="mt-6 text-lg text-muted-foreground">
+            Every scheduling feature is free. AI setlists are the only paid add-on.
+          </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
@@ -110,6 +111,11 @@ export function PricingSection() {
             </div>
           ))}
         </div>
+
+        <p className="mt-10 text-center text-sm text-muted-foreground">
+          Sign up free, then upgrade from your organization&apos;s dashboard. AI plans are per organization and can be
+          started by an owner.
+        </p>
       </div>
     </section>
   )

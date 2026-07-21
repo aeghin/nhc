@@ -19,8 +19,7 @@ export function CTASection() {
                 Ready to transform how your team coordinates?
               </h2>
               <p className="mt-6 text-lg text-muted-foreground max-w-2xl mx-auto">
-                Join thousands of churches and organizations already using Aeghin to streamline their volunteer management.
-                Get started in minutes.
+                Set up your organization, invite your team, and schedule your first service in minutes.
               </p>
               <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Link href="/sign-up">
@@ -36,7 +35,7 @@ export function CTASection() {
                 </Link>
               </div>
               <p className="mt-6 text-sm text-muted-foreground">
-                No credit card required. Free forever for small teams.
+                No credit card required. Every scheduling feature is free.
               </p>
             </div>
           </div>

@@ -6,25 +6,25 @@ const steps = [
     title: "Create your organization",
     description:
       "Set up your church or community organization in minutes. Define your team structure and invite members.",
-    highlights: ["Quick 2-minute setup", "Invite unlimited members", "Custom role definitions"],
+    highlights: ["Quick setup", "Invite members by email", "Color-coded service types"],
   },
   {
     step: "02",
     title: "Schedule events & assign roles",
-    description: "Create services, rehearsals, or special events. Specify which roles are needed for each.",
-    highlights: ["Recurring event support", "Role requirements", "Conflict detection"],
+    description: "Create services, rehearsals, or special events, and assign the volunteers each one needs.",
+    highlights: ["Reusable event templates", "Multiple time blocks", "Blockout dates respected"],
   },
   {
     step: "03",
     title: "Volunteers accept & prepare",
-    description: "Team members receive invitations, see their assigned roles, and confirm their availability.",
-    highlights: ["Mobile-friendly interface", "One-tap acceptance", "Automatic reminders"],
+    description: "Team members get an email, see the role they're assigned, and accept or decline.",
+    highlights: ["Mobile-friendly interface", "Accept or decline", "Setlist ready ahead of time"],
   },
   {
     step: "04",
     title: "Stay in sync, always",
-    description: "Real-time updates and notifications ensure your entire team is coordinated and ready.",
-    highlights: ["Live schedule updates", "Team notifications", "Performance insights"],
+    description: "Each event has its own chat thread, and declined roles get refilled without you chasing anyone.",
+    highlights: ["Realtime event chat", "Automatic replacement", "Org-wide announcements"],
   },
 ]
 

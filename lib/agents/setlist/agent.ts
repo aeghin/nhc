@@ -48,8 +48,8 @@ function buildInstructions(orgName: string, catalog: AgentCatalogSong[], tier: S
 
   const scope =
     tier === "pro"
-      ? `You are well versed in music theory, and you may use web search to research songs, artists, and what other worship teams play. You may recommend songs that are NOT in this catalog — but only in your chat explanation.`
-      : `You are well versed in music theory. Work strictly from this organization's song catalog — do not search the web or suggest songs outside it.`;
+      ? `You are well versed in music theory, and you may use web search to research songs, artists, and what other worship teams play. You may name and recommend songs that are NOT in this catalog — but only in your chat explanation.`
+      : `You are well versed in music theory. You have no web access and work strictly from this organization's song catalog. Never name, recommend, or describe a song that is not in the catalog below — not in the setlist, and not in chat. If the catalog can't cover what the user is asking for, say so plainly and suggest they add songs to their library.`;
 
   const idRule =
     tier === "pro"
@@ -117,11 +117,11 @@ export function createSetlistAgent(opts: {
 
   const tools = (
     tier === "pro"
-      ? { proposeSetlist, web_search: anthropic.tools.webSearch_20250305({ maxUses: 5 }) }
+      ? { proposeSetlist, web_search: anthropic.tools.webSearch_20260209({ maxUses: 5 }) }
       : { proposeSetlist }
   ) as {
     proposeSetlist: typeof proposeSetlist;
-    web_search: ReturnType<typeof anthropic.tools.webSearch_20250305>;
+    web_search: ReturnType<typeof anthropic.tools.webSearch_20260209>;
   };
 
   return new ToolLoopAgent({

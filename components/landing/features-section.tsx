@@ -1,46 +1,53 @@
-import { Calendar, Users, Music, Bell, Shield, Zap, BarChart3, Clock } from "lucide-react"
+import { Calendar, Users, Music, Mail, CalendarOff, Sparkles, MessageSquare, Repeat } from "lucide-react"
 
 const features = [
   {
-    icon: Users,
-    title: "Multi-Organization Support",
-    description: "Manage multiple churches or teams from a single dashboard with distinct roles and permissions.",
-  },
-  {
-    icon: Calendar,
-    title: "Smart Event Scheduling",
+    icon: Sparkles,
+    title: "AI Setlist Generation",
     description:
-      "Create recurring events, set role requirements, and let volunteers self-assign based on availability.",
+      "Describe the service and get an ordered setlist back — built from your own catalog, with key compatibility and a sensible tempo arc.",
   },
   {
     icon: Music,
-    title: "Instrument & Role Tracking",
-    description: "Define roles like guitarist, pianist, drummer, vocalist and match volunteers to their strengths.",
+    title: "Song Library",
+    description:
+      "Keep every song with its key, BPM, time signature, and themes. Attach charts and audio, and link straight to Spotify or YouTube.",
   },
   {
-    icon: Bell,
-    title: "Real-Time Notifications",
-    description: "Automated reminders, schedule changes, and instant updates keep everyone on the same page.",
+    icon: Repeat,
+    title: "Event Templates",
+    description:
+      "Save your weekly service once — roles, location, and multi-day time blocks — then spin up the next one without retyping it.",
   },
   {
-    icon: Shield,
-    title: "Role-Based Permissions",
-    description: "Admins get full control. Leaders manage their teams. Volunteers see what matters to them.",
+    icon: CalendarOff,
+    title: "Blockout Dates",
+    description:
+      "Members mark the dates they're away. Those dates are blocked everywhere scheduling happens, so nobody gets assigned while on vacation.",
   },
   {
-    icon: Clock,
-    title: "Availability Management",
-    description: "Volunteers set their availability, making scheduling conflicts a thing of the past.",
+    icon: Calendar,
+    title: "Smart Scheduling",
+    description:
+      "When someone declines, the best eligible member for that role is found automatically — skipping anyone with a conflict or blockout.",
   },
   {
-    icon: BarChart3,
-    title: "Insights & Reports",
-    description: "Track volunteer engagement, event attendance, and team health with beautiful dashboards.",
+    icon: MessageSquare,
+    title: "Event Chat",
+    description:
+      "Every event gets its own realtime thread for the volunteers serving on it. Details stay with the event instead of scattered in group texts.",
   },
   {
-    icon: Zap,
-    title: "Quick Actions",
-    description: "Accept events, swap shifts, and update availability in just a few taps.",
+    icon: Users,
+    title: "Volunteer Roles",
+    description:
+      "Guitarist, pianist, aux keys, drummer, lead vocalist, BGVs, bassist, sound tech, usher, and greeter — assign people to what they actually play.",
+  },
+  {
+    icon: Mail,
+    title: "Email Invites & Updates",
+    description:
+      "Invite members by email, notify them when they're scheduled, and reach your whole organization in one send.",
   },
 ]
 
