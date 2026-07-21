@@ -3,10 +3,16 @@
 import { auth } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
 import { organizationSchema, OrganizationInput, organizationLogoSchema, OrganizationLogoInput } from "@/lib/validations/organization";
+import { OrganizationEmailInput, organizationEmailSchema } from "../validations/organization-email";
 import { revalidatePath, updateTag } from "next/cache";
 import { OrgRole } from "@/generated/prisma/enums";
-import { redirect } from "next/navigation";
 import { UTApi } from "uploadthing/server";
+import { currentUser } from "../services/user";
+import { Resend } from "resend";
+import OrganizationMessageEmail from "@/components/email/organization-message-template";
+
+
+const resend = new Resend(process.env.RESEND_EMAIL_API_KEY);
 
 
 type ActionResponse =
@@ -354,3 +360,102 @@ export const deleteOrganization = async (organizationId: string): Promise<Action
         return { success: false, error: "Something went wrong." };
     }
 };
+
+
+type EmailOrganizationResult =
+  | { success: true; sentCount: number }
+  | { success: false; error: string };
+
+
+export const emailEntireOrganization = async (
+    organizationId: string,
+    data: OrganizationEmailInput,
+): Promise<EmailOrganizationResult> => {
+
+    try {
+
+        const user = await currentUser();
+
+        if (!user) return { success: false, error: "Unable to find user" };
+
+        const parsed = organizationEmailSchema.safeParse(data);
+
+        if (!parsed.success) return { success: false, error: "Invalid data provided." };
+
+        const { subject, body } = parsed.data;
+
+        const userMembership = await prisma.membership.findUnique({
+            where: {
+                userId_organizationId: {
+                    userId: user.id,
+                    organizationId
+                }
+            },
+            select: {
+                role: true,
+                organization: {
+                    select: {
+                        name: true
+                    }
+                }
+            }
+        });
+
+        if (!userMembership) return { success: false, error: "Unable to find membership." };
+
+        if (userMembership.role === OrgRole.MEMBER) return { success: false, error: "Insufficient permissions" };
+        
+        const membersInfo = await prisma.membership.findMany({
+            where: {
+                organizationId,
+            },
+            select: {
+                user: {
+                    select: {
+                        firstName: true,
+                        email: true,
+                    }
+                }
+            }
+        });
+
+        if (membersInfo.length === 0) {
+            return { success: false, error: "No members to email" };
+        }
+
+        const organizationName = userMembership.organization.name;
+        const senderName = `${user.firstName} ${user.lastName}`;
+        const viewLink = `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/organizations/${organizationId}`;
+
+        const emails = membersInfo.map(({ user: recipient }) => ({
+            from: `${organizationName} <support@aeghin.com>`,
+            to: recipient.email,
+            replyTo: user.email,
+            subject,
+            react: OrganizationMessageEmail({
+                recipientName: recipient.firstName,
+                senderName,
+                organizationName,
+                body,
+                viewLink,
+            }),
+        }));
+
+        // Sent in the request (not after()) so the sender gets a real
+        // delivered/failed answer. batch.send caps at 100 emails per call.
+        for (let i = 0; i < emails.length; i += 100) {
+            const { error } = await resend.batch.send(emails.slice(i, i + 100));
+
+            if (error) {
+                return { success: false, error: "Unable to send message, please try again" };
+            }
+        }
+
+        return { success: true, sentCount: membersInfo.length };
+
+    } catch (error) {
+        console.error('emailEntireOrganization error:', error);
+        return { success: false, error: "Something went wrong." };
+    }
+
+}

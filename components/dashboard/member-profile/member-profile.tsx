@@ -47,10 +47,12 @@ export default function MemberProfile({
   membership,
   stats,
   songs,
+  orgId,
 }: {
   membership: MemberProfileData;
   stats: Record<RangeKey, RangeStats>;
   songs: MemberSong[];
+  orgId: string;
 }) {
   const [range, setRange] = useState<RangeKey>("all");
 
@@ -91,7 +93,7 @@ export default function MemberProfile({
           </span>
         </div>
         <nav className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Link href="/members" className="transition-colors hover:text-foreground">
+          <Link href={`/dashboard/organizations/${orgId}?tab=members`} className="transition-colors hover:text-foreground">
             Members
           </Link>
           <span className="text-muted-foreground/50">/</span>

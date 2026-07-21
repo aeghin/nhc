@@ -18,6 +18,7 @@ import { userEventsTotalCount } from "@/lib/services/events";
 
 interface OrganizationTabsSectionProps {
   organizationId: string;
+  organizationName: string;
   canManage: boolean;
   isOwner: boolean;
   userId: string;
@@ -26,6 +27,7 @@ interface OrganizationTabsSectionProps {
 
 export const OrganizationTabsSection = async ({
   organizationId,
+  organizationName,
   canManage,
   isOwner,
   userId,
@@ -71,6 +73,7 @@ export const OrganizationTabsSection = async ({
           <Suspense fallback={<MembersTabSkeleton />}>
             <MembersTabContent
               organizationId={organizationId}
+              organizationName={organizationName}
               userId={userId}
             />
           </Suspense>

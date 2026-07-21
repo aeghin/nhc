@@ -37,7 +37,7 @@ const MemberProfileContent = async ({
   ]);
 
   return (
-    <MemberProfile membership={membership} stats={{ all, year }} songs={songs} />
+    <MemberProfile membership={membership} stats={{ all, year }} songs={songs} orgId={orgId} />
   );
 };
 

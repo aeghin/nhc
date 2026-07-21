@@ -85,6 +85,7 @@ export default async function OrganizationPage({
           <Suspense fallback={<TabsSkeleton />}>
             <OrganizationTabsSection
               organizationId={organization.id}
+              organizationName={organization.name}
               canManage={canManage}
               isOwner={isOwner}
               userId={userId}

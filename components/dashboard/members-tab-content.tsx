@@ -2,15 +2,19 @@ import { Users, UserCog } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MembersList } from "@/components/dashboard/members-list";
+import { EmailOrganizationDialog } from "@/components/dashboard/email-organization-dialog";
 import { organizationMembersList } from "@/lib/services/organization";
+import { OrgRole } from "@/generated/prisma/enums";
 import { notFound } from "next/navigation";
 
 interface MembersTabContentProps {
   organizationId: string;
+  organizationName: string;
   userId: string;
 }
 export const MembersTabContent = async ({
   organizationId,
+  organizationName,
   userId
 }: MembersTabContentProps) => {
 
@@ -25,7 +29,9 @@ export const MembersTabContent = async ({
 
   if (!viewerRole) notFound();
 
-  
+  const canManage = viewerRole === OrgRole.OWNER || viewerRole === OrgRole.ADMIN;
+
+
   return (
     <Card className="overflow-hidden rounded-xl border-border/40 bg-linear-to-br from-card to-card/80 shadow-sm">
       <CardHeader className="flex flex-row items-center justify-between border-b border-border/40 bg-secondary/20 px-6 py-4">
@@ -42,6 +48,14 @@ export const MembersTabContent = async ({
             </p>
           </div>
         </div>
+
+        {canManage && members.length > 1 && (
+          <EmailOrganizationDialog
+            organizationId={organizationId}
+            organizationName={organizationName}
+            recipientCount={members.length}
+          />
+        )}
       </CardHeader>
       <CardContent className="p-0">
         {sorted.length === 0 ? (
