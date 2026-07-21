@@ -65,6 +65,8 @@ import {
   X,
   TriangleAlert,
   LayoutTemplate,
+  Search,
+  ChevronRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { VolunteerRole } from "@/generated/prisma/enums";
@@ -307,6 +309,10 @@ export function CreateEventPageContent({
     conflict: MemberConflict;
   } | null>(null);
 
+  // Role picker modal — which role's member list is open, and its search text
+  const [pickerRole, setPickerRole] = useState<VolunteerRole | null>(null);
+  const [pickerSearch, setPickerSearch] = useState("");
+
   // React Hook Form
   const form = useForm<CreateEventFormData>({
     resolver: zodResolver(createEventSchema),
@@ -477,6 +483,8 @@ export function CreateEventPageContent({
     setError(null);
     setIsSuccess(false);
     setRoleAssignments({} as Record<VolunteerRole, string[]>);
+    setPickerRole(null);
+    setPickerSearch("");
     setMemberConflicts({});
     setMemberBlockouts({});
     router.replace(`/dashboard/organizations/${organizationId}`);
@@ -643,6 +651,20 @@ export function CreateEventPageContent({
     watchedRolesNeeded.length > 0;
 
   const assignedCount = Object.values(roleAssignments).flat().length;
+
+  // Members shown in the open role-picker modal, filtered by its search text
+  const pickerMembers = pickerRole ? membersByRole[pickerRole] || [] : [];
+  const pickerAssigned = pickerRole ? roleAssignments[pickerRole] || [] : [];
+  const pickerQuery = pickerSearch.trim().toLowerCase();
+  const pickerFiltered = pickerQuery
+    ? pickerMembers.filter(
+        (member) =>
+          `${member.user.firstName} ${member.user.lastName}`
+            .toLowerCase()
+            .includes(pickerQuery) ||
+          member.user.email.toLowerCase().includes(pickerQuery),
+      )
+    : pickerMembers;
 
   // Success state
   if (isSuccess) {
@@ -1362,112 +1384,202 @@ export function CreateEventPageContent({
                       </Select>
                   </div>
 
-                  {/* Role Assignments */}
-                  <div className="mt-8 flex flex-col gap-8">
+                  {/* Role Assignments — compact rows; picking happens in a modal */}
+                  <div className="mt-8 overflow-hidden rounded-2xl border border-border/40 bg-card/50">
                     {watchedRolesNeeded.map((role) => {
                       const config = volunteerRoleConfig[role];
                       const availableMembers = membersByRole[role] || [];
                       const assignedToRole = roleAssignments[role] || [];
+                      const assignedMembers = availableMembers.filter((m) =>
+                        assignedToRole.includes(m.userId),
+                      );
 
                       return (
-                        <div key={role} className="flex flex-col gap-4">
-                            <div className="flex items-center gap-2">
-                              <span className="text-lg">{config.icon}</span>
-                              <h3 className="text-base font-semibold tracking-tight">
-                                {config.label}
-                              </h3>
-                              {assignedToRole.length > 0 && (
-                                <Badge variant="secondary">
-                                  {assignedToRole.length} assigned
-                                </Badge>
+                        <button
+                          key={role}
+                          type="button"
+                          disabled={availableMembers.length === 0}
+                          onClick={() => {
+                            setPickerSearch("");
+                            setPickerRole(role);
+                          }}
+                          className="flex w-full items-center gap-3 border-b border-border/40 px-4 py-4 text-left transition-colors last:border-b-0 hover:bg-muted/50 disabled:cursor-not-allowed disabled:opacity-60 sm:px-5"
+                        >
+                          <span className="text-lg">{config.icon}</span>
+                          <div className="min-w-0 flex-1">
+                            <p className="font-medium">{config.label}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {availableMembers.length === 0
+                                ? "No members available for this role"
+                                : assignedToRole.length > 0
+                                  ? `${assignedToRole.length} assigned · ${availableMembers.length} available`
+                                  : `${availableMembers.length} available`}
+                            </p>
+                          </div>
+                          {assignedMembers.length > 0 && (
+                            <div className="flex -space-x-2">
+                              {assignedMembers.slice(0, 4).map((member) => (
+                                <Avatar
+                                  key={member.id}
+                                  className="h-7 w-7 border-2 border-background"
+                                >
+                                  <AvatarImage
+                                    src={member.user.userImageUrl ?? undefined}
+                                    alt={`${member.user.firstName} ${member.user.lastName}`}
+                                  />
+                                  <AvatarFallback className="bg-primary/10 text-xs font-medium text-primary">
+                                    {member.user.firstName.charAt(0)}
+                                  </AvatarFallback>
+                                </Avatar>
+                              ))}
+                              {assignedMembers.length > 4 && (
+                                <div className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-background bg-muted text-[10px] font-medium">
+                                  +{assignedMembers.length - 4}
+                                </div>
                               )}
                             </div>
-                            {availableMembers.length > 0 ? (
-                                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                                  {availableMembers.map((member) => {
-                                    const isAssigned = assignedToRole.includes(
-                                      member.userId,
-                                    );
-                                    const conflict =
-                                      memberConflicts[member.userId];
-                                    const blockout =
-                                      memberBlockouts[member.userId];
-
-                                    return (
-                                      <label
-                                        key={member.id}
-                                        className={cn(
-                                          "flex items-center gap-3 rounded-xl border p-3 transition-all",
-                                          blockout
-                                            ? "cursor-not-allowed border-border bg-muted/40 opacity-70"
-                                            : isAssigned
-                                              ? "cursor-pointer border-primary bg-primary/5"
-                                              : conflict
-                                                ? "cursor-pointer border-amber-200 bg-amber-50/50 dark:border-amber-500/20 dark:bg-amber-500/5"
-                                                : "cursor-pointer border-border hover:bg-muted/50",
-                                        )}
-                                      >
-                                        <Checkbox
-                                          checked={isAssigned}
-                                          disabled={!!blockout}
-                                          onCheckedChange={(checked) =>
-                                            handleAssignMember(
-                                              role,
-                                              member.userId,
-                                              checked as boolean,
-                                            )
-                                          }
-                                        />
-                                        <div className="flex items-center gap-3 flex-1 min-w-0">
-                                          <Avatar className="h-8 w-8 shrink-0">
-                                            <AvatarImage
-                                              src={member.user.userImageUrl ?? undefined}
-                                              alt={`${member.user.firstName} ${member.user.lastName}`}
-                                            />
-                                            <AvatarFallback className="bg-primary/10 text-sm font-medium text-primary">
-                                              {member.user.firstName.charAt(0)}
-                                            </AvatarFallback>
-                                          </Avatar>
-                                          <div className="min-w-0">
-                                            <p className="font-medium truncate">
-                                              {member.user.firstName}{" "}
-                                              {formatName(member.user.lastName)}
-                                            </p>
-                                            <p className="text-xs text-muted-foreground truncate">
-                                              {member.user.email}
-                                            </p>
-                                            {blockout ? (
-                                              <p className="text-xs text-red-600 dark:text-red-400 flex items-center gap-1 mt-0.5">
-                                                <CalendarOff className="h-3 w-3 shrink-0" />
-                                                Blocked out ·{" "}
-                                                {formatBlockoutDate(blockout.startDate)}
-                                                {blockout.endDate !== blockout.startDate && (
-                                                  <> – {formatBlockoutDate(blockout.endDate)}</>
-                                                )}
-                                              </p>
-                                            ) : conflict ? (
-                                              <p className="text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1 mt-0.5">
-                                                <TriangleAlert className="h-3 w-3 shrink-0" />
-                                                {conflict.eventName} ·{" "}
-                                                {formatConflictTime(conflict.startTime)} -{" "}
-                                                {formatConflictTime(conflict.endTime)}
-                                              </p>
-                                            ) : null}
-                                          </div>
-                                        </div>
-                                      </label>
-                                    );
-                                  })}
-                                </div>
-                            ) : (
-                              <p className="rounded-xl border border-dashed border-border/60 px-4 py-6 text-center text-sm text-muted-foreground">
-                                No members available for this role
-                              </p>
-                            )}
-                        </div>
+                          )}
+                          {availableMembers.length > 0 && (
+                            <span className="flex shrink-0 items-center gap-1 text-sm font-medium text-primary">
+                              <span className="hidden sm:inline">
+                                {assignedToRole.length > 0 ? "Manage" : "Assign"}
+                              </span>
+                              <ChevronRight className="h-4 w-4" />
+                            </span>
+                          )}
+                        </button>
                       );
                     })}
                   </div>
+
+                  {/* Role picker modal — same member cards, same blockout/conflict guards */}
+                  <Dialog
+                    open={pickerRole !== null}
+                    onOpenChange={(open) => {
+                      if (!open) setPickerRole(null);
+                    }}
+                  >
+                    <DialogContent className="sm:max-w-2xl">
+                      {pickerRole && (
+                        <>
+                          <DialogHeader>
+                            <DialogTitle className="flex items-center gap-2">
+                              <span className="text-lg">
+                                {volunteerRoleConfig[pickerRole].icon}
+                              </span>
+                              Assign {volunteerRoleConfig[pickerRole].label}
+                            </DialogTitle>
+                            <DialogDescription>
+                              {pickerAssigned.length} assigned ·{" "}
+                              {pickerMembers.length} available
+                            </DialogDescription>
+                          </DialogHeader>
+
+                          {pickerMembers.length > 5 && (
+                            <div className="relative">
+                              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                              <Input
+                                value={pickerSearch}
+                                onChange={(e) => setPickerSearch(e.target.value)}
+                                placeholder="Search by name or email..."
+                                className="pl-9"
+                              />
+                            </div>
+                          )}
+
+                          {pickerFiltered.length > 0 ? (
+                            <div className="grid max-h-[55vh] gap-3 overflow-y-auto pr-1 sm:grid-cols-2">
+                              {pickerFiltered.map((member) => {
+                                const isAssigned = pickerAssigned.includes(
+                                  member.userId,
+                                );
+                                const conflict = memberConflicts[member.userId];
+                                const blockout = memberBlockouts[member.userId];
+
+                                return (
+                                  <label
+                                    key={member.id}
+                                    className={cn(
+                                      "flex items-center gap-3 rounded-xl border p-3 transition-all",
+                                      blockout
+                                        ? "cursor-not-allowed border-border bg-muted/40 opacity-70"
+                                        : isAssigned
+                                          ? "cursor-pointer border-primary bg-primary/5"
+                                          : conflict
+                                            ? "cursor-pointer border-amber-200 bg-amber-50/50 dark:border-amber-500/20 dark:bg-amber-500/5"
+                                            : "cursor-pointer border-border hover:bg-muted/50",
+                                    )}
+                                  >
+                                    <Checkbox
+                                      checked={isAssigned}
+                                      disabled={!!blockout}
+                                      onCheckedChange={(checked) =>
+                                        handleAssignMember(
+                                          pickerRole,
+                                          member.userId,
+                                          checked as boolean,
+                                        )
+                                      }
+                                    />
+                                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                                      <Avatar className="h-8 w-8 shrink-0">
+                                        <AvatarImage
+                                          src={member.user.userImageUrl ?? undefined}
+                                          alt={`${member.user.firstName} ${member.user.lastName}`}
+                                        />
+                                        <AvatarFallback className="bg-primary/10 text-sm font-medium text-primary">
+                                          {member.user.firstName.charAt(0)}
+                                        </AvatarFallback>
+                                      </Avatar>
+                                      <div className="min-w-0">
+                                        <p className="font-medium truncate">
+                                          {member.user.firstName}{" "}
+                                          {formatName(member.user.lastName)}
+                                        </p>
+                                        <p className="text-xs text-muted-foreground truncate">
+                                          {member.user.email}
+                                        </p>
+                                        {blockout ? (
+                                          <p className="text-xs text-red-600 dark:text-red-400 flex items-center gap-1 mt-0.5">
+                                            <CalendarOff className="h-3 w-3 shrink-0" />
+                                            Blocked out ·{" "}
+                                            {formatBlockoutDate(blockout.startDate)}
+                                            {blockout.endDate !== blockout.startDate && (
+                                              <> – {formatBlockoutDate(blockout.endDate)}</>
+                                            )}
+                                          </p>
+                                        ) : conflict ? (
+                                          <p className="text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1 mt-0.5">
+                                            <TriangleAlert className="h-3 w-3 shrink-0" />
+                                            {conflict.eventName} ·{" "}
+                                            {formatConflictTime(conflict.startTime)} -{" "}
+                                            {formatConflictTime(conflict.endTime)}
+                                          </p>
+                                        ) : null}
+                                      </div>
+                                    </div>
+                                  </label>
+                                );
+                              })}
+                            </div>
+                          ) : (
+                            <p className="rounded-xl border border-dashed border-border/60 px-4 py-6 text-center text-sm text-muted-foreground">
+                              No members match your search
+                            </p>
+                          )}
+
+                          <DialogFooter>
+                            <Button
+                              type="button"
+                              onClick={() => setPickerRole(null)}
+                            >
+                              Done
+                            </Button>
+                          </DialogFooter>
+                        </>
+                      )}
+                    </DialogContent>
+                  </Dialog>
                 </m.div>
               )}
           </AnimatePresence>
