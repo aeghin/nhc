@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="public/aeghin-icon.svg" alt="Aeghin" width="88" height="88">
+
 # Aeghin
 
 **Event planning and volunteer coordination for worship and ministry teams.**
