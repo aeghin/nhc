@@ -395,7 +395,8 @@ export const emailEntireOrganization = async (
                 role: true,
                 organization: {
                     select: {
-                        name: true
+                        name: true,
+                        logoUrl: true
                     }
                 }
             }
@@ -423,7 +424,7 @@ export const emailEntireOrganization = async (
             return { success: false, error: "No members to email" };
         }
 
-        const organizationName = userMembership.organization.name;
+        const { name: organizationName, logoUrl } = userMembership.organization;
         const senderName = `${user.firstName} ${user.lastName}`;
         const viewLink = `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/organizations/${organizationId}`;
 
@@ -436,6 +437,7 @@ export const emailEntireOrganization = async (
                 recipientName: recipient.firstName,
                 senderName,
                 organizationName,
+                logoUrl,
                 body,
                 viewLink,
             }),

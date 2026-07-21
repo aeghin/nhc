@@ -91,8 +91,9 @@ export async function inviteMember(data: OrgInvitationInput): Promise<ActionResp
             from: `${membership.organization.name} <support@aeghin.com>`,
             to: email,
             subject: `You've been invited to join ${membership.organization.name}`,
-            react: InvitationEmail({ 
+            react: InvitationEmail({
                 organizationName: membership.organization.name,
+                logoUrl: membership.organization.logoUrl,
                 invitedByName: user.firstName,
                 volunteerRoles: volunteerRoles,
                 inviteLink: `${process.env.NEXT_PUBLIC_APP_URL}/invite/${invitation.token}`

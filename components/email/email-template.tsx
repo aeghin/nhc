@@ -8,6 +8,7 @@ import {
   Text,
   Button,
   Hr,
+  Img,
   Tailwind,
 } from "@react-email/components";
 
@@ -16,6 +17,7 @@ import { VolunteerRole } from "@/generated/prisma/enums";
 
 interface InvitationEmailProps {
   organizationName: string;
+  logoUrl: string | null;
   invitedByName: string;
   volunteerRoles: VolunteerRole[];
   inviteLink: string;
@@ -24,6 +26,7 @@ interface InvitationEmailProps {
 
 export default function InvitationEmail({
   organizationName,
+  logoUrl,
   invitedByName,
   volunteerRoles,
   inviteLink,
@@ -40,9 +43,19 @@ export default function InvitationEmail({
           <Container className="mx-auto my-10 max-w-120 rounded-2xl bg-white shadow-sm overflow-hidden">
             
             <Section className="bg-linear-to-br from-gray-50 to-gray-100 px-8 pt-10 pb-8 text-center">
-              <Section className="mx-auto mb-4 w-16 h-16 rounded-2xl bg-black text-center leading-16">
-                <Text className="text-2xl font-bold text-white m-0">N</Text>
-              </Section>
+              {logoUrl ? (
+                <Img
+                  src={logoUrl}
+                  alt={organizationName}
+                  width="64"
+                  height="64"
+                  className="mx-auto mb-4 rounded-2xl object-cover"
+                />
+              ) : (
+                <Section className="mx-auto mb-4 w-16 h-16 rounded-2xl bg-black text-center leading-16">
+                  <Text className="text-2xl font-bold text-white m-0">N</Text>
+                </Section>
+              )}
               <Text className="text-2xl font-bold tracking-tight text-gray-900 m-0">
                 You&apos;re Invited
               </Text>

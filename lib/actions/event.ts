@@ -156,7 +156,7 @@ export async function createEvent(
     const [membership, serviceType] = await Promise.all([
       prisma.membership.findFirst({
         where: { userId: id, organizationId },
-        include: { organization: { select: { name: true } } },
+        include: { organization: { select: { name: true, logoUrl: true } } },
       }),
       prisma.serviceType.findFirst({
         where: { id: serviceTypeId, organizationId, deletedAt: null },
@@ -174,7 +174,7 @@ export async function createEvent(
 
     if (!serviceType) return { success: false, error: "Invalid Service Type" };
 
-    const organizationName = membership.organization.name;
+    const { name: organizationName, logoUrl } = membership.organization;
 
     const assignedUserIds = Object.values(roleAssignments).flat();
 
@@ -278,6 +278,7 @@ export async function createEvent(
               recipientName: user.firstName,
               eventName: name,
               organizationName: organizationName || "",
+              logoUrl,
               viewLink: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/organizations/${organizationId}`,
             }),
           }),
@@ -361,7 +362,7 @@ export const declineEventInvitation = async (organizationId: string, eventId: st
         assignedById: true,
         expiresAt: true,
         event: { select: { name: true } },
-        organization: { select: { smartSchedulingEnabled: true, name: true } },
+        organization: { select: { smartSchedulingEnabled: true, name: true, logoUrl: true } },
       },
     });
 
@@ -423,6 +424,7 @@ export const declineEventInvitation = async (organizationId: string, eventId: st
                 recipientName: replacement.firstName,
                 eventName: assignment.event.name,
                 organizationName: assignment.organization.name,
+                logoUrl: assignment.organization.logoUrl,
                 viewLink: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/organizations/${organizationId}`,
               }),
             });
@@ -589,7 +591,7 @@ export const emailAcceptedVolunteers = async (
       where: {
         userId_organizationId: { userId: user.id, organizationId },
       },
-      include: { organization: { select: { name: true } } },
+      include: { organization: { select: { name: true, logoUrl: true } } },
     });
 
     if (!membership) return { success: false, error: "Unable to find membership" };
@@ -624,7 +626,7 @@ export const emailAcceptedVolunteers = async (
       return { success: false, error: "No accepted volunteers to email" };
     }
 
-    const organizationName = membership.organization.name;
+    const { name: organizationName, logoUrl } = membership.organization;
     const senderName = `${user.firstName} ${user.lastName}`;
     const viewLink = `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/organizations/${organizationId}/events/${eventId}`;
 
@@ -637,6 +639,7 @@ export const emailAcceptedVolunteers = async (
         recipientName: recipient.firstName,
         senderName,
         organizationName,
+        logoUrl,
         eventName: event.name,
         body,
         viewLink,
