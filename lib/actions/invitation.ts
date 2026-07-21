@@ -57,7 +57,7 @@ export async function inviteMember(data: OrgInvitationInput): Promise<ActionResp
         const existingMember = await prisma.membership.findFirst({
             where: {
                 organizationId: orgId,
-                user: { email }
+                user: { email: { equals: email, mode: "insensitive" } }
             }
         });
         
@@ -138,7 +138,7 @@ export async function acceptOrgInvite(token: string): Promise<ActionResponse> {
          
          if (invitation.status !== InvitationStatus.PENDING) return { success: false, error: "This invitation is no longer valid" };
          
-         if (user.email !== invitation.email) {
+         if (user.email.toLowerCase() !== invitation.email.toLowerCase()) {
             return { success: false, error: "Incorrect Invitation"}
          };
          
@@ -200,7 +200,7 @@ export async function declineOrgInvite(token: string): Promise<ActionResponse> {
 
     if (invitation.expiresAt < new Date()) return { success: false, error: "Invitation has expired"};
 
-    if (user.email !== invitation.email) return { success: false, error: "Incorrect Invitation"};
+    if (user.email.toLowerCase() !== invitation.email.toLowerCase()) return { success: false, error: "Incorrect Invitation"};
 
     if (invitation.status !== InvitationStatus.PENDING) return { success: false, error: "This invitation is no longer valid" };
 

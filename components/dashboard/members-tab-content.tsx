@@ -31,6 +31,14 @@ export const MembersTabContent = async ({
 
   const canManage = viewerRole === OrgRole.OWNER || viewerRole === OrgRole.ADMIN;
 
+  const visibleMembers = canManage
+    ? sorted
+    : sorted.map((member) =>
+        member.user.id === userId
+          ? member
+          : { ...member, user: { ...member.user, email: "", phoneNumber: "" } },
+      );
+
 
   return (
     <Card className="overflow-hidden rounded-xl border-border/40 bg-linear-to-br from-card to-card/80 shadow-sm">
@@ -64,7 +72,7 @@ export const MembersTabContent = async ({
             <p className="text-sm">No members found</p>
           </div>
         ) : (
-          <MembersList members={sorted} currentUserId={userId} viewerRole={viewerRole}/>
+          <MembersList members={visibleMembers} currentUserId={userId} viewerRole={viewerRole}/>
         )}
       </CardContent>
     </Card>

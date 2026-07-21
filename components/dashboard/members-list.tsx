@@ -93,7 +93,11 @@ export function MembersList({ members, currentUserId, viewerRole }: MembersListP
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by name or email..."
+            placeholder={
+              viewerRole === OrgRole.MEMBER
+                ? "Search by name..."
+                : "Search by name or email..."
+            }
             className="pl-9"
           />
         </div>
@@ -201,15 +205,21 @@ export function MembersList({ members, currentUserId, viewerRole }: MembersListP
                   )}
                 </div>
                 <div className="flex flex-col gap-1 text-xs text-muted-foreground sm:flex-row sm:items-center sm:gap-2">
-                  <span className="inline-flex min-w-0 items-center gap-1.5">
-                    <Mail className="h-3 w-3 shrink-0" />
-                    <span className="truncate">{member.user.email}</span>
-                  </span>
-                  <span className="hidden text-border sm:inline">•</span>
-                  <span className="inline-flex items-center gap-1.5 tabular-nums">
-                    <Phone className="h-3 w-3 shrink-0" />
-                    {formatPhone(member.user.phoneNumber)}
-                  </span>
+                  {member.user.email && (
+                    <span className="inline-flex min-w-0 items-center gap-1.5">
+                      <Mail className="h-3 w-3 shrink-0" />
+                      <span className="truncate">{member.user.email}</span>
+                    </span>
+                  )}
+                  {member.user.email && member.user.phoneNumber && (
+                    <span className="hidden text-border sm:inline">•</span>
+                  )}
+                  {member.user.phoneNumber && (
+                    <span className="inline-flex items-center gap-1.5 tabular-nums">
+                      <Phone className="h-3 w-3 shrink-0" />
+                      {formatPhone(member.user.phoneNumber)}
+                    </span>
+                  )}
                   <span className="inline-flex items-center gap-1.5 tabular-nums sm:hidden">
                     <CalendarDays className="h-3 w-3 shrink-0" />
                     Joined {joinedDate}

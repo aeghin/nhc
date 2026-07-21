@@ -333,6 +333,7 @@ export const deleteOrganization = async (organizationId: string): Promise<Action
         await prisma.$transaction([
             prisma.event.deleteMany({ where: { organizationId } }),
             prisma.song.deleteMany({ where: { organizationId } }),
+            prisma.eventTemplate.deleteMany({ where: { organizationId } }),
             prisma.serviceType.deleteMany({ where: { organizationId } }),
             prisma.organization.delete({ where: { id: organizationId } }),
         ]);
@@ -349,6 +350,7 @@ export const deleteOrganization = async (organizationId: string): Promise<Action
         updateTag(`org-${organizationId}-members-list`);
         updateTag(`org-${organizationId}-st`);
         updateTag(`org-${organizationId}-songs`);
+        updateTag(`org-${organizationId}-templates`);
         updateTag(`invitations-${organizationId}-list`);
 
         revalidatePath('/dashboard');

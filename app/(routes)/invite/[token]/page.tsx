@@ -91,7 +91,7 @@ const InvitePage = async ({
   // "Invitation Unavailable" wall below.
   if (
     invitation.status === InvitationStatus.ACCEPTED &&
-    user?.email === invitation.email
+    user?.email.toLowerCase() === invitation.email.toLowerCase()
   ) {
     return (
       <PageWrapper>
@@ -221,7 +221,7 @@ const InvitePage = async ({
   );
 };
 
-  if (email !== user.email) {
+  if (email.toLowerCase() !== user.email.toLowerCase()) {
   return (
     <PageWrapper>
       <Card className="border-2 overflow-hidden text-center">
