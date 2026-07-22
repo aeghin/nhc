@@ -35,7 +35,7 @@ interface EventAssignment {
   status: InvitationStatus;
   assignedBy: {
     firstName: string;
-  };
+  } | null;
   expiresAt: Date;
 }
 
@@ -966,7 +966,7 @@ function PendingEventCard({
   const service = getServiceType(event.serviceTypeId);
   const role = event.assignments[0]?.role ?? null;
   const colors = getColorClasses(service?.color || "indigo");
-  const assignedBy = event.assignments[0]?.assignedBy.firstName;
+  const assignedBy = event.assignments[0]?.assignedBy?.firstName ?? null;
   const isBusy = isAccepting || isDeclining;
 
   function handleAccept() {
@@ -1027,7 +1027,9 @@ function PendingEventCard({
           </span>
         </div>
 
-        <p className="text-xs text-muted-foreground">Assigned By: {assignedBy}</p>
+        {assignedBy && (
+          <p className="text-xs text-muted-foreground">Assigned By: {assignedBy}</p>
+        )}
       </Link>
 
       <div className="border-t border-border" />

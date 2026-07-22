@@ -144,7 +144,7 @@ model Invitation {
   expiresAt DateTime
 
   invitedById String
-  invitedBy User @relation(fields: [invitedById], references: [id])
+  invitedBy User @relation(fields: [invitedById], references: [id], onDelete: Cascade)
 
   organizationId String
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
@@ -235,8 +235,8 @@ model Event {
   messages Message[]
 
 
-  createdById String
-  createdBy User @relation(fields: [createdById], references: [id])
+  createdById String?
+  createdBy User? @relation(fields: [createdById], references: [id], onDelete: SetNull)
 
   serviceTypeId String
   serviceType ServiceType @relation(fields: [serviceTypeId], references: [id])
@@ -258,8 +258,8 @@ model EventAssignment {
   userId String
   user User @relation("assignedUser", fields: [userId], references: [id], onDelete: Cascade)
 
-  assignedById String
-  assignedBy User @relation("assignedBy", fields: [assignedById], references: [id])
+  assignedById String?
+  assignedBy User? @relation("assignedBy", fields: [assignedById], references: [id], onDelete: SetNull)
 
   organizationId String
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)

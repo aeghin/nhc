@@ -9,7 +9,7 @@ export type EventDetailsAssignment = {
   id: string
   eventId: string
   userId: string
-  assignedById: string
+  assignedById: string | null
   organizationId: string
   role: VolunteerRole
   status: InvitationStatus
@@ -74,7 +74,7 @@ export type EventDetails = {
   location: string
   createdAt: Date
   updatedAt: Date
-  createdById: string
+  createdById: string | null
   serviceTypeId: string
   organizationId: string
   organization: {
