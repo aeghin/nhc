@@ -4,6 +4,7 @@ import prisma from "@/lib/prisma";
 import { ServiceType, OrgRole } from "@/generated/prisma/client";
 import { currentUser } from "@/lib/services/user";
 import { revalidatePath, updateTag } from "next/cache";
+import { editServiceTypeSchema, type EditServiceTypeInput } from "@/lib/validations/service-types";
 
 
 
@@ -137,5 +138,93 @@ export const deleteServiceType = async (organizationId: string, serviceTypeId: s
 
     return { success: false, error: "Something went wrong. Try again" };
 
+    }
+}
+
+
+export const editServiceType = async (input: EditServiceTypeInput): Promise<ActionResponse> => {
+
+    try {
+
+        const parsed = editServiceTypeSchema.safeParse(input);
+
+        if (!parsed.success) return { success: false, error: parsed.error.issues[0].message };
+
+        const { organizationId, serviceTypeId, name, color } = parsed.data;
+
+        const user = await currentUser();
+
+        if (!user) return { success: false, error: "Unable to find user" };
+
+        const membership = await prisma.membership.findUnique({
+            where: {
+                userId_organizationId: {
+                    userId: user.id,
+                    organizationId
+                }
+            },
+            select: {
+                role: true
+            }
+        });
+
+        if (!membership) return { success: false, error: "Unable to locate membership." };
+
+        if (membership.role === OrgRole.MEMBER) return { success: false, error: "Insufficient permissions." };
+
+        const serviceTypeExist = await prisma.serviceType.findFirst({
+            where: {
+                id: serviceTypeId,
+                organizationId,
+                deletedAt: null
+            }
+        });
+
+        if (!serviceTypeExist) return { success: false, error: "This service type is not valid." };
+
+        // @@unique([name, organizationId]) still counts soft-deleted rows, so a rename
+        // can collide with a type that was deleted but is kept for past events.
+        const nameOwner = await prisma.serviceType.findUnique({
+            where: {
+                name_organizationId: {
+                    name,
+                    organizationId
+                }
+            },
+            select: {
+                id: true,
+                deletedAt: true
+            }
+        });
+
+        if (nameOwner && nameOwner.id !== serviceTypeId) {
+            return {
+                success: false,
+                error: nameOwner.deletedAt
+                    ? "A deleted service type already uses that name. Pick a different one."
+                    : "A service type with that name already exists."
+            };
+        }
+
+        const serviceType = await prisma.serviceType.update({
+            where: {
+                id: serviceTypeId,
+                organizationId,
+            },
+            data: {
+                name,
+                color
+            }
+        });
+
+        updateTag(`org-${organizationId}-st`);
+        revalidatePath(`/dashboard/organizations/${organizationId}`);
+        revalidatePath(`/dashboard/organizations/${organizationId}/events/create`);
+
+        return { success: true, serviceType };
+
+    } catch (err) {
+        console.log(err);
+        return { success: false, error: "Something went wrong. Try again" };
     }
 }

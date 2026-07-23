@@ -1,4 +1,15 @@
 
+export const SERVICE_TYPE_COLORS = [
+  "indigo",
+  "amber",
+  "emerald",
+  "pink",
+  "violet",
+  "red",
+  "blue",
+  "cyan",
+] as const;
+
 export const serviceColorClasses: Record<
   string,
   { dot: string; border: string; badge: string; badgeText: string }
