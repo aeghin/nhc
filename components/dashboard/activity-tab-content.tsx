@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import {
   Activity,
   CalendarPlus,
+  CalendarX,
   Mail,
   MailX,
   UserCheck,
@@ -30,6 +31,7 @@ type ActivityItem = {
 
 const activityConfig: Record<ActivityType, { icon: LucideIcon; className: string }> = {
   EVENT_CREATED: { icon: CalendarPlus, className: "bg-emerald-500/10 text-emerald-600" },
+  EVENT_DELETED: { icon: CalendarX, className: "bg-destructive/10 text-destructive" },
   INVITE_SENT: { icon: Mail, className: "bg-sky-500/10 text-sky-600" },
   INVITE_ACCEPTED: { icon: UserCheck, className: "bg-emerald-500/10 text-emerald-600" },
   INVITE_DECLINED: { icon: XCircle, className: "bg-destructive/10 text-destructive" },
@@ -50,6 +52,12 @@ const describeActivity = (item: ActivityItem): ReactNode => {
       return (
         <>
           <Name>{item.actorName}</Name> created the event <Name>{item.targetName}</Name>
+        </>
+      );
+    case ActivityType.EVENT_DELETED:
+      return (
+        <>
+          <Name>{item.actorName}</Name> deleted the event <Name>{item.targetName}</Name>
         </>
       );
     case ActivityType.INVITE_SENT:

@@ -547,6 +547,8 @@ export const deleteEvent = async (organizationId: string, eventId: string): Prom
         organizationId,
       },
       select: {
+        name: true,
+        serviceType: { select: { name: true } },
         assignments: {
           select: { userId: true, status: true },
         },
@@ -561,8 +563,17 @@ export const deleteEvent = async (organizationId: string, eventId: string): Prom
       }
     });
 
+    await logActivity({
+      organizationId,
+      type: ActivityType.EVENT_DELETED,
+      actorName: `${user.firstName} ${user.lastName}`,
+      targetName: event.name,
+      detail: event.serviceType.name,
+    });
+
     updateTag(`org-${organizationId}-events`);
     updateTag(`event-${eventId}-org-${organizationId}-details`);
+    updateTag(`org-${organizationId}-activity`);
 
     for (const { userId } of event.assignments) {
       updateTag(`user-${userId}-events-${organizationId}`);
