@@ -2,10 +2,13 @@
 
 import prisma from "@/lib/prisma";
 import {
+  ActivityType,
   InvitationStatus,
   OrgRole,
   VolunteerRole,
 } from "@/generated/prisma/enums";
+
+import { logActivity, volunteerRoleLabels } from "@/lib/activity";
 
 import {
   CreateEventInput,
@@ -287,7 +290,16 @@ export async function createEvent(
   });
 };
 
+    await logActivity({
+      organizationId,
+      type: ActivityType.EVENT_CREATED,
+      actorName: `${users.firstName} ${users.lastName}`,
+      targetName: name,
+      detail: serviceType.name,
+    });
+
     updateTag(`org-${organizationId}-events`);
+    updateTag(`org-${organizationId}-activity`);
 
     revalidatePath(`/dashboard/organizations/${organizationId}`);
 
@@ -412,8 +424,16 @@ export const declineEventInvitation = async (organizationId: string, eventId: st
             },
           });
 
+          await logActivity({
+            organizationId,
+            type: ActivityType.AUTO_INVITE_SENT,
+            targetName: replacement.firstName,
+            detail: `${volunteerRoleLabels[assignment.role]} for "${assignment.event.name}" after ${user.firstName} ${user.lastName} declined`,
+          });
+
           updateTag(`user-${replacement.userId}-events-${organizationId}`);
           updateTag(`event-${eventId}-org-${organizationId}-details`);
+          updateTag(`org-${organizationId}-activity`);
 
           after(async () => {
             await resend.emails.send({

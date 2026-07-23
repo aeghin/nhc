@@ -33,6 +33,18 @@ enum InvitationStatus {
   CANCELED
 }
 
+enum ActivityType {
+  EVENT_CREATED
+  INVITE_SENT
+  INVITE_ACCEPTED
+  INVITE_DECLINED
+  INVITE_CANCELED
+  AUTO_INVITE_SENT
+  MEMBER_REMOVED
+  MEMBER_LEFT
+  ROLE_CHANGED
+}
+
 enum Pitch {
   C
   C_SHARP   @map("C#")
@@ -110,6 +122,7 @@ model Organization {
   songs Song[]
   messages Message[]
   blockoutDates BlockoutDate[]
+  activityLogs ActivityLog[]
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -329,6 +342,24 @@ model Message {
   @@index([eventId, createdAt])
   @@index([organizationId])
   @@index([authorId])
+}
+
+model ActivityLog {
+  id   String       @id @default(uuid())
+  type ActivityType
+
+  // Snapshotted display strings, not FKs, so feed entries survive deletion of
+  // the user/event/invitation they describe. actorName null = system activity.
+  actorName  String?
+  targetName String?
+  detail     String?
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([organizationId, createdAt])
 }
 
 model Song {

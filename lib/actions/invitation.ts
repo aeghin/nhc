@@ -3,7 +3,8 @@
 import { auth } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
 import { orgInvitationSchema, OrgInvitationInput } from "../validations/invitations";
-import { OrgRole, InvitationStatus } from "@/generated/prisma/enums";
+import { OrgRole, InvitationStatus, ActivityType } from "@/generated/prisma/enums";
+import { logActivity, volunteerRoleLabels } from "@/lib/activity";
 
 import { Resend } from "resend";
 import InvitationEmail from "@/components/email/email-template";
@@ -85,7 +86,18 @@ export async function inviteMember(data: OrgInvitationInput): Promise<ActionResp
             }
         });
 
+        await logActivity({
+            organizationId: orgId,
+            type: ActivityType.INVITE_SENT,
+            actorName: `${user.firstName} ${user.lastName}`,
+            targetName: email,
+            detail: volunteerRoles.length
+                ? volunteerRoles.map((role) => volunteerRoleLabels[role]).join(", ")
+                : undefined,
+        });
+
         updateTag(`invitations-${orgId}-list`);
+        updateTag(`org-${orgId}-activity`);
 
         after(async () => {await resend.emails.send({
             from: `${membership.organization.name} <support@aeghin.com>`,
@@ -164,11 +176,18 @@ export async function acceptOrgInvite(token: string): Promise<ActionResponse> {
         
          });
 
+         await logActivity({
+            organizationId: acceptedInvitation.organizationId,
+            type: ActivityType.INVITE_ACCEPTED,
+            actorName: `${user.firstName} ${user.lastName}`,
+         });
+
          updateTag(`invitations-${acceptedInvitation.organizationId}-list`);
          updateTag(`user-${user.id}-orgs`);
          updateTag(`org-${acceptedInvitation.organizationId}-member-count`);
          updateTag(`org-${acceptedInvitation.organizationId}-members-list`);
          updateTag(`user-${user.id}-memberships`);
+         updateTag(`org-${acceptedInvitation.organizationId}-activity`);
 
          return { success: true, orgId: acceptedInvitation.organizationId }
 
@@ -213,7 +232,14 @@ export async function declineOrgInvite(token: string): Promise<ActionResponse> {
         }
     });
 
+    await logActivity({
+        organizationId: invitation.organizationId,
+        type: ActivityType.INVITE_DECLINED,
+        actorName: `${user.firstName} ${user.lastName}`,
+    });
+
     updateTag(`invitations-${invitation.organizationId}-list`);
+    updateTag(`org-${invitation.organizationId}-activity`);
 
     return { success: true };
 
@@ -272,7 +298,15 @@ export const cancelOrgInvite = async (organizationId: string, userEmail: string)
             }
         });
 
+        await logActivity({
+            organizationId,
+            type: ActivityType.INVITE_CANCELED,
+            actorName: `${user.firstName} ${user.lastName}`,
+            targetName: userEmail,
+        });
+
         updateTag(`invitations-${organizationId}-list`);
+        updateTag(`org-${organizationId}-activity`);
 
         return { success: true };
 

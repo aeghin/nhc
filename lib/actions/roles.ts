@@ -2,8 +2,9 @@
 
 import { currentUser } from "@/lib/services/user";
 import prisma from "@/lib/prisma";
-import { OrgRole, VolunteerRole } from "@/generated/prisma/enums";
+import { ActivityType, OrgRole, VolunteerRole } from "@/generated/prisma/enums";
 import { revalidatePath, updateTag } from "next/cache";
+import { logActivity, orgRoleLabels } from "@/lib/activity";
 import { userRoleSchema, UserRoleInput, assignOwnerSchema, AssignOwnerInput } from "../validations/roles";
 
 
@@ -49,6 +50,7 @@ export const updateUserRole = async (data: UserRoleInput): Promise<ActionRespons
             },
             select: {
                 role: true,
+                user: { select: { firstName: true, lastName: true } },
             }
         });
 
@@ -71,9 +73,18 @@ export const updateUserRole = async (data: UserRoleInput): Promise<ActionRespons
             }
         });
         
+        await logActivity({
+            organizationId,
+            type: ActivityType.ROLE_CHANGED,
+            actorName: `${user.firstName} ${user.lastName}`,
+            targetName: `${assignee.user.firstName} ${assignee.user.lastName}`,
+            detail: orgRoleLabels[newRole.role],
+        });
+
         updateTag(`org-${organizationId}-members-list`);
         updateTag(`user-${userId}-org-${organizationId}-role`)
         updateTag(`user-${userId}-orgs`);
+        updateTag(`org-${organizationId}-activity`);
         revalidatePath(`/dashboard/organizations/${organizationId}`);
 
         return { success: true, role: newRole.role };
@@ -104,7 +115,7 @@ export const removeMember = async (userId: string, organizationId: string): Prom
                 }
             },
             include: {
-                user: { select: { email: true } }
+                user: { select: { email: true, firstName: true, lastName: true } }
             }
         });
 
@@ -156,6 +167,13 @@ export const removeMember = async (userId: string, organizationId: string): Prom
             }),
         ]);
 
+        await logActivity({
+            organizationId,
+            type: ActivityType.MEMBER_REMOVED,
+            actorName: `${user.firstName} ${user.lastName}`,
+            targetName: `${assignee.user.firstName} ${assignee.user.lastName}`,
+        });
+
         for (const { eventId } of upcoming) {
             updateTag(`event-${eventId}-org-${organizationId}-details`);
         };
@@ -168,6 +186,7 @@ export const removeMember = async (userId: string, organizationId: string): Prom
         updateTag(`user-${userId}-org-${organizationId}-role`);
         updateTag(`user-${userId}-memberships`);
         updateTag(`invitations-${organizationId}-list`);
+        updateTag(`org-${organizationId}-activity`);
 
         revalidatePath(`/dashboard/organizations/${organizationId}`);
 
@@ -316,6 +335,12 @@ export const leaveOrganization = async (organizationId: string): Promise<ActionR
         }),
       ]);
       
+        await logActivity({
+            organizationId,
+            type: ActivityType.MEMBER_LEFT,
+            actorName: `${user.firstName} ${user.lastName}`,
+        });
+
         for (const { eventId } of upcoming) {
             updateTag(`event-${eventId}-org-${organizationId}-details`);
         }
@@ -327,6 +352,7 @@ export const leaveOrganization = async (organizationId: string): Promise<ActionR
           updateTag(`org-${organizationId}-member-count`);
           updateTag(`user-${user.id}-org-${organizationId}-role`);
           updateTag(`user-${user.id}-memberships`);
+          updateTag(`org-${organizationId}-activity`);
           revalidatePath(`/dashboard/organizations/${organizationId}`);
 
         return { success: true }
@@ -368,6 +394,9 @@ export const assignOwnerRole = async (data: AssignOwnerInput): Promise<ActionRes
                     userId,
                     organizationId
                 }
+            },
+            include: {
+                user: { select: { firstName: true, lastName: true } }
             }
         });
 
@@ -385,9 +414,18 @@ export const assignOwnerRole = async (data: AssignOwnerInput): Promise<ActionRes
             }
         });
 
+        await logActivity({
+            organizationId,
+            type: ActivityType.ROLE_CHANGED,
+            actorName: `${user.firstName} ${user.lastName}`,
+            targetName: `${assignee.user.firstName} ${assignee.user.lastName}`,
+            detail: orgRoleLabels[OrgRole.OWNER],
+        });
+
         updateTag(`org-${organizationId}-members-list`);
         updateTag(`user-${userId}-org-${organizationId}-role`);
         updateTag(`user-${userId}-orgs`);
+        updateTag(`org-${organizationId}-activity`);
         revalidatePath(`/dashboard/organizations/${organizationId}`);
 
         return { success: true }

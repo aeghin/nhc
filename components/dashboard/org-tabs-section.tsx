@@ -12,6 +12,8 @@ import { MembersTabSkeleton } from "@/components/dashboard/members-tab-skeleton"
 import { InvitationsTabSkeleton } from "@/components/dashboard//invitations-tab-skeleton";
 import { BlockoutsTabContent } from "@/components/dashboard/blockouts-tab-content";
 import { BlockoutsTabSkeleton } from "@/components/dashboard/blockouts-tab-skeleton";
+import { ActivityTabContent } from "@/components/dashboard/activity-tab-content";
+import { ActivityTabSkeleton } from "@/components/dashboard/activity-tab-skeleton";
 
 import { getOrgMemberCountById } from "@/lib/services/organization";
 import { userEventsTotalCount } from "@/lib/services/events";
@@ -33,12 +35,12 @@ export const OrganizationTabsSection = async ({
   userId,
   activeTab,
 }: OrganizationTabsSectionProps) => {
-  const validTabs = ["events", "members", "blockouts", "invitations", "templates", "settings"];
+  const validTabs = ["events", "members", "blockouts", "invitations", "templates", "activity", "settings"];
   const tab = validTabs.includes(activeTab) ? activeTab : "events";
 
 
   const effectiveTab =
-    (tab === "invitations" || tab === "templates") && !canManage ? "events" : tab;
+    (tab === "invitations" || tab === "templates" || tab === "activity") && !canManage ? "events" : tab;
  
     const [totalEventsCount, totalMembersCount] = await Promise.all([
       userEventsTotalCount(userId, organizationId, canManage),
@@ -99,6 +101,14 @@ export const OrganizationTabsSection = async ({
         {effectiveTab === "templates" && canManage && (
           <Suspense fallback={<TemplatesTabSkeleton />}>
             <TemplatesTabContent
+              organizationId={organizationId}
+            />
+          </Suspense>
+        )}
+
+        {effectiveTab === "activity" && canManage && (
+          <Suspense fallback={<ActivityTabSkeleton />}>
+            <ActivityTabContent
               organizationId={organizationId}
             />
           </Suspense>

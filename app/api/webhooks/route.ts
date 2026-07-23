@@ -2,7 +2,7 @@ import prisma from "@/lib/prisma";
 import { verifyWebhook } from "@clerk/nextjs/webhooks";
 import { NextRequest } from "next/server";
 import { revalidateTag } from "next/cache";
-import { OrgRole } from "@/generated/prisma/enums";
+import { ActivityType, OrgRole } from "@/generated/prisma/enums";
 import { UTApi } from "uploadthing/server";
 
 export async function POST(req: NextRequest) {
@@ -99,6 +99,8 @@ export async function POST(req: NextRequest) {
       select: {
         id: true,
         email: true,
+        firstName: true,
+        lastName: true,
         memberships: { select: { organizationId: true, role: true } },
         assignedEvents: { select: { eventId: true, organizationId: true } },
         setlistSongAssignment: {
@@ -158,6 +160,36 @@ export async function POST(req: NextRequest) {
       else doomedOrgIds.push(organizationId);
     }
 
+    // Feed entries for orgs that outlive this user: the departure itself, plus
+    // any silent owner succession. Names are snapshotted before the rows go.
+    const successors = promotions.length
+      ? await prisma.user.findMany({
+          where: { id: { in: promotions.map((p) => p.userId) } },
+          select: { id: true, firstName: true, lastName: true },
+        })
+      : [];
+
+    const successorNameById = new Map(
+      successors.map((s) => [s.id, `${s.firstName} ${s.lastName}`]),
+    );
+
+    const survivingOrgIds = orgIds.filter((id) => !doomedOrgIds.includes(id));
+
+    const activityRows = [
+      ...survivingOrgIds.map((organizationId) => ({
+        organizationId,
+        type: ActivityType.MEMBER_LEFT,
+        actorName: `${user.firstName} ${user.lastName}`,
+        detail: "Account deleted",
+      })),
+      ...promotions.map(({ userId, organizationId }) => ({
+        organizationId,
+        type: ActivityType.ROLE_CHANGED,
+        targetName: successorNameById.get(userId) ?? "A member",
+        detail: "Owner",
+      })),
+    ];
+
     // UploadThing keys have to be collected before the rows go.
     const doomedOrgs = doomedOrgIds.length
       ? await prisma.organization.findMany({
@@ -179,6 +211,9 @@ export async function POST(req: NextRequest) {
       ),
       // Invitations addressed to this user carry no FK, only an email string.
       prisma.invitation.deleteMany({ where: { email: user.email } }),
+      ...(activityRows.length
+        ? [prisma.activityLog.createMany({ data: activityRows })]
+        : []),
       // Cascades: Membership, EventAssignment, BlockoutDate, Message,
       // SetlistSongAssignment, and the invitations they sent.
       prisma.user.delete({ where: { id: user.id } }),
@@ -222,6 +257,7 @@ export async function POST(req: NextRequest) {
       revalidateTag(`org-${organizationId}-list-entry`, { expire: 0 });
       revalidateTag(`org-${organizationId}-acceptance-stats`, { expire: 0 });
       revalidateTag(`org-${organizationId}-events`, { expire: 0 });
+      revalidateTag(`org-${organizationId}-activity`, { expire: 0 });
     }
 
     for (const { organizationId } of [...user.memberships, ...invitedOrgs]) {
