@@ -60,12 +60,6 @@ Every scheduling feature is free. AI setlist generation is the only paid add-on.
 3. **Schedule an event**, assign volunteers, and let them confirm
 4. **Build the setlist** yourself or hand it to the AI
 
-## Tech stack
-
-Next.js 16 (App Router, Cache Components) · React 19 · TypeScript · Tailwind CSS 4 ·
-shadcn/ui · Prisma 7 + PostgreSQL · Clerk · Stripe · Vercel AI SDK + Claude · Ably ·
-UploadThing · Resend
-
 ## Notes on the build
 
 A few pieces that were more interesting than the CRUD:
