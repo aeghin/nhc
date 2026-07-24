@@ -1,6 +1,6 @@
 
 import { VolunteerRole, OrgRole } from "@/generated/prisma/enums";
-import { Crown, Shield, Users } from "lucide-react";
+import { Crown, Shield, User } from "lucide-react";
 
 export const volunteerRoleConfig: Record<VolunteerRole, { label: string; icon: string }> = {
   [VolunteerRole.GUITARIST]:   { label: "Guitarist",   icon: "🎸" },
@@ -47,10 +47,10 @@ export const roleToCategory: Record<VolunteerRole, RoleCategory> = {
 export const getRoleConfig = (role: OrgRole) => {
   switch (role) {
       case OrgRole.OWNER:
-        return { icon: Crown, label: "Owner", className: "bg-amber-500/10 text-amber-600 border-amber-500/20" }
+        return { icon: Crown, label: "Owner", className: "border-amber-500/40 bg-linear-to-r from-amber-500/15 to-yellow-500/10 text-amber-700 dark:text-amber-300" }
       case OrgRole.ADMIN:
         return { icon: Shield, label: "Admin", className: "bg-blue-500/10 text-blue-600 border-blue-500/20" }
       default:
-        return { icon: Users, label: "Member", className: "bg-muted text-muted-foreground border-border" }
+        return { icon: User, label: "Member", className: "bg-muted text-muted-foreground border-border" }
     };
 };

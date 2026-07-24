@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { ArrowUpRight, Calendar, Crown, Shield, User, Users } from "lucide-react";
+import { ArrowUpRight, Calendar, Users } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { getRoleConfig } from "@/lib/config/roles";
 import { OrgRole } from "@/generated/prisma/enums";
 
 interface OrganizationCardProps {
@@ -19,15 +20,9 @@ interface OrganizationCardProps {
 };
 
 
-const ROLE_CONFIGS = {
-  OWNER: { icon: Crown, label: "Owner", className: "bg-amber-500/10 text-amber-600 border-amber-500/20" },
-  ADMIN: { icon: Shield, label: "Admin", className: "bg-primary/10 text-primary border-primary/20" },
-  MEMBER: { icon: User, label: "Member", className: "bg-muted text-muted-foreground border-border" },
-} as const;
-
 export function OrganizationCard({ organization, upcomingEvents }: OrganizationCardProps ) {
-  
-  const roleConfig = ROLE_CONFIGS[organization.role]
+
+  const roleConfig = getRoleConfig(organization.role)
   const RoleIcon = roleConfig.icon;
 
   const isAdmin = organization.role === OrgRole.OWNER || organization.role === OrgRole.ADMIN;

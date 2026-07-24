@@ -1,6 +1,6 @@
 import prisma from "@/lib/prisma";
 import { verifyWebhook } from "@clerk/nextjs/webhooks";
-import { NextRequest } from "next/server";
+import { NextRequest, after } from "next/server";
 import { revalidateTag } from "next/cache";
 import { ActivityType, OrgRole } from "@/generated/prisma/enums";
 import { UTApi } from "uploadthing/server";
@@ -30,6 +30,8 @@ export async function POST(req: NextRequest) {
         userImageUrl,
       },
     });
+
+    after(() => notifyNewSignup({ email, firstName, lastName }));
   }
 
   if (event.type === "user.updated") {
@@ -275,4 +277,43 @@ export async function POST(req: NextRequest) {
   }
 
   return new Response("Webhook received", { status: 200 });
+}
+
+type NewSignup = {
+  email: string;
+  firstName: string;
+  lastName: string;
+};
+
+async function notifyNewSignup({ email, firstName, lastName }: NewSignup) {
+  const webhookUrl = process.env.DISCORD_SIGNUP_WEBHOOK_URL;
+  if (!webhookUrl) return;
+
+  try {
+    const response = await fetch(webhookUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        embeds: [
+          {
+            title: "New signup",
+            color: 16347926,
+            fields: [
+              { name: "Name", value: `${firstName} ${lastName}`, inline: true },
+              { name: "Email", value: email, inline: true },
+            ],
+            timestamp: new Date().toISOString(),
+          },
+        ],
+      }),
+    });
+
+    if (!response.ok) {
+      console.error(
+        `Discord signup notification failed: ${response.status} ${await response.text()}`,
+      );
+    }
+  } catch (error) {
+    console.error("Discord signup notification failed", error);
+  }
 }
