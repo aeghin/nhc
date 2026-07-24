@@ -12,6 +12,8 @@ export const volunteerRoleLabels: Record<VolunteerRole, string> = {
   BGVS: "BGVs",
   BASSIST: "Bassist",
   SOUND_TECH: "Sound Tech",
+  STREAM_TECH: "Stream Tech",
+  PROJECTION_TECH: "Projection",
   USHER: "Usher",
   GREETER: "Greeter",
 };

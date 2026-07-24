@@ -22,6 +22,8 @@ enum VolunteerRole {
   BGVS
   BASSIST
   SOUND_TECH
+  STREAM_TECH
+  PROJECTION_TECH
   USHER
   GREETER
 }

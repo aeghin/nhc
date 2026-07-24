@@ -8,9 +8,11 @@ export const volunteerRoleConfig: Record<VolunteerRole, { label: string; icon: s
   [VolunteerRole.AUX_KEYS]:   { label: "Aux Keys",     icon: "🎹" },
   [VolunteerRole.DRUMMER]:    { label: "Drummer",       icon: "🥁" },
   [VolunteerRole.LEAD_VOCALIST]: { label: "Lead Vocalist", icon: "🎤" },
-  [VolunteerRole.BGVS]:       { label: "Bgvs", icon: "🎤" },
+  [VolunteerRole.BGVS]:       { label: "BGVs", icon: "🎤" },
   [VolunteerRole.BASSIST]:    { label: "Bassist",       icon: "🎸" },
   [VolunteerRole.SOUND_TECH]: { label: "Sound Tech",    icon: "🎚️" },
+  [VolunteerRole.STREAM_TECH]: { label: "Stream Tech",  icon: "📹" },
+  [VolunteerRole.PROJECTION_TECH]: { label: "Projection", icon: "📽️" },
   [VolunteerRole.USHER]:      { label: "Usher",         icon: "🚪" },
   [VolunteerRole.GREETER]:    { label: "Greeter",       icon: "👋" },
 };
@@ -36,6 +38,8 @@ export const roleToCategory: Record<VolunteerRole, RoleCategory> = {
   [VolunteerRole.LEAD_VOCALIST]: "vocals",
   [VolunteerRole.BGVS]: "vocals",
   [VolunteerRole.SOUND_TECH]: "production",
+  [VolunteerRole.STREAM_TECH]: "production",
+  [VolunteerRole.PROJECTION_TECH]: "production",
   [VolunteerRole.USHER]: "hospitality",
   [VolunteerRole.GREETER]: "hospitality",
 };

@@ -14,7 +14,8 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { InvitationStatus } from "@/generated/prisma/enums";
+import { InvitationStatus, VolunteerRole } from "@/generated/prisma/enums";
+import { volunteerRoleConfig } from "@/lib/config/roles";
 import { toast } from "sonner";
 import {
   acceptEventInvitation,
@@ -54,34 +55,6 @@ interface Event {
   assignments: EventAssignment[];
   serviceTypeId: string;
 }
-
-// ─── Role config ────────────────────────────────────────────────
-
-const roleEmojis: Record<string, string> = {
-  GUITARIST: "🎸",
-  PIANIST: "🎹",
-  AUX_KEYS: "🎹",
-  DRUMMER: "🥁",
-  LEAD_VOCALIST: "🎤",
-  BGVS: "🎤",
-  BASSIST: "🎸",
-  SOUND_TECH: "🎛️",
-  USHER: "🚪",
-  GREETER: "👋",
-};
-
-const roleNames: Record<string, string> = {
-  GUITARIST: "Guitarist",
-  PIANIST: "Pianist",
-  AUX_KEYS: "Aux Keys",
-  DRUMMER: "Drummer",
-  LEAD_VOCALIST: "Lead Vocalist",
-  BGVS: "BGVs",
-  BASSIST: "Bassist",
-  SOUND_TECH: "Sound Tech",
-  USHER: "Usher",
-  GREETER: "Greeter",
-};
 
 // ─── Color config ───────────────────────────────────────────────
 
@@ -857,6 +830,9 @@ export function MemberEventsDashboard({
                           {dateEvents.map((event, eventIndex) => {
                             const service = getServiceType(event.serviceTypeId);
                             const role = event.assignments[0]?.role ?? null;
+                            const roleInfo = role
+                              ? volunteerRoleConfig[role as VolunteerRole]
+                              : null;
                             const colors = getColorClasses(
                               service?.color || "indigo",
                             );
@@ -898,9 +874,9 @@ export function MemberEventsDashboard({
                                         </span>
                                       )}
                                     </span>
-                                    {role && (
+                                    {roleInfo && (
                                       <span className="shrink-0 rounded-md bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground">
-                                        {roleEmojis[role]} {roleNames[role]}
+                                        {roleInfo.icon} {roleInfo.label}
                                       </span>
                                     )}
                                   </div>
@@ -912,9 +888,9 @@ export function MemberEventsDashboard({
                                       >
                                         {service?.name || "Event"}
                                       </span>
-                                      {role && (
+                                      {roleInfo && (
                                         <span className="shrink-0 rounded-md bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground">
-                                          {roleEmojis[role]} {roleNames[role]}
+                                          {roleInfo.icon} {roleInfo.label}
                                         </span>
                                       )}
                                     </div>
@@ -965,6 +941,7 @@ function PendingEventCard({
 
   const service = getServiceType(event.serviceTypeId);
   const role = event.assignments[0]?.role ?? null;
+  const roleInfo = role ? volunteerRoleConfig[role as VolunteerRole] : null;
   const colors = getColorClasses(service?.color || "indigo");
   const assignedBy = event.assignments[0]?.assignedBy?.firstName ?? null;
   const isBusy = isAccepting || isDeclining;
@@ -1004,7 +981,7 @@ function PendingEventCard({
             {service?.name || "Event"}
           </span>
           <span className="rounded-md bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground">
-            {role && roleEmojis[role]} {role && roleNames[role]}
+            {roleInfo?.icon} {roleInfo?.label}
           </span>
         </div>
 

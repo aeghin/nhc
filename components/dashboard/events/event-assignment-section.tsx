@@ -44,6 +44,8 @@ const roleOrder: VolunteerRole[] = [
   VolunteerRole.LEAD_VOCALIST,
   VolunteerRole.BGVS,
   VolunteerRole.SOUND_TECH,
+  VolunteerRole.STREAM_TECH,
+  VolunteerRole.PROJECTION_TECH,
   VolunteerRole.USHER,
   VolunteerRole.GREETER,
 ];
