@@ -47,7 +47,7 @@ export const roleToCategory: Record<VolunteerRole, RoleCategory> = {
 export const getRoleConfig = (role: OrgRole) => {
   switch (role) {
       case OrgRole.OWNER:
-        return { icon: Crown, label: "Owner", className: "border-amber-500/40 bg-linear-to-r from-amber-500/15 to-yellow-500/10 text-amber-700 dark:text-amber-300" }
+        return { icon: Crown, label: "Owner", className: "border-gold/40 bg-linear-to-r from-gold/15 to-gold/8 text-gold" }
       case OrgRole.ADMIN:
         return { icon: Shield, label: "Admin", className: "bg-blue-500/10 text-blue-600 border-blue-500/20" }
       default:
