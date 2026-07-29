@@ -123,7 +123,7 @@ export default function MemberProfile({
             </h1>
 
             <div className="mt-5 flex flex-wrap items-center gap-2.5">
-              <Badge className={`gap-2 rounded-full border px-4 py-2 ${memberRole.className}`}>
+              <Badge variant="outline" className={`gap-2 rounded-full border px-4 py-2 ${memberRole.className}`}>
                 <span className="flex items-center gap-1.5 text-sm font-semibold">
                   <RoleIcon className="h-3.5 w-3.5" />
                   {memberRole.label}
