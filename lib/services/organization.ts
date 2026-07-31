@@ -81,6 +81,7 @@ if (!user) return [];
       role: m.role,
       memberCount: m.organization._count.memberships,
       invitationCount: m.organization._count.invitations,
+      volunteerRoles: m.volunteerRoles
     }));
 
     for (const o of organizations) {

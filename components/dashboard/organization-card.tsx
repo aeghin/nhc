@@ -3,8 +3,8 @@ import { ArrowUpRight, Calendar, Users } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { getRoleConfig } from "@/lib/config/roles";
-import { OrgRole } from "@/generated/prisma/enums";
+import { getRoleConfig, volunteerRoleConfig } from "@/lib/config/roles";
+import { OrgRole, VolunteerRole } from "@/generated/prisma/enums";
 
 interface OrganizationCardProps {
   organization: {
@@ -15,6 +15,7 @@ interface OrganizationCardProps {
     role: OrgRole
     memberCount: number
     invitationCount: number
+    volunteerRoles: VolunteerRole[]
   }
   upcomingEvents?: number
 };
@@ -26,6 +27,8 @@ export function OrganizationCard({ organization, upcomingEvents }: OrganizationC
   const RoleIcon = roleConfig.icon;
 
   const isAdmin = organization.role === OrgRole.OWNER || organization.role === OrgRole.ADMIN;
+
+  const volunterRoles = organization.volunteerRoles;
 
 
   return (
@@ -72,10 +75,27 @@ export function OrganizationCard({ organization, upcomingEvents }: OrganizationC
               
               <div className="flex flex-wrap items-center gap-2">
                 <Badge variant="outline" className={cn("text-xs font-medium", roleConfig.className)}>
-                  <RoleIcon className="mr-1.5 h-3 w-3" />
+                  <RoleIcon />
                   {roleConfig.label}
                 </Badge>
+                {
+                volunterRoles.map((role) => {
+
+                  const config = volunteerRoleConfig[role]
+                  
+
+                  return (
+                    <Badge key={role} variant="outline" className="text-xs font-medium">
+                      <span className="leading-none">{config.icon}</span>
+                      {config.label}
+                    </Badge>
+                  )
+                })
+              }
               </div>
+
+              
+              
             </div>
 
             <ArrowUpRight className="h-5 w-5 text-muted-foreground opacity-0 transition-all duration-200 group-hover:opacity-100 group-hover:text-primary group-hover:translate-x-0.5 group-hover:-translate-y-0.5 shrink-0" />

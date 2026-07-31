@@ -257,6 +257,7 @@ export const updateVolunteerRoles = async (userId: string, organizationId: strin
         }
     });
     updateTag(`user-${userId}-roles`);
+    updateTag(`user-${userId}-orgs`);
     updateTag(`org-${organizationId}-members-list`);
     revalidatePath(`/dashboard/organizations/${organizationId}`);
 
