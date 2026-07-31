@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { ArrowUpRight, Calendar, Users } from "lucide-react";
+import { ArrowUpRight, Calendar, Users, TriangleAlert } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { getRoleConfig, volunteerRoleConfig } from "@/lib/config/roles";
@@ -16,6 +17,7 @@ interface OrganizationCardProps {
     memberCount: number
     invitationCount: number
     volunteerRoles: VolunteerRole[]
+    eventAssignmentCount: number
   }
   upcomingEvents?: number
 };
@@ -29,6 +31,8 @@ export function OrganizationCard({ organization, upcomingEvents }: OrganizationC
   const isAdmin = organization.role === OrgRole.OWNER || organization.role === OrgRole.ADMIN;
 
   const volunterRoles = organization.volunteerRoles;
+
+  const count = 1;
 
 
   return (
@@ -80,10 +84,7 @@ export function OrganizationCard({ organization, upcomingEvents }: OrganizationC
                 </Badge>
                 {
                 volunterRoles.map((role) => {
-
                   const config = volunteerRoleConfig[role]
-                  
-
                   return (
                     <Badge key={role} variant="outline" className="text-xs font-medium">
                       <span className="leading-none">{config.icon}</span>
@@ -93,11 +94,7 @@ export function OrganizationCard({ organization, upcomingEvents }: OrganizationC
                 })
               }
               </div>
-
-              
-              
             </div>
-
             <ArrowUpRight className="h-5 w-5 text-muted-foreground opacity-0 transition-all duration-200 group-hover:opacity-100 group-hover:text-primary group-hover:translate-x-0.5 group-hover:-translate-y-0.5 shrink-0" />
           </div>
 
@@ -119,6 +116,18 @@ export function OrganizationCard({ organization, upcomingEvents }: OrganizationC
               <Badge variant="secondary" className="bg-primary/10 text-primary font-medium text-xs">
                 {organization.invitationCount} pending
               </Badge>
+            )}
+            {organization.eventAssignmentCount > 0 && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="inline-flex" tabIndex={0}>
+                    <TriangleAlert className="size-4 text-primary" />
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent className="bg-muted-foreground text-background [&_svg]:bg-muted-foreground [&_svg]:fill-muted-foreground">
+                  <p>Pending Invites</p>
+                </TooltipContent>
+              </Tooltip>
             )}
           </div>
         </CardContent>

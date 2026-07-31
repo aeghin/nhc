@@ -43,7 +43,6 @@ export const getUserOrganizations = async (userId: string) => {
   cacheLife('hours');
 
   cacheTag(`user-${userId}-orgs`)
-  
 
   
   const user = await prisma.user.findUnique({
@@ -60,8 +59,14 @@ export const getUserOrganizations = async (userId: string) => {
                     status: InvitationStatus.PENDING
                   },
                 },
-                memberships: true
-              }
+                memberships: true,
+                eventAssignments: {
+                  where: {
+                    userId,
+                    status: InvitationStatus.PENDING
+                  },
+                },
+              },
             },
           },
         },
@@ -81,7 +86,8 @@ if (!user) return [];
       role: m.role,
       memberCount: m.organization._count.memberships,
       invitationCount: m.organization._count.invitations,
-      volunteerRoles: m.volunteerRoles
+      volunteerRoles: m.volunteerRoles,
+      eventAssignmentCount: m.organization._count.eventAssignments,
     }));
 
     for (const o of organizations) {
