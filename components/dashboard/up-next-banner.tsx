@@ -130,7 +130,7 @@ export function UpNextBanner({
         href={`/dashboard/organizations/${organizationId}/events/${upNext.id}`}
         className="group block"
       >
-        <div className="relative overflow-hidden rounded-xl border border-border/40 bg-linear-to-r from-primary/10 via-card to-card p-4 transition-all duration-300 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 sm:p-5">
+        <div className="relative overflow-hidden rounded-xl border border-border/40 bg-linear-to-r from-primary/10 via-card to-card p-4 transition-[border-color,box-shadow] duration-300 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 sm:p-5">
           <div className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full bg-primary/10 blur-3xl" />
 
           <div className="relative flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-5">
@@ -190,7 +190,7 @@ export function UpNextBanner({
               </div>
             </div>
 
-            <ArrowUpRight className="hidden h-5 w-5 shrink-0 text-muted-foreground transition-all duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-foreground sm:block" />
+            <ArrowUpRight className="hidden h-5 w-5 shrink-0 text-muted-foreground transition-[transform,color] duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-foreground sm:block" />
           </div>
         </div>
       </Link>

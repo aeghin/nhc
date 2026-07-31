@@ -129,6 +129,7 @@ export function SongModal({ orgId, song, open, onOpenChange }: SongModalProps) {
   const { isValid } = form.formState;
 
   const themes = form.watch("themes");
+  const themeSet = new Set(themes);
 
   const [internalOpen, setInternalOpen] = useState(false);
   const isControlled = open !== undefined;
@@ -198,7 +199,7 @@ export function SongModal({ orgId, song, open, onOpenChange }: SongModalProps) {
         <DialogTrigger asChild>
           <Button
             size="sm"
-            className="gap-2 shadow-lg shadow-primary/20 transition-all hover:scale-105 hover:shadow-primary/30"
+            className="gap-2 shadow-lg shadow-primary/20 transition-[background-color,transform,box-shadow] hover:scale-105 hover:shadow-primary/30"
           >
             <Plus className="h-4 w-4" />
             Add Song
@@ -449,7 +450,7 @@ export function SongModal({ orgId, song, open, onOpenChange }: SongModalProps) {
                       </div>
                     </div>
                     <div className="flex flex-wrap gap-1.5">
-                      {COMMON_THEMES.filter((t) => !themes.includes(t))
+                      {COMMON_THEMES.filter((t) => !themeSet.has(t))
                         .slice(0, 8)
                         .map((suggestion) => (
                           <button

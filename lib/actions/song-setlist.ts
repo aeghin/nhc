@@ -3,10 +3,20 @@
 import prisma from "@/lib/prisma";
 import { currentUser } from "@/lib/services/user";
 import { InvitationStatus, OrgRole, VolunteerRole } from "@/generated/prisma/enums";
+import type { KeyQuality, Pitch } from "@/generated/prisma/enums";
 import { revalidatePath, updateTag } from "next/cache";
 import type { SetlistSong } from "@/lib/types";
 
 type ActionResponse = { success: true } | { success: false; error: string };
+
+// The per-row columns a setlist save writes, shared by inserts and updates.
+type SetlistRowData = {
+  position: number;
+  pitch: Pitch;
+  keyQuality: KeyQuality;
+  bpm: number;
+  timeSignature: string;
+};
 
 export const saveSetlist = async (
   eventId: string,
@@ -78,8 +88,10 @@ export const saveSetlist = async (
 
       // Upsert surviving + new songs, refreshing position/key/bpm. Surviving
       // rows keep their id so per-song assignments are preserved across edits.
-      for (let idx = 0; idx < songs.length; idx++) {
-        const s = songs[idx];
+      const updates: { id: string; data: SetlistRowData }[] = [];
+      const creates: (SetlistRowData & { eventId: string; songId: string })[] = [];
+
+      songs.forEach((s, idx) => {
         const data = {
           position: idx,
           pitch: s.pitch,
@@ -88,14 +100,18 @@ export const saveSetlist = async (
           timeSignature: s.timeSignature,
         };
         const existingId = existingIdBySongId.get(s.songId);
-        if (existingId) {
-          await tx.setlistSong.update({ where: { id: existingId }, data });
-        } else {
-          await tx.setlistSong.create({
-            data: { eventId, songId: s.songId, ...data },
-          });
-        }
+        if (existingId) updates.push({ id: existingId, data });
+        else creates.push({ eventId, songId: s.songId, ...data });
+      });
+
+      // New rows share a shape, so they go in one insert. Updates each carry
+      // their own values, so they fan out instead.
+      if (creates.length > 0) {
+        await tx.setlistSong.createMany({ data: creates });
       }
+      await Promise.all(
+        updates.map(({ id, data }) => tx.setlistSong.update({ where: { id }, data })),
+      );
     });
 
     updateTag(`event-${eventId}-org-${organizationId}-details`);

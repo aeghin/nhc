@@ -134,32 +134,49 @@ export async function POST(req: NextRequest) {
     });
 
     // Orgs this user solely owned: promote a successor, or tear the org down if
-    // they were the last member.
+    // they were the last member. Orgs don't depend on each other, so they all
+    // resolve at once instead of one round trip at a time.
+    const ownedOrgIds = user.memberships.flatMap((m) =>
+      m.role === OrgRole.OWNER ? [m.organizationId] : [],
+    );
+
+    const succession = await Promise.all(
+      ownedOrgIds.map(async (organizationId) => {
+        const otherOwners = await prisma.membership.count({
+          where: { organizationId, role: OrgRole.OWNER, userId: { not: user.id } },
+        });
+        if (otherOwners > 0) return null;
+
+        // Admins inherit first, so only look at members when there are none.
+        const successor =
+          (await prisma.membership.findFirst({
+            where: { organizationId, role: OrgRole.ADMIN },
+            orderBy: { createdAt: "asc" },
+            select: { userId: true },
+          })) ??
+          (await prisma.membership.findFirst({
+            where: { organizationId, role: OrgRole.MEMBER },
+            orderBy: { createdAt: "asc" },
+            select: { userId: true },
+          }));
+
+        return { organizationId, successorId: successor?.userId ?? null };
+      }),
+    );
+
     const promotions: { userId: string; organizationId: string }[] = [];
     const doomedOrgIds: string[] = [];
 
-    for (const { organizationId, role } of user.memberships) {
-      if (role !== OrgRole.OWNER) continue;
-
-      const otherOwners = await prisma.membership.count({
-        where: { organizationId, role: OrgRole.OWNER, userId: { not: user.id } },
-      });
-      if (otherOwners > 0) continue;
-
-      const successor =
-        (await prisma.membership.findFirst({
-          where: { organizationId, role: OrgRole.ADMIN },
-          orderBy: { createdAt: "asc" },
-          select: { userId: true },
-        })) ??
-        (await prisma.membership.findFirst({
-          where: { organizationId, role: OrgRole.MEMBER },
-          orderBy: { createdAt: "asc" },
-          select: { userId: true },
-        }));
-
-      if (successor) promotions.push({ userId: successor.userId, organizationId });
-      else doomedOrgIds.push(organizationId);
+    for (const entry of succession) {
+      if (!entry) continue;
+      if (entry.successorId) {
+        promotions.push({
+          userId: entry.successorId,
+          organizationId: entry.organizationId,
+        });
+      } else {
+        doomedOrgIds.push(entry.organizationId);
+      }
     }
 
     // Feed entries for orgs that outlive this user: the departure itself, plus
@@ -175,7 +192,8 @@ export async function POST(req: NextRequest) {
       successors.map((s) => [s.id, `${s.firstName} ${s.lastName}`]),
     );
 
-    const survivingOrgIds = orgIds.filter((id) => !doomedOrgIds.includes(id));
+    const doomedOrgIdSet = new Set(doomedOrgIds);
+    const survivingOrgIds = orgIds.filter((id) => !doomedOrgIdSet.has(id));
 
     const activityRows = [
       ...survivingOrgIds.map((organizationId) => ({

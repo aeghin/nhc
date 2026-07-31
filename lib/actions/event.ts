@@ -182,6 +182,8 @@ export async function createEvent(
     const assignedUserIds = Object.values(roleAssignments).flat();
 
     if (assignedUserIds.length > 0) {
+      const assignedUserIdSet = new Set(assignedUserIds);
+
       const validMemberships = await prisma.membership.count({
         where: {
           organizationId,
@@ -189,7 +191,7 @@ export async function createEvent(
         },
       });
 
-      if (validMemberships !== new Set(assignedUserIds).size) {
+      if (validMemberships !== assignedUserIdSet.size) {
         return { success: false, error: "One or more assigned users are not members of this organization" };
       }
 
@@ -205,7 +207,7 @@ export async function createEvent(
       const blockedIds = new Set(
         blockoutRows
           .map((b) => b.userId)
-          .filter((uid) => assignedUserIds.includes(uid)),
+          .filter((uid) => assignedUserIdSet.has(uid)),
       );
 
       if (blockedIds.size > 0) {

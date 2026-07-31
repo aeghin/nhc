@@ -337,6 +337,9 @@ export function CreateEventPageContent({
   const watchedRolesNeeded = watch("rolesNeeded");
   const watchedExpiresAt = watch("expiresAt");
 
+  // The role grid tests every known role against this, so keep it keyed.
+  const rolesNeededSet = new Set(watchedRolesNeeded);
+
   const selectedServiceType = optimisticServiceTypes.find(
     (t) => t.id === watchedServiceTypeId,
   );
@@ -655,6 +658,7 @@ export function CreateEventPageContent({
   // Members shown in the open role-picker modal, filtered by its search text
   const pickerMembers = pickerRole ? membersByRole[pickerRole] || [] : [];
   const pickerAssigned = pickerRole ? roleAssignments[pickerRole] || [] : [];
+  const pickerAssignedSet = new Set(pickerAssigned);
   const pickerQuery = pickerSearch.trim().toLowerCase();
   const pickerFiltered = pickerQuery
     ? pickerMembers.filter(
@@ -1245,8 +1249,7 @@ export function CreateEventPageContent({
                     </div>
                         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
                           {volunteerRoleEntries.map(([role, config]) => {
-                            const isSelected =
-                              watchedRolesNeeded.includes(role);
+                            const isSelected = rolesNeededSet.has(role);
                             const availableCount =
                               membersByRole[role]?.length || 0;
                             return (
@@ -1390,8 +1393,9 @@ export function CreateEventPageContent({
                       const config = volunteerRoleConfig[role];
                       const availableMembers = membersByRole[role] || [];
                       const assignedToRole = roleAssignments[role] || [];
+                      const assignedToRoleSet = new Set(assignedToRole);
                       const assignedMembers = availableMembers.filter((m) =>
-                        assignedToRole.includes(m.userId),
+                        assignedToRoleSet.has(m.userId),
                       );
 
                       return (
@@ -1490,7 +1494,7 @@ export function CreateEventPageContent({
                           {pickerFiltered.length > 0 ? (
                             <div className="grid max-h-[55vh] gap-3 overflow-y-auto pr-1 sm:grid-cols-2">
                               {pickerFiltered.map((member) => {
-                                const isAssigned = pickerAssigned.includes(
+                                const isAssigned = pickerAssignedSet.has(
                                   member.userId,
                                 );
                                 const conflict = memberConflicts[member.userId];

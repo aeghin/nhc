@@ -78,7 +78,7 @@ export function OrganizationCard({ organization, upcomingEvents }: OrganizationC
               </div>
             </div>
 
-            <ArrowUpRight className="h-5 w-5 text-muted-foreground opacity-0 transition-all duration-200 group-hover:opacity-100 group-hover:text-primary group-hover:translate-x-0.5 group-hover:-translate-y-0.5 shrink-0" />
+            <ArrowUpRight className="h-5 w-5 text-muted-foreground opacity-0 transition-[opacity,color,transform] duration-200 group-hover:opacity-100 group-hover:text-primary group-hover:translate-x-0.5 group-hover:-translate-y-0.5 shrink-0" />
           </div>
 
          

@@ -16,7 +16,7 @@ interface StatsCardProps {
 
 export function StatsCard({ title, value, icon: Icon, description, trend }: StatsCardProps) {
   return (
-    <Card className="group relative overflow-hidden border-border/40 bg-linear-to-br from-card to-card/80 transition-all duration-300 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5">
+    <Card className="group relative overflow-hidden border-border/40 bg-linear-to-br from-card to-card/80 transition-[border-color,box-shadow] duration-300 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5">
       <div className="absolute inset-0 bg-linear-to-br from-transparent via-transparent to-primary/10 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
       <CardContent className="relative p-4 sm:p-6">
         <div className="flex items-start justify-between gap-2">

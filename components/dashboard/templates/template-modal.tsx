@@ -169,7 +169,7 @@ export function TemplateModal({
         <DialogTrigger asChild>
           <Button
             size="sm"
-            className="gap-2 shadow-lg shadow-primary/20 transition-all hover:scale-105 hover:shadow-primary/30"
+            className="gap-2 shadow-lg shadow-primary/20 transition-[background-color,transform,box-shadow] hover:scale-105 hover:shadow-primary/30"
           >
             <Plus className="h-4 w-4" />
             New Template

@@ -68,6 +68,7 @@ export function InvitePersonModal({
   const { isValid } = form.formState;
 
   const volunteerRoles = form.watch("volunteerRoles");
+  const volunteerRoleSet = new Set(volunteerRoles);
 
   const toggleRole = (role: VolunteerRole) => {
     const current = form.getValues("volunteerRoles");
@@ -190,7 +191,7 @@ export function InvitePersonModal({
                           className="flex cursor-pointer items-center gap-3 rounded-md p-2 hover:bg-muted/75"
                         >
                           <Checkbox
-                            checked={volunteerRoles.includes(role)}
+                            checked={volunteerRoleSet.has(role)}
                             onCheckedChange={() => toggleRole(role)}
                             disabled={isPending}
                           />

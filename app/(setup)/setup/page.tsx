@@ -47,7 +47,7 @@ export default function SetupPage() {
 
           <div className="grid gap-6 sm:grid-cols-2">
             <Card
-              className="group relative cursor-pointer overflow-hidden border-2 transition-all hover:border-primary hover:shadow-lg"
+              className="group relative cursor-pointer overflow-hidden border-2 transition-[border-color,box-shadow] hover:border-primary hover:shadow-lg"
               onClick={() => setCreateModalOpen(true)}
             >
               <CardContent className="p-8">
@@ -66,7 +66,7 @@ export default function SetupPage() {
             </Card>
 
             <Card
-              className="group relative cursor-pointer overflow-hidden border-2 transition-all hover:border-primary hover:shadow-lg"
+              className="group relative cursor-pointer overflow-hidden border-2 transition-[border-color,box-shadow] hover:border-primary hover:shadow-lg"
               onClick={() => setJoinModalOpen(true)}
             >
               <CardContent className="p-8">

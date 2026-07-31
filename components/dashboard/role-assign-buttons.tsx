@@ -57,6 +57,9 @@ export const RoleAssignButtons = ({ currentRole, userId, organizationId, memberN
                 : [...current, role]
     );
 
+    // The menu renders a checkbox per known role, so keep the lookup keyed.
+    const optimisticRoleSet = new Set(optimisticRoles);
+
     const handleRoleChange = (role: string) => {
         const newRole = role as OrgRole;
 
@@ -152,7 +155,7 @@ export const RoleAssignButtons = ({ currentRole, userId, organizationId, memberN
                                     return (
                                         <DropdownMenuCheckboxItem
                                             key={role}
-                                            checked={optimisticRoles.includes(role)}
+                                            checked={optimisticRoleSet.has(role)}
                                             onCheckedChange={() => handleVolunteerRoleToggle(role)}
                                             onSelect={(e) => e.preventDefault()}
                                             disabled={isPending}

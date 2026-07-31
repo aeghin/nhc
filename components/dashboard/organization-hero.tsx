@@ -95,7 +95,7 @@ export const OrganizationHero = async ({
             <Button
               variant="outline"
               size="sm"
-              className="cursor-pointer bg-background/50 backdrop-blur-sm transition-all hover:bg-background hover:border-primary/30 hover:scale-105"
+              className="cursor-pointer bg-background/50 backdrop-blur-sm transition-[background-color,border-color,transform] hover:bg-background hover:border-primary/30 hover:scale-105"
               asChild
             >
               <Link
