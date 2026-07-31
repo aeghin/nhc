@@ -18,7 +18,7 @@ export function InviteMemberButton({ organizationId, organizationName }: InviteM
     <>
         <Button
           size="sm"
-          className="cursor-pointer shadow-lg shadow-primary/20 transition-[background-color,transform,box-shadow] hover:scale-105 hover:shadow-primary/30"
+          className="cursor-pointer shadow-lg shadow-primary/20 transition-all hover:scale-105 hover:shadow-primary/30"
           onClick={() => setInviteModalOpen(true)}
         >
           <Plus className="mr-2 h-4 w-4" />

@@ -62,7 +62,7 @@ const TemplateCard = ({
     colorClasses[template.serviceType.color] || colorClasses.indigo;
 
   return (
-    <div className="flex flex-col rounded-xl border border-border/40 bg-card p-4 shadow-sm transition-shadow hover:shadow-md">
+    <div className="flex flex-col rounded-xl border border-border/40 bg-card p-4 shadow-sm transition-all hover:shadow-md">
       <div className="flex items-start justify-between gap-2">
         <span
           className={cn(

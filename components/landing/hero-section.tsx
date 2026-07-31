@@ -59,21 +59,21 @@ export function HeroSection() {
 
         {/* Feature preview cards */}
         <div className="mt-24 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-          <div className="group relative rounded-2xl border border-border bg-card/50 backdrop-blur-sm p-6 hover:border-primary/50 hover:bg-card transition-colors duration-300">
+          <div className="group relative rounded-2xl border border-border bg-card/50 backdrop-blur-sm p-6 hover:border-primary/50 hover:bg-card transition-all duration-300">
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary mb-4 group-hover:scale-110 transition-transform">
               <Users className="h-6 w-6" />
             </div>
             <h3 className="text-lg font-semibold mb-1">Team Management</h3>
             <p className="text-sm text-muted-foreground">Invite members and assign the roles they play</p>
           </div>
-          <div className="group relative rounded-2xl border border-border bg-card/50 backdrop-blur-sm p-6 hover:border-primary/50 hover:bg-card transition-colors duration-300">
+          <div className="group relative rounded-2xl border border-border bg-card/50 backdrop-blur-sm p-6 hover:border-primary/50 hover:bg-card transition-all duration-300">
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary mb-4 group-hover:scale-110 transition-transform">
               <Calendar className="h-6 w-6" />
             </div>
             <h3 className="text-lg font-semibold mb-1">Event Scheduling</h3>
             <p className="text-sm text-muted-foreground">Templates, blockout dates, and automatic refills</p>
           </div>
-          <div className="group relative rounded-2xl border border-border bg-card/50 backdrop-blur-sm p-6 hover:border-primary/50 hover:bg-card transition-colors duration-300">
+          <div className="group relative rounded-2xl border border-border bg-card/50 backdrop-blur-sm p-6 hover:border-primary/50 hover:bg-card transition-all duration-300">
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary mb-4 group-hover:scale-110 transition-transform">
               <Music className="h-6 w-6" />
             </div>
