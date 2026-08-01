@@ -17,13 +17,13 @@ interface OrganizationCardProps {
     memberCount: number
     invitationCount: number
     volunteerRoles: VolunteerRole[]
-    eventAssignmentCount: number
   }
-  upcomingEvents?: number
+  pendingInvites: number
+  upcomingEvents: number
 };
 
 
-export function OrganizationCard({ organization, upcomingEvents }: OrganizationCardProps ) {
+export function OrganizationCard({ organization, pendingInvites, upcomingEvents }: OrganizationCardProps ) {
 
   const roleConfig = getRoleConfig(organization.role)
   const RoleIcon = roleConfig.icon;
@@ -31,8 +31,6 @@ export function OrganizationCard({ organization, upcomingEvents }: OrganizationC
   const isAdmin = organization.role === OrgRole.OWNER || organization.role === OrgRole.ADMIN;
 
   const volunterRoles = organization.volunteerRoles;
-
-  const count = 1;
 
 
   return (
@@ -105,19 +103,19 @@ export function OrganizationCard({ organization, upcomingEvents }: OrganizationC
               <span className="font-medium">{organization.memberCount}</span>
               <span>members</span>
             </div>
-            {/* {typeof upcomingEvents === "number" && upcomingEvents > 0 && (
-              <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                <Calendar className="h-3.5 w-3.5" />
+            {upcomingEvents > 0 && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Calendar className="h-4 w-4" />
                 <span className="font-medium">{upcomingEvents}</span>
                 <span>upcoming</span>
               </div>
-            )} */}
+            )}
             {organization.invitationCount > 0 && isAdmin && (
               <Badge variant="secondary" className="bg-primary/10 text-primary font-medium text-xs">
                 {organization.invitationCount} pending
               </Badge>
             )}
-            {organization.eventAssignmentCount > 0 && (
+            {pendingInvites > 0 && (
               <Tooltip>
                 <TooltipTrigger asChild>
                   <span className="inline-flex" tabIndex={0}>

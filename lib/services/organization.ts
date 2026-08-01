@@ -60,12 +60,6 @@ export const getUserOrganizations = async (userId: string) => {
                   },
                 },
                 memberships: true,
-                eventAssignments: {
-                  where: {
-                    userId,
-                    status: InvitationStatus.PENDING
-                  },
-                },
               },
             },
           },
@@ -87,7 +81,6 @@ if (!user) return [];
       memberCount: m.organization._count.memberships,
       invitationCount: m.organization._count.invitations,
       volunteerRoles: m.volunteerRoles,
-      eventAssignmentCount: m.organization._count.eventAssignments,
     }));
 
     for (const o of organizations) {

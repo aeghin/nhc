@@ -209,3 +209,65 @@ export const getEventDetailsById = async (eventId: string, organizationId: strin
 
 }
 
+
+type OrgAssignmentCounts = {
+  pending: number
+  upcoming: number
+};
+
+// Per-org assignment counts for the dashboard org cards. Lives here rather than
+// on getUserOrganizations because these numbers move on accept/decline, which
+// busts `user-${userId}-events-${orgId}` — a tag the org-list query never carries.
+export const getAssignmentCountsByOrg = async (userId: string) => {
+
+  "use cache";
+
+  cacheLife("minutes");
+
+  const memberships = await prisma.membership.findMany({
+    where: { userId },
+    select: { organizationId: true },
+  });
+
+  for (const m of memberships) {
+    cacheTag(`user-${userId}-events-${m.organizationId}`);
+  }
+
+  const now = new Date();
+
+  const grouped = await prisma.eventAssignment.groupBy({
+    by: ["organizationId", "status"],
+    where: {
+      userId,
+      event: {
+        dates: {
+          some: {
+            endTime: { gte: now },
+          },
+        },
+      },
+      OR: [
+        { status: InvitationStatus.ACCEPTED },
+        { status: InvitationStatus.PENDING, expiresAt: { gt: now } },
+      ],
+    },
+    _count: { _all: true },
+  });
+
+  const counts: Record<string, OrgAssignmentCounts> = {};
+
+  for (const m of memberships) {
+    counts[m.organizationId] = { pending: 0, upcoming: 0 };
+  }
+
+  for (const row of grouped) {
+    const entry = counts[row.organizationId];
+    if (!entry) continue;
+
+    if (row.status === InvitationStatus.ACCEPTED) entry.upcoming = row._count._all;
+    else entry.pending = row._count._all;
+  }
+
+  return counts;
+};
+
