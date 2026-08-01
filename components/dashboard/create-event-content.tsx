@@ -263,6 +263,7 @@ interface CreateEventPageContentProps {
   serviceTypes: ServiceType[];
   templates: EventTemplateWithServiceType[];
   initialTemplateId?: string;
+  smartSchedulingStatus: boolean;
 }
 
 export function CreateEventPageContent({
@@ -271,7 +272,8 @@ export function CreateEventPageContent({
   members,
   serviceTypes,
   templates,
-  initialTemplateId
+  initialTemplateId,
+  smartSchedulingStatus
 }: CreateEventPageContentProps) {
   const router = useRouter();
 
@@ -767,8 +769,24 @@ export function CreateEventPageContent({
                 </p>
               </div>
             </div>
-            {/* Step indicator */}
-            <div className="flex items-center">
+            {/* Smart scheduling status + step indicator */}
+            <div className="flex flex-wrap items-center gap-3">
+              <div
+                className={cn(
+                  "flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
+                  smartSchedulingStatus
+                    ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                    : "border-red-500/20 bg-red-500/10 text-red-600 dark:text-red-400",
+                )}
+              >
+                <span
+                  className={cn(
+                    "h-2 w-2 rounded-full",
+                    smartSchedulingStatus ? "bg-emerald-500" : "bg-red-500",
+                  )}
+                />
+                Smart Scheduling {smartSchedulingStatus ? "On" : "Off"}
+              </div>
               <p className="text-xs font-medium text-muted-foreground sm:hidden">
                 Step {step} of 2
               </p>
