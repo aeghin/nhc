@@ -124,7 +124,7 @@ export function OrganizationCard({ organization, upcomingEvents }: OrganizationC
                     <TriangleAlert className="size-4 text-primary" />
                   </span>
                 </TooltipTrigger>
-                <TooltipContent className="bg-muted-foreground text-background [&_svg]:bg-muted-foreground [&_svg]:fill-muted-foreground">
+                <TooltipContent className="border border-border/60 bg-muted text-foreground shadow-md [&_svg]:bg-muted [&_svg]:fill-muted">
                   <p>Pending Invites</p>
                 </TooltipContent>
               </Tooltip>

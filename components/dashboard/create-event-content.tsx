@@ -82,6 +82,8 @@ import { checkMemberAvailability } from "@/lib/actions/event";
 import { createServiceType } from "@/lib/actions/service-type";
 import { createEvent } from "@/lib/actions/event";
 
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+
 const colorClasses: Record<
   string,
   { dot: string; badge: string; badgeText: string }
@@ -771,6 +773,8 @@ export function CreateEventPageContent({
             </div>
             {/* Smart scheduling status + step indicator */}
             <div className="flex flex-wrap items-center gap-3">
+            <Tooltip>
+              <TooltipTrigger asChild>
               <div
                 className={cn(
                   "flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
@@ -787,6 +791,15 @@ export function CreateEventPageContent({
                 />
                 Smart Scheduling {smartSchedulingStatus ? "On" : "Off"}
               </div>
+              </TooltipTrigger>
+              <TooltipContent className="max-w-56 border border-border/60 bg-muted text-foreground shadow-md [&_svg]:bg-muted [&_svg]:fill-muted">
+                  <p>
+                    {smartSchedulingStatus
+                      ? "Declines auto-fill from your roster. Manage in Settings."
+                      : "Declines won't be refilled automatically. Enable in Settings."}
+                  </p>
+              </TooltipContent>
+            </Tooltip>
               <p className="text-xs font-medium text-muted-foreground sm:hidden">
                 Step {step} of 2
               </p>
