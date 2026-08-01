@@ -131,7 +131,7 @@ export const RoleAssignButtons = ({ currentRole, userId, organizationId, memberN
                             </DropdownMenuRadioItem>
                         </DropdownMenuRadioGroup>
                         {canAssignOwner && (
-                            <DropdownMenuItem inset onClick={() => setAssignOwnerConfirm(true)} disabled={isPending} className="cursor-pointer text-amber-600 focus:text-amber-600">
+                            <DropdownMenuItem inset onClick={() => setAssignOwnerConfirm(true)} disabled={isPending} className="cursor-pointer text-gold focus:text-gold">
                                 <Crown className="mr-2 h-4 w-4 text-gold" />
                                 Make Owner
                             </DropdownMenuItem>
