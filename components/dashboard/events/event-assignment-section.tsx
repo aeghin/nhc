@@ -196,6 +196,7 @@ export function EventAssignmentsCard({
                 eventId={event.id}
                 existingRoles={[...rosterRoles]}
                 memberCountByRole={memberCountByRole}
+                serviceColor={event.serviceType.color}
               />
             )}
             {canManage && acceptedCount > 0 && (
@@ -204,6 +205,7 @@ export function EventAssignmentsCard({
                 eventId={event.id}
                 eventName={event.name}
                 recipientCount={acceptedCount}
+                serviceColor={event.serviceType.color}
               />
             )}
           </div>
@@ -259,6 +261,7 @@ export function EventAssignmentsCard({
                               members={membersByRole[group.role] || []}
                               unavailableUserIds={unavailableUserIds}
                               eventDates={eventDates}
+                              serviceColor={event.serviceType.color}
                             />
                           </span>
                         )}
@@ -274,6 +277,7 @@ export function EventAssignmentsCard({
                             unavailableUserIds={unavailableUserIds}
                             eventDates={eventDates}
                             variant="row"
+                            serviceColor={event.serviceType.color}
                           />
                         ) : (
                           <p className="px-3 py-2.5 text-sm text-muted-foreground">

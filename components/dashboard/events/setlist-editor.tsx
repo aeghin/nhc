@@ -11,6 +11,8 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
+import { cn } from "@/lib/utils";
+import { colorClasses } from "@/lib/config/service-types-config";
 import { saveSetlist } from "@/lib/actions/song-setlist";
 import { SetlistDraft } from "./setlist-draft";
 import { CatalogPicker } from "./song-catalog-picker";
@@ -26,6 +28,7 @@ interface SetlistEditorProps {
   orgId: string
   backHref: string
   initialSongs: SetlistSong[]
+  serviceColor: string
   catalog: Song[]
   canUseAi: boolean
   hasPro: boolean
@@ -38,11 +41,13 @@ export function SetlistEditor({
   orgId,
   backHref,
   initialSongs,
+  serviceColor,
   catalog,
   canUseAi,
   hasPro,
   canSubscribe
 }: SetlistEditorProps) {
+  const serviceColors = colorClasses[serviceColor];
   const router = useRouter();
   const [songs, setSongs] = useState<SetlistSong[]>(initialSongs);
   const [isDirty, setIsDirty] = useState(false);
@@ -97,7 +102,12 @@ export function SetlistEditor({
             </div>
           </div>
 
-          <Button size="sm" onClick={handleSave} disabled={!canSave || isPending} className="cursor-pointer">
+          <Button
+            size="sm"
+            onClick={handleSave}
+            disabled={!canSave || isPending}
+            className={cn("cursor-pointer", serviceColors.solid, serviceColors.solidHover)}
+          >
             <Save className="mr-1.5 h-3.5 w-3.5" />
             Save
           </Button>
@@ -106,7 +116,11 @@ export function SetlistEditor({
 
       <div className="container mx-auto grid grid-cols-1 gap-6 px-4 py-6 lg:grid-cols-3">
         <section className="lg:col-span-2">
-          <SetlistDraft songs={songs} onChange={updateSongs} />
+          <SetlistDraft
+            songs={songs}
+            onChange={updateSongs}
+            serviceColor={serviceColor}
+          />
         </section>
 
         <aside className="lg:col-span-1">
@@ -124,6 +138,7 @@ export function SetlistEditor({
                 catalog={catalog}
                 draftSongIds={new Set(songs.map((s) => s.songId))}
                 onAdd={addSongs}
+                serviceColor={serviceColor}
               />
             </TabsContent>
             <TabsContent value="ai" className="mt-3 space-y-3">
@@ -139,6 +154,7 @@ export function SetlistEditor({
                     eventId={eventId}
                     orgId={orgId}
                     onApply={updateSongs}
+                    serviceColor={serviceColor}
                   />
                 </>
               ) : (

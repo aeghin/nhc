@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { MessagesSquare, SendHorizontal } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { colorClasses } from "@/lib/config/service-types-config";
 import { useEventChat } from "@/lib/realtime/use-event-chat";
 import type { ChatMessage } from "@/lib/realtime/types";
 
@@ -17,6 +18,7 @@ interface EventChatPanelProps {
   currentUserId: string;
   me: { firstName: string; lastName: string; userImageUrl: string | null };
   initialMessages: ChatMessage[];
+  serviceColor: string;
 }
 
 export function EventChatPanel({
@@ -24,7 +26,10 @@ export function EventChatPanel({
   currentUserId,
   me,
   initialMessages,
+  serviceColor,
 }: EventChatPanelProps) {
+  const serviceColors = colorClasses[serviceColor];
+
   const { messages, presence, status, sendOptimistic, loadOlder, hasMore } =
     useEventChat(eventId, {
       initial: initialMessages,
@@ -112,7 +117,7 @@ export function EventChatPanel({
                       className={cn(
                         "mt-0.5 inline-block rounded-2xl px-3 py-1.5 text-sm",
                         isMe
-                          ? "bg-primary text-primary-foreground"
+                          ? cn(serviceColors.solid, "text-primary-foreground")
                           : "bg-muted text-foreground",
                         m.id.startsWith("temp-") && "opacity-60",
                       )}
@@ -140,7 +145,12 @@ export function EventChatPanel({
               }
             }}
           />
-          <Button size="icon" onClick={handleSend} aria-label="Send">
+          <Button
+            size="icon"
+            className={cn(serviceColors.solid, serviceColors.solidHover)}
+            onClick={handleSend}
+            aria-label="Send"
+          >
             <SendHorizontal className="h-4 w-4" />
           </Button>
         </div>

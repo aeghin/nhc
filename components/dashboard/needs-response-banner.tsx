@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
-import { getServiceColorClasses } from "@/lib/config/service-colors";
+import { getServiceColors } from "@/lib/config/service-types-config";
 import {
   acceptEventInvitation,
   declineEventInvitation,
@@ -78,7 +78,7 @@ function InviteRow({
   const [isAccepting, startAccept] = useTransition();
   const [isDeclining, startDecline] = useTransition();
 
-  const colors = getServiceColorClasses(invite.serviceColor);
+  const colors = getServiceColors(invite.serviceColor);
   const isBusy = isAccepting || isDeclining;
 
   function handleAccept() {

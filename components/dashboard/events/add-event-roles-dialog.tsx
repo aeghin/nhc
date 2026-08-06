@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dialog";
 
 import { cn } from "@/lib/utils";
+import { colorClasses } from "@/lib/config/service-types-config";
 import { VolunteerRole } from "@/generated/prisma/enums";
 import { volunteerRoleConfig } from "@/lib/config/roles";
 import { addEventRoles } from "@/lib/actions/event";
@@ -32,6 +33,7 @@ interface AddEventRolesDialogProps {
   existingRoles: VolunteerRole[];
   /** How many org members hold each role, for the "N available" hint */
   memberCountByRole: Record<string, number>;
+  serviceColor: string;
 }
 
 export function AddEventRolesDialog({
@@ -39,7 +41,9 @@ export function AddEventRolesDialog({
   eventId,
   existingRoles,
   memberCountByRole,
+  serviceColor,
 }: AddEventRolesDialogProps) {
+  const serviceColors = colorClasses[serviceColor];
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<VolunteerRole[]>([]);
   const [isSaving, startSaving] = useTransition();
@@ -119,8 +123,16 @@ export function AddEventRolesDialog({
                   alreadyOnEvent
                     ? "cursor-not-allowed border-border bg-muted/40 opacity-70"
                     : isSelected
-                      ? "cursor-pointer border-primary bg-primary/5 ring-1 ring-primary"
-                      : "cursor-pointer border-border/60 bg-card/50 hover:border-primary/50 hover:bg-muted/50",
+                      ? cn(
+                          "cursor-pointer ring-1",
+                          serviceColors.borderSolid,
+                          serviceColors.tint,
+                          serviceColors.ring,
+                        )
+                      : cn(
+                          "cursor-pointer border-border/60 bg-card/50 hover:bg-muted/50",
+                          serviceColors.borderHover,
+                        ),
                 )}
               >
                 <span className="text-xl">{config.icon}</span>
@@ -136,7 +148,11 @@ export function AddEventRolesDialog({
                   className={cn(
                     "flex h-5 w-5 items-center justify-center rounded-full border transition-colors",
                     isSelected || alreadyOnEvent
-                      ? "border-primary bg-primary text-primary-foreground"
+                      ? cn(
+                          serviceColors.borderSolid,
+                          serviceColors.solid,
+                          "text-primary-foreground",
+                        )
                       : "border-muted-foreground/30",
                   )}
                 >
@@ -160,6 +176,7 @@ export function AddEventRolesDialog({
           </Button>
           <Button
             type="button"
+            className={cn(serviceColors.solid, serviceColors.solidHover)}
             onClick={handleSave}
             disabled={selected.length === 0 || isSaving}
           >

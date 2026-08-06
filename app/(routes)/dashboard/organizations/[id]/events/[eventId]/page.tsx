@@ -97,6 +97,7 @@ export default async function EventDetailPage({
             {canChat && (
               <EventChatPanel
                 eventId={eventId}
+                serviceColor={event.serviceType.color}
                 currentUserId={user.id}
                 me={{
                   firstName: user.firstName,

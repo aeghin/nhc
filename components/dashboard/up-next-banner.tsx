@@ -2,7 +2,7 @@ import Link from "next/link";
 import { CalendarClock, Clock, MapPin, ArrowUpRight } from "lucide-react";
 import { AnimatedSection } from "@/components/dashboard/animate-section";
 import { cn } from "@/lib/utils";
-import { getServiceColorClasses } from "@/lib/config/service-colors";
+import { getServiceColors } from "@/lib/config/service-types-config";
 import { volunteerRoleConfig } from "@/lib/config/roles";
 import { InvitationStatus, VolunteerRole } from "@/generated/prisma/enums";
 
@@ -111,7 +111,7 @@ export function UpNextBanner({
   const upNextDate = nextDate;
 
   const service = serviceTypes.find((s) => s.id === upNext.serviceTypeId);
-  const colors = getServiceColorClasses(service?.color || "indigo");
+  const colors = getServiceColors(service?.color || "indigo");
 
   const role = upNext.assignments.find(
     (a) => a.status === InvitationStatus.ACCEPTED,

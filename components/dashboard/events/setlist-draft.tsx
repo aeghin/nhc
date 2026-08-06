@@ -20,13 +20,18 @@ import {
 } from "@/lib/constants/key";
 import type { SetlistSong } from "@/lib/types";
 import { SpotifyIcon, YoutubeIcon } from "@/components/icons/brand-icons";
+import { cn } from "@/lib/utils";
+import { colorClasses } from "@/lib/config/service-types-config";
 
 interface SetlistDraftProps {
   songs: SetlistSong[];
   onChange: (songs: SetlistSong[]) => void;
+  serviceColor: string;
 }
 
-export function SetlistDraft({ songs, onChange }: SetlistDraftProps) {
+export function SetlistDraft({ songs, onChange, serviceColor }: SetlistDraftProps) {
+  const serviceColors = colorClasses[serviceColor];
+
   const updateSong = <K extends keyof SetlistSong>(
     id: string,
     field: K,
@@ -52,7 +57,7 @@ export function SetlistDraft({ songs, onChange }: SetlistDraftProps) {
     <Card>
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-sm font-semibold">
-          <Music className="h-4 w-4 text-primary" />
+          <Music className={cn("h-4 w-4", serviceColors.badgeText)} />
           Setlist
           <span className="ml-auto text-xs font-normal text-muted-foreground">
             {songs.length} {songs.length === 1 ? "song" : "songs"}

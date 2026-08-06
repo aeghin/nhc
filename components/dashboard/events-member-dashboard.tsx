@@ -22,6 +22,7 @@ import {
   declineEventInvitation,
 } from "@/lib/actions/event";
 import { Spinner } from "@/components/ui/spinner";
+import { getServiceColors as getColorClasses } from "@/lib/config/service-types-config";
 
 interface EventDate {
   id: string;
@@ -57,63 +58,7 @@ interface Event {
 }
 
 // ─── Color config ───────────────────────────────────────────────
-
-const colorClasses: Record<
-  string,
-  { dot: string; border: string; badge: string; badgeText: string }
-> = {
-  indigo: {
-    dot: "bg-indigo-500",
-    border: "border-l-indigo-500",
-    badge: "bg-indigo-500/10",
-    badgeText: "text-indigo-600",
-  },
-  amber: {
-    dot: "bg-amber-500",
-    border: "border-l-amber-500",
-    badge: "bg-amber-500/10",
-    badgeText: "text-amber-600",
-  },
-  emerald: {
-    dot: "bg-emerald-500",
-    border: "border-l-emerald-500",
-    badge: "bg-emerald-500/10",
-    badgeText: "text-emerald-600",
-  },
-  pink: {
-    dot: "bg-pink-500",
-    border: "border-l-pink-500",
-    badge: "bg-pink-500/10",
-    badgeText: "text-pink-600",
-  },
-  violet: {
-    dot: "bg-violet-500",
-    border: "border-l-violet-500",
-    badge: "bg-violet-500/10",
-    badgeText: "text-violet-600",
-  },
-  red: {
-    dot: "bg-red-500",
-    border: "border-l-red-500",
-    badge: "bg-red-500/10",
-    badgeText: "text-red-600",
-  },
-  blue: {
-    dot: "bg-blue-500",
-    border: "border-l-blue-500",
-    badge: "bg-blue-500/10",
-    badgeText: "text-blue-600",
-  },
-  cyan: {
-    dot: "bg-cyan-500",
-    border: "border-l-cyan-500",
-    badge: "bg-cyan-500/10",
-    badgeText: "text-cyan-600",
-  },
-};
-
-const getColorClasses = (color: string) =>
-  colorClasses[color] || colorClasses.indigo;
+// Palette lives in lib/config/service-types-config.ts — see getServiceColors.
 
 // ─── Date helpers (pure functions — accept `today` as parameter) ─
 
@@ -347,7 +292,7 @@ export function MemberEventsDashboard({
       ? "pending"
       : "schedule",
   );
-  const [timeScope, setTimeScope] = useState<TimeScope>("month");
+  const [timeScope, setTimeScope] = useState<TimeScope>("upcoming");
   const [selectedServiceType, setSelectedServiceType] = useState<string | null>(
     null,
   );
@@ -612,7 +557,7 @@ export function MemberEventsDashboard({
         className="flex flex-wrap items-center gap-2"
       >
         <div className="flex rounded-lg border border-border bg-background p-1">
-          {(["month", "week", "upcoming", "past"] as TimeScope[]).map(
+          {(["upcoming", "month", "week", "past"] as TimeScope[]).map(
             (scope) => (
               <button
                 type="button"

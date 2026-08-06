@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
+import { colorClasses } from "@/lib/config/service-types-config";
 import { volunteerRoleConfig } from "@/lib/config/roles";
 import {
   assignSongVocalist,
@@ -42,6 +43,7 @@ interface SongVocalistAssignProps {
   candidates: VocalistCandidate[];
   /** Only managers get the ⊕ trigger; everyone sees the avatar stack. */
   canManage: boolean;
+  serviceColor: string;
 }
 
 export function SongVocalistAssign({
@@ -49,7 +51,9 @@ export function SongVocalistAssign({
   assigned,
   candidates,
   canManage,
+  serviceColor,
 }: SongVocalistAssignProps) {
+  const serviceColors = colorClasses[serviceColor];
   const [isPending, startTransition] = useTransition();
 
   // Base = server truth; optimistic changes apply only while an action is in
@@ -173,7 +177,11 @@ export function SongVocalistAssign({
                           className={cn(
                             "flex h-4 w-4 shrink-0 items-center justify-center rounded-full border transition-colors",
                             isAssigned
-                              ? "border-primary bg-primary text-primary-foreground"
+                              ? cn(
+                                  serviceColors.borderSolid,
+                                  serviceColors.solid,
+                                  "text-primary-foreground",
+                                )
                               : "border-border",
                           )}
                         >

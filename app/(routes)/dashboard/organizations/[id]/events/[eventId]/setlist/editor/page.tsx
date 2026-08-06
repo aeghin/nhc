@@ -66,6 +66,7 @@ export default async function SetlistEditPage({ params }: PageProps) {
       orgId={orgId}
       backHref={backHref}
       initialSongs={initialSongs}
+      serviceColor={event.serviceType.color}
       catalog={catalog}
       canUseAi={canUseAi}
       hasPro={hasPro}

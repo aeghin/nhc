@@ -4,6 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EditSetlistButton } from "./edit-setlist-button";
+import { cn } from "@/lib/utils";
+import { colorClasses } from "@/lib/config/service-types-config";
 import { formatKey } from "@/lib/constants/key";
 import { InvitationStatus, VolunteerRole } from "@/generated/prisma/enums";
 import { SongVocalistAssign } from "./song-vocalist-assign";
@@ -20,6 +22,8 @@ export function EventSetlistSection({
   orgId,
   canManage,
 }: EventSetlistSectionProps) {
+  const serviceColors = colorClasses[event.serviceType.color];
+
   const songs: SetlistSong[] = event.setlistSongs.map((s) => ({
     id: s.id,
     songId: s.songId,
@@ -69,7 +73,7 @@ export function EventSetlistSection({
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-sm font-semibold">
-            <Music className="h-4 w-4 text-primary" />
+            <Music className={cn("h-4 w-4", serviceColors.badgeText)} />
             Setlist
           </CardTitle>
           {canManage && (
@@ -79,6 +83,7 @@ export function EventSetlistSection({
                   eventId={event.id}
                   eventName={event.name}
                   initialSongs={songs}
+                  serviceColor={event.serviceType.color}
                 />
               )}
               <Button asChild variant="outline" size="sm">
@@ -163,6 +168,7 @@ export function EventSetlistSection({
                   candidates={vocalistCandidates}
                   assigned={assignedBySong.get(song.id) ?? []}
                   canManage={canManage}
+                  serviceColor={event.serviceType.color}
                 />
                 <div className="flex items-center gap-2 shrink-0">
                   <Badge

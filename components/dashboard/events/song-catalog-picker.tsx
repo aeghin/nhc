@@ -16,6 +16,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import { colorClasses } from "@/lib/config/service-types-config";
 import type { SetlistSong } from "@/lib/types";
 import { Song } from "@/generated/prisma/client";
 
@@ -23,6 +24,7 @@ interface CatalogPickerProps {
   catalog: Song[]
   draftSongIds: Set<string>
   onAdd: (songs: SetlistSong[]) => void
+  serviceColor: string
 }
 
 type SortKey = "title" | "artist" | "bpm"
@@ -37,7 +39,10 @@ export function CatalogPicker({
   catalog,
   draftSongIds,
   onAdd,
+  serviceColor,
 }: CatalogPickerProps) {
+  const serviceColors = colorClasses[serviceColor];
+
   const [query, setQuery] = useState("")
   const [selectedThemes, setSelectedThemes] = useState<Set<string>>(new Set())
   const [selectedArtists, setSelectedArtists] = useState<Set<string>>(new Set())
@@ -156,7 +161,12 @@ export function CatalogPicker({
                   size="sm"
                   className={cn(
                     "h-7 gap-1 px-2 text-[11px]",
-                    selectedThemes.size > 0 && "border-primary/50 bg-primary/5 text-primary"
+                    selectedThemes.size > 0 &&
+                      cn(
+                        serviceColors.borderSoft,
+                        serviceColors.tint,
+                        serviceColors.badgeText,
+                      )
                   )}
                 >
                   Theme
@@ -196,7 +206,12 @@ export function CatalogPicker({
                   size="sm"
                   className={cn(
                     "h-7 gap-1 px-2 text-[11px]",
-                    selectedArtists.size > 0 && "border-primary/50 bg-primary/5 text-primary"
+                    selectedArtists.size > 0 &&
+                      cn(
+                        serviceColors.borderSoft,
+                        serviceColors.tint,
+                        serviceColors.badgeText,
+                      )
                   )}
                 >
                   Artist

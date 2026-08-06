@@ -28,6 +28,9 @@ import {
 
 import { emailAcceptedVolunteers } from "@/lib/actions/event";
 
+import { cn } from "@/lib/utils";
+import { colorClasses } from "@/lib/config/service-types-config";
+
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { EventEmailInput, eventEmailSchema } from "@/lib/validations/event-email";
@@ -39,6 +42,7 @@ interface EmailTeamDialogProps {
   eventId: string;
   eventName: string;
   recipientCount: number;
+  serviceColor: string;
 }
 
 export function EmailTeamDialog({
@@ -46,8 +50,10 @@ export function EmailTeamDialog({
   eventId,
   eventName,
   recipientCount,
+  serviceColor,
 }: EmailTeamDialogProps) {
 
+  const serviceColors = colorClasses[serviceColor];
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [sentCount, setSentCount] = useState<number | null>(null);
@@ -98,8 +104,13 @@ export function EmailTeamDialog({
         <DialogContent className="sm:max-w-120">
           {sentCount !== null ? (
             <div className="flex flex-col items-center justify-center py-8 text-center">
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-                <Check className="h-8 w-8 text-primary" />
+              <div
+                className={cn(
+                  "mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full",
+                  serviceColors.badge,
+                )}
+              >
+                <Check className={cn("h-8 w-8", serviceColors.badgeText)} />
               </div>
               <DialogTitle className="mb-2 text-xl">Message Sent!</DialogTitle>
               <DialogDescription className="text-center">
@@ -110,8 +121,13 @@ export function EmailTeamDialog({
           ) : (
             <>
               <DialogHeader>
-                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-                  <Mail className="h-6 w-6 text-primary" />
+                <div
+                  className={cn(
+                    "mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full",
+                    serviceColors.badge,
+                  )}
+                >
+                  <Mail className={cn("h-6 w-6", serviceColors.badgeText)} />
                 </div>
                 <DialogTitle className="text-center text-xl">Email Team</DialogTitle>
                 <DialogDescription className="text-center">
@@ -171,7 +187,15 @@ export function EmailTeamDialog({
                     >
                       Cancel
                     </Button>
-                    <Button type="submit" disabled={isPending || !isValid} className="cursor-pointer">
+                    <Button
+                      type="submit"
+                      disabled={isPending || !isValid}
+                      className={cn(
+                        "cursor-pointer",
+                        serviceColors.solid,
+                        serviceColors.solidHover,
+                      )}
+                    >
                       {isPending ? (
                         <>
                           <Spinner data-icon="inline-start" />

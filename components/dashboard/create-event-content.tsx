@@ -84,54 +84,8 @@ import { createEvent } from "@/lib/actions/event";
 
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
-const colorClasses: Record<
-  string,
-  { dot: string; badge: string; badgeText: string }
-> = {
-  indigo: {
-    dot: "bg-indigo-500",
-    badge: "bg-indigo-500/10",
-    badgeText: "text-indigo-600",
-  },
-  amber: {
-    dot: "bg-amber-500",
-    badge: "bg-amber-500/10",
-    badgeText: "text-amber-600",
-  },
-  emerald: {
-    dot: "bg-emerald-500",
-    badge: "bg-emerald-500/10",
-    badgeText: "text-emerald-600",
-  },
-  pink: {
-    dot: "bg-pink-500",
-    badge: "bg-pink-500/10",
-    badgeText: "text-pink-600",
-  },
-  violet: {
-    dot: "bg-violet-500",
-    badge: "bg-violet-500/10",
-    badgeText: "text-violet-600",
-  },
-  red: {
-    dot: "bg-red-500",
-    badge: "bg-red-500/10",
-    badgeText: "text-red-600",
-  },
-  blue: {
-    dot: "bg-blue-500",
-    badge: "bg-blue-500/10",
-    badgeText: "text-blue-600",
-  },
-  cyan: {
-    dot: "bg-cyan-500",
-    badge: "bg-cyan-500/10",
-    badgeText: "text-cyan-600",
-  },
-};
+import { getServiceColors as getColorClasses } from "@/lib/config/service-types-config";
 
-const getColorClasses = (color: string) =>
-  colorClasses[color] || colorClasses.indigo;
 const newTypeColorOptions = [
   "indigo",
   "amber",

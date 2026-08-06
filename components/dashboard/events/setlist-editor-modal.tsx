@@ -21,6 +21,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { saveSetlist } from "@/lib/actions/song-setlist";
+import { cn } from "@/lib/utils";
+import { colorClasses } from "@/lib/config/service-types-config";
 
 import {
   KEY_OPTIONS,
@@ -36,6 +38,7 @@ interface SetlistEditorModalProps {
   eventId: string
   eventName: string
   initialSongs: SetlistSong[]
+  serviceColor: string
 }
 
 export function SetlistEditorModal({
@@ -43,8 +46,10 @@ export function SetlistEditorModal({
   onOpenChange,
   eventId,
   initialSongs,
+  serviceColor,
 }: SetlistEditorModalProps) {
-  
+  const serviceColors = colorClasses[serviceColor]
+
   const [songs, setSongs] = useState<SetlistSong[]>(initialSongs)
   const [isPending, startTransition] = useTransition()
 
@@ -141,7 +146,12 @@ export function SetlistEditorModal({
           >
             Cancel
           </Button>
-          <Button size="sm" onClick={handleSave} disabled={isPending}>
+          <Button
+            size="sm"
+            className={cn(serviceColors.solid, serviceColors.solidHover)}
+            onClick={handleSave}
+            disabled={isPending}
+          >
             {isPending ? "Saving…" : "Save"}
           </Button>
         </DialogFooter>

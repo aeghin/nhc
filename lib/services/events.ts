@@ -149,6 +149,7 @@ export const getEventDetailsById = async (eventId: string, organizationId: strin
 
   cacheTag(`event-${eventId}-org-${organizationId}-details`);
   cacheTag(`org-${organizationId}-songs`);
+  cacheTag(`org-${organizationId}-st`);
 
   const details = await prisma.event.findFirst({
       where: {

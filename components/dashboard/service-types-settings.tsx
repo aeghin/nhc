@@ -16,10 +16,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tags, Trash2, AlertCircle, Pencil } from "lucide-react";
 import { deleteServiceType, editServiceType } from "@/lib/actions/service-type";
-import {
-  SERVICE_TYPE_COLORS,
-  getServiceColorClasses,
-} from "@/lib/config/service-colors";
+import { SERVICE_TYPE_COLORS } from "@/lib/config/service-colors";
+import { getServiceColors } from "@/lib/config/service-types-config";
 import { serviceTypeSchema } from "@/lib/validations/service-types";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -124,7 +122,7 @@ export const ServiceTypesSettings = ({
         ) : (
           <ul className="divide-y divide-border/40">
             {serviceTypes.map((serviceType) => {
-              const colors = getServiceColorClasses(serviceType.color);
+              const colors = getServiceColors(serviceType.color);
 
               return (
                 <li
@@ -207,7 +205,7 @@ export const ServiceTypesSettings = ({
                     onClick={() => setEditColor(color)}
                     className={cn(
                       "h-6 w-6 cursor-pointer rounded-full transition-all",
-                      getServiceColorClasses(color).dot,
+                      getServiceColors(color).dot,
                       editColor === color
                         ? "ring-2 ring-offset-1 ring-primary"
                         : "hover:scale-110",

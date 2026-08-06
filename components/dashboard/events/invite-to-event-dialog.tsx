@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/select";
 
 import { cn } from "@/lib/utils";
+import { colorClasses } from "@/lib/config/service-types-config";
 import { VolunteerRole } from "@/generated/prisma/enums";
 import { volunteerRoleConfig } from "@/lib/config/roles";
 import {
@@ -68,6 +69,7 @@ interface InviteToEventDialogProps {
   eventDates: InviteEventDate[];
   /** Renders the trigger as a full row instead of a compact button */
   variant?: "row" | "compact";
+  serviceColor: string;
 }
 
 function formatConflictTime(iso: string): string {
@@ -99,7 +101,9 @@ export function InviteToEventDialog({
   unavailableUserIds,
   eventDates,
   variant = "compact",
+  serviceColor,
 }: InviteToEventDialogProps) {
+  const serviceColors = colorClasses[serviceColor];
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<string[]>([]);
@@ -253,7 +257,12 @@ export function InviteToEventDialog({
             >
               Cancel
             </Button>
-            <Button onClick={confirmConflictSelection}>Select Anyway</Button>
+            <Button
+              className={cn(serviceColors.solid, serviceColors.solidHover)}
+              onClick={confirmConflictSelection}
+            >
+              Select Anyway
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -336,7 +345,11 @@ export function InviteToEventDialog({
                       isBlocked
                         ? "cursor-not-allowed border-border bg-muted/40 opacity-70"
                         : isSelected
-                          ? "cursor-pointer border-primary bg-primary/5"
+                          ? cn(
+                              "cursor-pointer",
+                              serviceColors.borderSolid,
+                              serviceColors.tint,
+                            )
                           : conflict
                             ? "cursor-pointer border-amber-200 bg-amber-50/50 dark:border-amber-500/20 dark:bg-amber-500/5"
                             : "cursor-pointer border-border hover:bg-muted/50",
@@ -355,7 +368,13 @@ export function InviteToEventDialog({
                           src={member.user.userImageUrl ?? undefined}
                           alt={`${member.user.firstName} ${member.user.lastName}`}
                         />
-                        <AvatarFallback className="bg-primary/10 text-sm font-medium text-primary">
+                        <AvatarFallback
+                          className={cn(
+                            "text-sm font-medium",
+                            serviceColors.badge,
+                            serviceColors.badgeText,
+                          )}
+                        >
                           {member.user.firstName.charAt(0)}
                         </AvatarFallback>
                       </Avatar>
@@ -431,6 +450,7 @@ export function InviteToEventDialog({
             </Button>
             <Button
               type="button"
+              className={cn(serviceColors.solid, serviceColors.solidHover)}
               onClick={handleInvite}
               disabled={selected.length === 0 || isSending}
             >
