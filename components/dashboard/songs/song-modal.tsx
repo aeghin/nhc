@@ -450,7 +450,7 @@ export function SongModal({ orgId, song, open, onOpenChange }: SongModalProps) {
                       </div>
                     </div>
                     <div className="flex flex-wrap gap-1.5">
-                      {COMMON_THEMES.filter((t) => !themeSet.has(t))
+                      {COMMON_THEMES.filter((t) => !themeSet.has(t.toLowerCase()))
                         .slice(0, 8)
                         .map((suggestion) => (
                           <button

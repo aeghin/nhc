@@ -29,3 +29,19 @@ export const createEventInputSchema = createEventSchema.extend({
 });
 
 export type CreateEventInput = z.infer<typeof createEventInputSchema>;
+
+
+export const addEventRolesSchema = z.object({
+  roles: z.array(z.enum(VolunteerRole)).min(1, "Select at least one role"),
+});
+
+export type AddEventRolesInput = z.infer<typeof addEventRolesSchema>;
+
+
+export const inviteToEventSchema = z.object({
+  role: z.enum(VolunteerRole),
+  userIds: z.array(z.string()).min(1, "Select at least one member"),
+  expiresAt: z.number().refine((v) => [3, 5, 7].includes(v)),
+});
+
+export type InviteToEventInput = z.infer<typeof inviteToEventSchema>;

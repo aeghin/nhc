@@ -10,7 +10,12 @@ export const songSchema = z.object({
     defaultKeyQuality: keyQualitySchema,
     spotifyUrl: z.url("Link required"),
     youtubeUrl: z.url("Link required"),
-    themes: z.string().array().min(1, "Theme selection is required"),
+    themes: z
+        .string()
+        .transform((t) => t.trim().toLowerCase())
+        .array()
+        .min(1, "Theme selection is required")
+        .transform((arr) => [...new Set(arr)]),
     organizationId: z.uuid(),
 });
 

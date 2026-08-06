@@ -11,8 +11,12 @@ import {
 import { logActivity, volunteerRoleLabels } from "@/lib/activity";
 
 import {
+  AddEventRolesInput,
+  addEventRolesSchema,
   CreateEventInput,
   createEventInputSchema,
+  InviteToEventInput,
+  inviteToEventSchema,
 } from "@/lib/validations/event";
 
 import {
@@ -46,6 +50,9 @@ type CheckMemberAvailabilityInput = {
     startTime: string;
     endTime: string;
   }[];
+  // Set when checking availability for an event that already exists, so the
+  // event's own roster doesn't come back as conflicting with itself.
+  excludeEventId?: string;
 };
 
 export type MemberConflict = {
@@ -69,6 +76,7 @@ type ActionResponse = { success: true } | { success: false; error: string };
 export const checkMemberAvailability = async ({
   organizationId,
   dates,
+  excludeEventId,
 }: CheckMemberAvailabilityInput): Promise<MemberAvailability> => {
   
   const user = await currentUser();
@@ -90,7 +98,7 @@ export const checkMemberAvailability = async ({
   }
 
   const [conflictingAssignments, blockoutRows] = await Promise.all([
-    getConflictingAssignments(organizationId, dates),
+    getConflictingAssignments(organizationId, dates, excludeEventId),
     getBlockoutsForDates(organizationId, dates),
   ]);
 
@@ -153,6 +161,7 @@ export async function createEvent(
       location,
       description,
       roleAssignments,
+      rolesNeeded,
       expiresAt
     } = parsed.data;
 
@@ -233,6 +242,7 @@ export async function createEvent(
           name,
           description: description || "",
           location,
+          rolesNeeded,
           createdById: id,
           serviceTypeId,
           organizationId,
@@ -514,6 +524,307 @@ export const cancelUserEventAssignment = async (userId: string, organizationId: 
 
   };
 }
+
+
+// Adds roles to an event's roster without assigning anyone — an open slot the
+// Team card can render and invite into later.
+export const addEventRoles = async (
+  organizationId: string,
+  eventId: string,
+  input: AddEventRolesInput,
+): Promise<ActionResponse> => {
+
+  try {
+
+    const user = await currentUser();
+
+    if (!user) return { success: false, error: "Unauthorized" };
+
+    const parsed = addEventRolesSchema.safeParse(input);
+
+    if (!parsed.success) return { success: false, error: parsed.error.message };
+
+    const { roles } = parsed.data;
+
+    const [membership, event] = await Promise.all([
+      prisma.membership.findUnique({
+        where: {
+          userId_organizationId: { userId: user.id, organizationId },
+        },
+        select: { role: true },
+      }),
+      prisma.event.findFirst({
+        where: { id: eventId, organizationId },
+        select: { rolesNeeded: true },
+      }),
+    ]);
+
+    if (!membership) return { success: false, error: "Unable to locate membership" };
+
+    if (membership.role === OrgRole.MEMBER) return { success: false, error: "Unauthorized" };
+
+    if (!event) return { success: false, error: "Unable to locate event" };
+
+    const merged = [...new Set([...event.rolesNeeded, ...roles])];
+
+    if (merged.length === event.rolesNeeded.length) {
+      return { success: false, error: "Those roles are already on this event" };
+    }
+
+    await prisma.event.update({
+      where: { id: eventId },
+      data: { rolesNeeded: merged },
+    });
+
+    updateTag(`event-${eventId}-org-${organizationId}-details`);
+    updateTag(`org-${organizationId}-events`);
+
+    return { success: true };
+
+  } catch {
+
+    return { success: false, error: "Unable to add roles, please try again" };
+
+  };
+};
+
+
+type InviteToEventResult =
+  | { success: true; invitedCount: number; skippedNames: string[] }
+  | { success: false; error: string };
+
+// Invites members into a role on an event that already exists. Mirrors the
+// guards createEvent applies at creation time: admin/owner only, blockouts are
+// a hard stop, conflicts are the caller's call (warned about in the UI).
+export const inviteMembersToEvent = async (
+  organizationId: string,
+  eventId: string,
+  input: InviteToEventInput,
+): Promise<InviteToEventResult> => {
+
+  try {
+
+    const user = await currentUser();
+
+    if (!user) return { success: false, error: "Unauthorized" };
+
+    const parsed = inviteToEventSchema.safeParse(input);
+
+    if (!parsed.success) return { success: false, error: parsed.error.message };
+
+    const { role, userIds, expiresAt } = parsed.data;
+
+    const uniqueUserIds = [...new Set(userIds)];
+
+    const [membership, event] = await Promise.all([
+      prisma.membership.findUnique({
+        where: {
+          userId_organizationId: { userId: user.id, organizationId },
+        },
+        include: { organization: { select: { name: true, logoUrl: true } } },
+      }),
+      prisma.event.findFirst({
+        where: { id: eventId, organizationId },
+        select: {
+          name: true,
+          rolesNeeded: true,
+          dates: { select: { startTime: true, endTime: true } },
+          assignments: {
+            where: { userId: { in: uniqueUserIds } },
+            select: {
+              id: true,
+              userId: true,
+              status: true,
+              expiresAt: true,
+              user: { select: { firstName: true, lastName: true } },
+            },
+          },
+        },
+      }),
+    ]);
+
+    if (!membership) return { success: false, error: "Unable to locate membership" };
+
+    if (membership.role !== OrgRole.OWNER && membership.role !== OrgRole.ADMIN) {
+      return {
+        success: false,
+        error: "Unauthorized, please reach out to your Admin",
+      };
+    }
+
+    if (!event) return { success: false, error: "Unable to locate event" };
+
+    const validMemberships = await prisma.membership.count({
+      where: {
+        organizationId,
+        userId: { in: uniqueUserIds },
+      },
+    });
+
+    if (validMemberships !== uniqueUserIds.length) {
+      return { success: false, error: "One or more members are not part of this organization" };
+    }
+
+    // Hard block: members with a blockout on any event day can't be assigned.
+    const blockoutRows = await getBlockoutsForDates(organizationId, event.dates);
+
+    const blockedIds = new Set(
+      blockoutRows
+        .map((b) => b.userId)
+        .filter((uid) => uniqueUserIds.includes(uid)),
+    );
+
+    if (blockedIds.size > 0) {
+      const blockedUsers = await prisma.user.findMany({
+        where: { id: { in: [...blockedIds] } },
+        select: { firstName: true, lastName: true },
+      });
+
+      const names = blockedUsers
+        .map((u) => `${u.firstName} ${u.lastName}`)
+        .join(", ");
+
+      return {
+        success: false,
+        error: `Unable to assign ${names} — they have blockout dates during this event`,
+      };
+    }
+
+    // A member holds at most one role per event (unique eventId+userId), so
+    // anyone still live on the roster is skipped rather than re-roled. Declined,
+    // removed, and lapsed rows are reused — a second row would violate it. A
+    // lapsed invite can no longer be accepted, so re-inviting is the only way
+    // to unstick it.
+    const existingByUser = new Map(event.assignments.map((a) => [a.userId, a]));
+
+    const now = new Date();
+
+    const skippedNames: string[] = [];
+    const toCreate: string[] = [];
+    const toReactivate: { id: string; userId: string }[] = [];
+
+    for (const uid of uniqueUserIds) {
+      const existing = existingByUser.get(uid);
+
+      if (!existing) {
+        toCreate.push(uid);
+        continue;
+      }
+
+      const isLive =
+        existing.status === InvitationStatus.ACCEPTED ||
+        (existing.status === InvitationStatus.PENDING &&
+          existing.expiresAt > now);
+
+      if (isLive) {
+        skippedNames.push(`${existing.user.firstName} ${existing.user.lastName}`);
+        continue;
+      }
+
+      toReactivate.push({ id: existing.id, userId: uid });
+    }
+
+    const invitedUserIds = [...toCreate, ...toReactivate.map((a) => a.userId)];
+
+    if (invitedUserIds.length === 0) {
+      return { success: false, error: "Everyone selected is already on this event" };
+    }
+
+    const expiry = new Date(Date.now() + expiresAt * 24 * 60 * 60 * 1000);
+
+    await prisma.$transaction(async (tx) => {
+      if (toCreate.length > 0) {
+        await tx.eventAssignment.createMany({
+          data: toCreate.map((uid) => ({
+            eventId,
+            userId: uid,
+            role,
+            assignedById: user.id,
+            organizationId,
+            expiresAt: expiry,
+          })),
+        });
+      }
+
+      if (toReactivate.length > 0) {
+        await tx.eventAssignment.updateMany({
+          where: { id: { in: toReactivate.map((a) => a.id) }, organizationId },
+          data: {
+            role,
+            status: InvitationStatus.PENDING,
+            assignedById: user.id,
+            autoAssigned: false,
+            expiresAt: expiry,
+          },
+        });
+      }
+
+      // Inviting into a role means the event needs it — keep the roster honest
+      // for events created before rolesNeeded was persisted.
+      if (!event.rolesNeeded.includes(role)) {
+        await tx.event.update({
+          where: { id: eventId },
+          data: { rolesNeeded: [...event.rolesNeeded, role] },
+        });
+      }
+    });
+
+    const invitedUsers = await prisma.user.findMany({
+      where: { id: { in: invitedUserIds } },
+      select: { email: true, firstName: true },
+    });
+
+    const { name: organizationName, logoUrl } = membership.organization;
+
+    after(async () => {
+      await Promise.allSettled(
+        invitedUsers.map((invitee) =>
+          resend.emails.send({
+            from: "Aeghin <support@aeghin.com>",
+            to: invitee.email,
+            subject: `You've been assigned to ${event.name}`,
+            react: EventAssignmentEmail({
+              recipientName: invitee.firstName,
+              eventName: event.name,
+              organizationName: organizationName || "",
+              logoUrl,
+              viewLink: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/organizations/${organizationId}`,
+            }),
+          }),
+        ),
+      );
+    });
+
+    await logActivity({
+      organizationId,
+      type: ActivityType.INVITE_SENT,
+      actorName: `${user.firstName} ${user.lastName}`,
+      targetName: event.name,
+      detail: `${volunteerRoleLabels[role]} · ${invitedUserIds.length} invited`,
+    });
+
+    for (const uid of invitedUserIds) {
+      updateTag(`user-${uid}-events-${organizationId}`);
+    };
+
+    updateTag(`event-${eventId}-org-${organizationId}-details`);
+    updateTag(`org-${organizationId}-events`);
+    updateTag(`org-${organizationId}-activity`);
+
+    // Reusing a row drops whatever ACCEPTED/DECLINED it held, which moves the
+    // acceptance numbers those stats are counted from.
+    if (toReactivate.length > 0) {
+      updateTag(`org-${organizationId}-acceptance-stats`);
+    }
+
+    return { success: true, invitedCount: invitedUserIds.length, skippedNames };
+
+  } catch {
+
+    return { success: false, error: "Unable to send invites, please try again" };
+
+  };
+};
 
 
 export const deleteEvent = async (organizationId: string, eventId: string): Promise<ActionResponse> => {

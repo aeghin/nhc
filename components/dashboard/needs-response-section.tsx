@@ -10,6 +10,7 @@ import {
 interface NeedsResponseSectionProps {
   organizationId: string;
   userId: string;
+  canManage: boolean;
 }
 
 // Events store wall-clock times with a Z suffix, so display always pins to UTC.
@@ -49,6 +50,7 @@ function expiryLabel(
 export const NeedsResponseSection = async ({
   organizationId,
   userId,
+  canManage
 }: NeedsResponseSectionProps) => {
 
   const [events, serviceTypes] = await Promise.all([
@@ -102,6 +104,7 @@ export const NeedsResponseSection = async ({
     <NeedsResponseBanner
       invites={pending.map((p) => p.invite)}
       organizationId={organizationId}
+      canManage={canManage}
     />
   );
 };

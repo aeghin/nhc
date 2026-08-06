@@ -6,9 +6,13 @@ import { getBlockedUserIds } from "@/lib/services/blockouts";
 
 type DateRange = { startTime: Date | string; endTime: Date | string };
 
+// `excludeEventId` skips one event's own assignments. Callers checking
+// availability for an event that already exists must pass it, or everyone
+// already on the roster comes back conflicting with themselves.
 export async function getConflictingAssignments(
   organizationId: string,
   dates: DateRange[],
+  excludeEventId?: string,
 ) {
   const overlapConditions = dates.map(({ startTime, endTime }) => ({
     event: {
@@ -24,6 +28,7 @@ export async function getConflictingAssignments(
   return prisma.eventAssignment.findMany({
     where: {
       organizationId,
+      ...(excludeEventId ? { eventId: { not: excludeEventId } } : {}),
       AND: [
         {
           OR: [
@@ -53,9 +58,10 @@ export async function getConflictingAssignments(
 export async function getConflictingUserIds(
   organizationId: string,
   dates: DateRange[],
+  excludeEventId?: string,
 ): Promise<Set<string>> {
   if (dates.length === 0) return new Set();
-  const rows = await getConflictingAssignments(organizationId, dates);
+  const rows = await getConflictingAssignments(organizationId, dates, excludeEventId);
   return new Set(rows.map((r) => r.userId));
 }
 

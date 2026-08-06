@@ -256,3 +256,94 @@ export const deleteSongAttachment = async (attachmentId: string, organizationId:
         return { success: false, error: "Something went wrong. Try Again" };
     }
 }
+
+export const deleteSongFromLibrary = async (organizationId: string, songId: string): Promise<ActionResponse> => {
+
+    try {
+
+        const user = await currentUser();
+
+        if (!user) return { success: false, error: "Unauthorized" };
+
+        if (!organizationId || !songId) return { success: false, error: "Insufficient data" };
+
+        const membership = await prisma.membership.findUnique({
+            where: {
+                userId_organizationId: {
+                    userId: user.id,
+                    organizationId
+                }
+            },
+            select: { role: true }
+        });
+
+        if (!membership) return { success: false, error: "Unable to locate membership" };
+
+        if (membership.role === OrgRole.MEMBER) return { success: false, error: "Unauthorized" };
+
+        const song = await prisma.song.findUnique({
+            where: { id: songId, organizationId, deletedAt: null },
+            select: {
+                id: true,
+                attachments: { select: { key: true } }
+            }
+        });
+
+        if (!song) return { success: false, error: "Song not found." };
+
+       
+        const upcoming = await prisma.setlistSong.findMany({
+            where: {
+                songId,
+                event: { dates: { some: { endTime: { gte: new Date() } } } }
+            },
+            select: { event: { select: { name: true } } }
+        });
+
+        if (upcoming.length > 0) {
+            const names = upcoming.map((s) => s.event.name);
+            const shown = names.slice(0, 3).join(", ");
+            const rest = names.length > 3 ? ` and ${names.length - 3} more` : "";
+
+            return {
+                success: false,
+                error: `This song is scheduled for ${shown}${rest}. Remove it from those setlists first.`
+            };
+        }
+
+        
+        const setlistUses = await prisma.setlistSong.count({ where: { songId } });
+
+        const purgeAttachments = setlistUses === 0 && song.attachments.length > 0;
+
+        await prisma.$transaction(async (tx) => {
+            if (purgeAttachments) {
+                await tx.songAttachment.deleteMany({ where: { songId } });
+            }
+
+            await tx.song.update({
+                where: { id: songId, organizationId },
+                data: { deletedAt: new Date() }
+            });
+        });
+
+        if (purgeAttachments) {
+            try {
+                const utapi = new UTApi();
+                await utapi.deleteFiles(song.attachments.map((a) => a.key));
+            } catch (err) {
+               
+                console.log(err);
+            }
+        }
+
+        updateTag(`org-${organizationId}-songs`);
+        revalidatePath(`/dashboard/organizations/${organizationId}/songs`);
+
+        return { success: true };
+
+    } catch (err) {
+        console.log(err);
+        return { success: false, error: "Something went wrong. Try again" };
+    }
+}

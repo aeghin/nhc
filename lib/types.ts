@@ -72,6 +72,7 @@ export type EventDetails = {
   name: string
   description: string
   location: string
+  rolesNeeded: VolunteerRole[]
   createdAt: Date
   updatedAt: Date
   createdById: string | null

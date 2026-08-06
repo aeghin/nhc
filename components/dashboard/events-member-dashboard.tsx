@@ -755,6 +755,7 @@ export function MemberEventsDashboard({
                     index={index}
                     isMounted={isMounted}
                     getServiceType={getServiceType}
+                    canManage={canManage}
                   />
                 ))}
               </div>
@@ -929,12 +930,14 @@ function PendingEventCard({
   index,
   isMounted,
   getServiceType,
+  canManage,
 }: {
   event: Event;
   organizationId: string;
   index: number;
   isMounted: boolean;
   getServiceType: (id: string) => ServiceType | undefined;
+  canManage: boolean;
 }) {
   const [isAccepting, startAccept] = useTransition();
   const [isDeclining, startDecline] = useTransition();
@@ -962,6 +965,46 @@ function PendingEventCard({
     });
   }
 
+  // Pending invites aren't viewable until accepted, so only managers — who
+  // reach the event page via their role — get a clickable card.
+  const details = (
+    <>
+      <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
+        <span
+          className={`rounded px-2 py-0.5 text-xs font-medium ${colors.badge} ${colors.badgeText}`}
+        >
+          {service?.name || "Event"}
+        </span>
+        <span className="rounded-md bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground">
+          {roleInfo?.icon} {roleInfo?.label}
+        </span>
+      </div>
+
+      <h3 className="mb-2 text-base font-semibold text-foreground">
+        {event.name}
+      </h3>
+
+      <div className="mb-2 flex flex-col gap-1 text-sm text-muted-foreground sm:flex-row sm:flex-wrap sm:gap-x-4 sm:gap-y-1">
+        <span className="flex items-center gap-1.5">
+          <Calendar className="h-3.5 w-3.5 shrink-0" />
+          {formatDateRange(event.dates)}
+        </span>
+        <span className="flex items-center gap-1.5">
+          <Clock className="h-3.5 w-3.5 shrink-0" />
+          {formatTimeRange(event.dates)}
+        </span>
+        <span className="flex items-center gap-1.5">
+          <MapPin className="h-3.5 w-3.5 shrink-0" />
+          <span className="truncate">{event.location}</span>
+        </span>
+      </div>
+
+      {assignedBy && (
+        <p className="text-xs text-muted-foreground">Assigned By: {assignedBy}</p>
+      )}
+    </>
+  );
+
   return (
     <m.div
       initial={isMounted ? { opacity: 0, y: 20 } : false}
@@ -970,44 +1013,16 @@ function PendingEventCard({
       whileHover={{ scale: 1.01 }}
       className={`group overflow-hidden rounded-lg border border-border border-l-[3px] bg-card transition-shadow duration-200 hover:shadow-md ${colors.border}`}
     >
-      <Link
-        href={`/dashboard/organizations/${organizationId}/events/${event.id}`}
-        className="block p-4"
-      >
-        <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
-          <span
-            className={`rounded px-2 py-0.5 text-xs font-medium ${colors.badge} ${colors.badgeText}`}
-          >
-            {service?.name || "Event"}
-          </span>
-          <span className="rounded-md bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground">
-            {roleInfo?.icon} {roleInfo?.label}
-          </span>
-        </div>
-
-        <h3 className="mb-2 text-base font-semibold text-foreground">
-          {event.name}
-        </h3>
-
-        <div className="mb-2 flex flex-col gap-1 text-sm text-muted-foreground sm:flex-row sm:flex-wrap sm:gap-x-4 sm:gap-y-1">
-          <span className="flex items-center gap-1.5">
-            <Calendar className="h-3.5 w-3.5 shrink-0" />
-            {formatDateRange(event.dates)}
-          </span>
-          <span className="flex items-center gap-1.5">
-            <Clock className="h-3.5 w-3.5 shrink-0" />
-            {formatTimeRange(event.dates)}
-          </span>
-          <span className="flex items-center gap-1.5">
-            <MapPin className="h-3.5 w-3.5 shrink-0" />
-            <span className="truncate">{event.location}</span>
-          </span>
-        </div>
-
-        {assignedBy && (
-          <p className="text-xs text-muted-foreground">Assigned By: {assignedBy}</p>
-        )}
-      </Link>
+      {canManage ? (
+        <Link
+          href={`/dashboard/organizations/${organizationId}/events/${event.id}`}
+          className="block p-4"
+        >
+          {details}
+        </Link>
+      ) : (
+        <div className="p-4">{details}</div>
+      )}
 
       <div className="border-t border-border" />
       <div className="flex gap-2 p-3 sm:gap-3">

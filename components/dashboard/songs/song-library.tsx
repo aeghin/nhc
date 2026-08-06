@@ -32,6 +32,7 @@ import { SongModal } from "@/components/dashboard/songs/song-modal";
 import { EditSongDetails } from "@/components/dashboard/songs/song-edit";
 
 import { KeyQuality } from "@/generated/prisma/enums";
+import { formatKey } from "@/lib/constants/key";
 import { YoutubeIcon, SpotifyIcon } from "@/components/icons/brand-icons";
 import type { LibrarySong as Song } from "@/lib/types";
 
@@ -50,10 +51,9 @@ const SORT_OPTIONS: { value: SortKey; label: string }[] = [
   { value: "bpm", label: "BPM (low to high)" },
 ];
 
-function formatKey(song: Song) {
+function formatSongKey(song: Song) {
   if (!song.defaultPitch) return "—"
-  const quality = song.defaultKeyQuality === KeyQuality.MINOR ? "m" : ""
-  return `${song.defaultPitch}${quality}`
+  return formatKey(song.defaultPitch, song.defaultKeyQuality)
 }
 
 function SongLinks({ song }: { song: Song }) {
@@ -438,7 +438,7 @@ export function SongLibrary({ songs, orgId, orgName, canManage }: SongLibraryPro
                       <p className="truncate text-xs text-muted-foreground">{song.artist}</p>
                     </div>
                     <span className="shrink-0 font-mono text-xs text-muted-foreground tabular-nums">
-                      {formatKey(song)} · {song.bpm} · {song.timeSignature}
+                      {formatSongKey(song)} · {song.bpm} · {song.timeSignature}
                     </span>
                     <div className="flex shrink-0 items-center gap-1">
                       <SongLinks song={song} />
@@ -510,7 +510,7 @@ export function SongLibrary({ songs, orgId, orgName, canManage }: SongLibraryPro
                         : "",
                     )}
                   >
-                    {formatKey(song)}
+                    {formatSongKey(song)}
                   </Badge>
                 </div>
 

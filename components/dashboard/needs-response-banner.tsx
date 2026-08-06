@@ -27,11 +27,13 @@ export interface PendingInvite {
 interface NeedsResponseBannerProps {
   invites: PendingInvite[];
   organizationId: string;
+  canManage: boolean;
 }
 
 export function NeedsResponseBanner({
   invites,
   organizationId,
+  canManage
 }: NeedsResponseBannerProps) {
   return (
     <m.div
@@ -56,6 +58,7 @@ export function NeedsResponseBanner({
             key={invite.eventId}
             invite={invite}
             organizationId={organizationId}
+            canManage={canManage}
           />
         ))}
       </div>
@@ -66,9 +69,11 @@ export function NeedsResponseBanner({
 function InviteRow({
   invite,
   organizationId,
+  canManage
 }: {
   invite: PendingInvite;
   organizationId: string;
+  canManage: boolean;
 }) {
   const [isAccepting, startAccept] = useTransition();
   const [isDeclining, startDecline] = useTransition();
@@ -107,12 +112,14 @@ function InviteRow({
       <span className={cn("size-2 shrink-0 rounded-full", colors.dot)} />
 
       <div className="min-w-0 flex-1 basis-52">
-        <Link
+        {canManage ? (<Link
           href={`/dashboard/organizations/${organizationId}/events/${invite.eventId}`}
           className="hover:underline"
         >
           <p className="truncate text-sm font-medium">{invite.eventName}</p>
-        </Link>
+        </Link>):
+          (<p className="truncate text-sm font-medium">{invite.eventName}</p>)
+        }
         <p className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground">
           {invite.roleLabel && <span>{invite.roleLabel}</span>}
           <span>· {invite.whenLabel}</span>

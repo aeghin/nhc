@@ -78,6 +78,7 @@ export default async function OrganizationPage({
           <NeedsResponseSection
             organizationId={organization.id}
             userId={userId}
+            canManage={canManage}
           />
         </Suspense>
  

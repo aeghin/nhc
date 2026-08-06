@@ -241,6 +241,11 @@ model Event {
   description String
   location String
 
+  // Roles this event calls for, including ones nobody is assigned to yet.
+  // Assignments alone can't express an open slot, and they vanish from the
+  // roster the moment the only volunteer is removed.
+  rolesNeeded VolunteerRole[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

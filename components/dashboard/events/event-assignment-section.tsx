@@ -28,11 +28,26 @@ import {
 } from "@/lib/config/roles";
 import { EventVolunteerRowMenu } from "./event-volunteer-row-menu";
 import { EmailTeamDialog } from "./email-team-dialog";
+import { AddEventRolesDialog } from "./add-event-roles-dialog";
+import { InviteToEventDialog } from "./invite-to-event-dialog";
+
+export type TeamMember = {
+  userId: string;
+  volunteerRoles: VolunteerRole[];
+  user: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    userImageUrl: string | null;
+  };
+};
 
 interface EventAssignmentsCardProps {
   event: EventDetails;
   currentUserId: string;
   canManage: boolean;
+  /** Org roster for the invite pickers — empty for members, who can't invite */
+  members: TeamMember[];
 }
 
 const roleOrder: VolunteerRole[] = [
@@ -62,6 +77,7 @@ export function EventAssignmentsCard({
   event,
   currentUserId,
   canManage,
+  members,
 }: EventAssignmentsCardProps) {
   const serviceColors = colorClasses[event.serviceType.color];
 
@@ -70,6 +86,42 @@ export function EventAssignmentsCard({
     (e) => e.status === InvitationStatus.ACCEPTED,
   ).length;
 
+  // A role belongs on the roster if the event declared it or someone is on it.
+  // The union keeps events created before rolesNeeded was persisted intact.
+  const rosterRoles = new Set<VolunteerRole>([
+    ...event.rolesNeeded,
+    ...event.assignments.map((a) => a.role),
+  ]);
+
+  // One role per member (unique eventId+userId), so anyone still live on the
+  // event can't be invited into another role. A lapsed invite isn't live —
+  // it can't be accepted anymore, so re-inviting is what unsticks it.
+  const now = new Date();
+
+  const unavailableUserIds = event.assignments
+    .filter(
+      (a) =>
+        a.status === InvitationStatus.ACCEPTED ||
+        (a.status === InvitationStatus.PENDING && a.expiresAt > now),
+    )
+    .map((a) => a.userId);
+
+  const membersByRole: Record<string, TeamMember[]> = {};
+  const memberCountByRole: Record<string, number> = {};
+
+  for (const role of roleOrder) {
+    const eligible = members.filter((m) => m.volunteerRoles.includes(role));
+    membersByRole[role] = eligible;
+    memberCountByRole[role] = eligible.length;
+  }
+
+  // Times are stored as wall-clock with Z, so the day key comes off the ISO string
+  const eventDates = event.dates.map((d) => ({
+    date: d.startTime.toISOString().slice(0, 10),
+    startTime: d.startTime.toISOString(),
+    endTime: d.endTime.toISOString(),
+  }));
+
   const categoryKeys = (Object.keys(roleCategoryConfig) as RoleCategory[]).sort(
     (a, b) => roleCategoryConfig[a].order - roleCategoryConfig[b].order,
   );
@@ -77,12 +129,11 @@ export function EventAssignmentsCard({
   const categories = categoryKeys
     .map((key) => {
       const roleGroups = roleOrder
-        .filter((role) => roleToCategory[role] === key)
+        .filter((role) => roleToCategory[role] === key && rosterRoles.has(role))
         .map((role) => ({
           role,
           items: event.assignments.filter((a) => a.role === role),
-        }))
-        .filter((group) => group.items.length > 0);
+        }));
 
       const items = roleGroups.flatMap((g) => g.items);
       const acceptedCount = items.filter(
@@ -97,7 +148,7 @@ export function EventAssignmentsCard({
         acceptedCount,
       };
     })
-    .filter((cat) => cat.total > 0);
+    .filter((cat) => cat.roleGroups.length > 0);
 
   const decorativeMask =
     "linear-gradient(to bottom, black 0%, black 35%, transparent 75%)";
@@ -135,10 +186,18 @@ export function EventAssignmentsCard({
             <Users className="h-4 w-4 text-muted-foreground" />
             Team
           </CardTitle>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <span className="text-xs text-muted-foreground tabular-nums">
               {acceptedCount}/{total} confirmed
             </span>
+            {canManage && (
+              <AddEventRolesDialog
+                organizationId={event.organizationId}
+                eventId={event.id}
+                existingRoles={[...rosterRoles]}
+                memberCountByRole={memberCountByRole}
+              />
+            )}
             {canManage && acceptedCount > 0 && (
               <EmailTeamDialog
                 organizationId={event.organizationId}
@@ -174,6 +233,8 @@ export function EventAssignmentsCard({
               <AccordionContent className="space-y-5 pt-1">
                 {category.roleGroups.map((group) => {
                   const roleInfo = volunteerRoleConfig[group.role];
+                  const isUnfilled = group.items.length === 0;
+
                   return (
                     <div key={group.role} className="space-y-2">
                       <div className="flex items-center gap-2 text-xs">
@@ -189,7 +250,36 @@ export function EventAssignmentsCard({
                         <span className="text-muted-foreground tabular-nums">
                           {group.items.length}
                         </span>
+                        {canManage && !isUnfilled && (
+                          <span className="ml-auto">
+                            <InviteToEventDialog
+                              organizationId={event.organizationId}
+                              eventId={event.id}
+                              role={group.role}
+                              members={membersByRole[group.role] || []}
+                              unavailableUserIds={unavailableUserIds}
+                              eventDates={eventDates}
+                            />
+                          </span>
+                        )}
                       </div>
+
+                      {isUnfilled &&
+                        (canManage ? (
+                          <InviteToEventDialog
+                            organizationId={event.organizationId}
+                            eventId={event.id}
+                            role={group.role}
+                            members={membersByRole[group.role] || []}
+                            unavailableUserIds={unavailableUserIds}
+                            eventDates={eventDates}
+                            variant="row"
+                          />
+                        ) : (
+                          <p className="px-3 py-2.5 text-sm text-muted-foreground">
+                            No one assigned yet
+                          </p>
+                        ))}
 
                       <div className="space-y-1.5">
                         {group.items.map((assignment) => {

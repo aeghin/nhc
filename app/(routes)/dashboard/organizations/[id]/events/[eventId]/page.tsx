@@ -17,7 +17,10 @@ import { EventChatPanel } from "@/components/dashboard/events/event-chat-panel";
 import { currentUser } from "@/lib/services/user";
 import { getEventDetailsById } from "@/lib/services/events";
 import { getEventMessages } from "@/lib/services/chat";
-import { getUserMembershipRole } from "@/lib/services/organization";
+import {
+  getOrgMembersWithUser,
+  getUserMembershipRole,
+} from "@/lib/services/organization";
 import { InvitationStatus, OrgRole } from "@/generated/prisma/enums";
 
 export default async function EventDetailPage({
@@ -41,19 +44,25 @@ export default async function EventDetailPage({
 
   const canManage = membership.role === OrgRole.ADMIN || membership.role === OrgRole.OWNER;
 
-  const hasAssignment = event.assignments.some((e) => e.userId === user.id);
+  
+  const hasAssignment = event.assignments.some(
+    (e) => e.userId === user.id && e.status === InvitationStatus.ACCEPTED,
+  );
 
   const hasAccess = canManage || hasAssignment;
 
   if (!hasAccess) notFound();
 
-  // Accepted-volunteers-only chat gate (reuses already-fetched assignments).
+  
   const canChat = event.assignments.some(
     (a) => a.userId === user.id && a.status === InvitationStatus.ACCEPTED,
   );
   const { messages: initialMessages } = canChat
     ? await getEventMessages(eventId)
     : { messages: [] };
+
+  // Only managers can invite, so members never pay for the roster
+  const members = canManage ? await getOrgMembersWithUser(orgId) : [];
 
   return (
     <main className="mx-auto max-w-screen-2xl px-6 py-8">
@@ -83,6 +92,7 @@ export default async function EventDetailPage({
               event={event}
               currentUserId={user.id}
               canManage={canManage}
+              members={members}
             />
             {canChat && (
               <EventChatPanel
