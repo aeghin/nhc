@@ -107,8 +107,8 @@ export type LibrarySong = {
   timeSignature: string
   defaultPitch: Pitch
   defaultKeyQuality: KeyQuality
-  spotifyUrl: string
-  youtubeUrl: string
+  spotifyUrl: string | null
+  youtubeUrl: string | null
   themes: string[]
   attachments: SongAttachment[]
 }

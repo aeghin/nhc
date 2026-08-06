@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Song" ALTER COLUMN "spotifyUrl" DROP NOT NULL,
+ALTER COLUMN "youtubeUrl" DROP NOT NULL;

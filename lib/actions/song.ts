@@ -25,6 +25,9 @@ export const addSongToLibrary = async (song: songSchemaInput): Promise<ActionRes
 
    const { title, artist, bpm, timeSignature, defaultPitch, defaultKeyQuality, spotifyUrl, youtubeUrl, themes, organizationId } = parsed.data;
 
+    const spotify = spotifyUrl || null;
+    const youtube = youtubeUrl || null;
+
     const membership = await prisma.membership.findUnique({
         where: {
             userId_organizationId: {
@@ -60,8 +63,8 @@ export const addSongToLibrary = async (song: songSchemaInput): Promise<ActionRes
                 timeSignature,
                 defaultPitch,
                 defaultKeyQuality,
-                spotifyUrl,
-                youtubeUrl,
+                spotifyUrl: spotify,
+                youtubeUrl: youtube,
                 themes,
                 deletedAt: null
             }
@@ -75,8 +78,8 @@ export const addSongToLibrary = async (song: songSchemaInput): Promise<ActionRes
                 timeSignature,
                 defaultPitch,
                 defaultKeyQuality,
-                spotifyUrl,
-                youtubeUrl,
+                spotifyUrl: spotify,
+                youtubeUrl: youtube,
                 themes,
                 organizationId
             }
@@ -111,6 +114,9 @@ export const addSongToLibrary = async (song: songSchemaInput): Promise<ActionRes
 
             const { title, artist, bpm, timeSignature, defaultPitch, defaultKeyQuality, spotifyUrl, youtubeUrl, themes, organizationId } = parsed.data;
 
+            const spotify = spotifyUrl || null;
+            const youtube = youtubeUrl || null;
+
             const membership = await prisma.membership.findUnique({
                 where: {
                     userId_organizationId: {
@@ -136,7 +142,7 @@ export const addSongToLibrary = async (song: songSchemaInput): Promise<ActionRes
 
             await prisma.song.update({
               where: { id: songId, organizationId },
-              data: { title, artist, bpm, timeSignature, defaultPitch, defaultKeyQuality, spotifyUrl, youtubeUrl, themes }
+              data: { title, artist, bpm, timeSignature, defaultPitch, defaultKeyQuality, spotifyUrl: spotify, youtubeUrl: youtube, themes }
             });
 
 

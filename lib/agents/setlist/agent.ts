@@ -13,8 +13,8 @@ export type AgentCatalogSong = {
   defaultPitch: Pitch;
   defaultKeyQuality: KeyQuality;
   themes: string[];
-  spotifyUrl: string;
-  youtubeUrl: string;
+  spotifyUrl: string | null;
+  youtubeUrl: string | null;
 };
 
 // Shape the client applies into the draft (mirrors SetlistSong fields).

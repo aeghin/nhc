@@ -1658,11 +1658,15 @@ export function CreateEventPageContent({
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       Creating...
                     </>
-                  ) : (
+                  ) : assignedCount > 0 ? (
                     <>
                       <Send className="mr-2 h-4 w-4" />
-                      Create & Send Invites
-                      {assignedCount > 0 && ` (${assignedCount})`}
+                      Create & Send Invites ({assignedCount})
+                    </>
+                  ) : (
+                    <>
+                      <CalendarPlus className="mr-2 h-4 w-4" />
+                      Create Event
                     </>
                   )}
                 </Button>

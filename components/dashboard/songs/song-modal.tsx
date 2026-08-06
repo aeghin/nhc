@@ -92,8 +92,8 @@ const getFormValues = (orgId: string, song: LibrarySong): songSchemaInput => ({
   timeSignature: song.timeSignature,
   defaultPitch: song.defaultPitch,
   defaultKeyQuality: song.defaultKeyQuality,
-  spotifyUrl: song.spotifyUrl,
-  youtubeUrl: song.youtubeUrl,
+  spotifyUrl: song.spotifyUrl ?? "",
+  youtubeUrl: song.youtubeUrl ?? "",
   themes: song.themes,
 });
 
@@ -400,6 +400,10 @@ export function SongModal({ orgId, song, open, onOpenChange }: SongModalProps) {
                       </FormItem>
                     )}
                   />
+                  <p className="text-xs text-muted-foreground">
+                    Add at least one so the team has something to open from the
+                    setlist.
+                  </p>
                 </div>
 
               {/* Attachments (existing songs only) */}

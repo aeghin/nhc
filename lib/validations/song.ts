@@ -1,6 +1,8 @@
 import { z } from "zod/v4";
 import { pitchSchema, keyQualitySchema } from "@/lib/constants/key";
 
+const optionalUrl = z.literal("").or(z.url("Enter a valid URL"));
+
 export const songSchema = z.object({
     title: z.string().min(1, "Song title required"),
     artist: z.string().min(1, "Artist name required"),
@@ -8,8 +10,8 @@ export const songSchema = z.object({
     timeSignature: z.string().min(1, "time signature required"),
     defaultPitch: pitchSchema,
     defaultKeyQuality: keyQualitySchema,
-    spotifyUrl: z.url("Link required"),
-    youtubeUrl: z.url("Link required"),
+    spotifyUrl: optionalUrl,
+    youtubeUrl: optionalUrl,
     themes: z
         .string()
         .transform((t) => t.trim().toLowerCase())
@@ -17,6 +19,9 @@ export const songSchema = z.object({
         .min(1, "Theme selection is required")
         .transform((arr) => [...new Set(arr)]),
     organizationId: z.uuid(),
+}).refine((d) => Boolean(d.spotifyUrl || d.youtubeUrl), {
+    message: "Add a Spotify or YouTube link",
+    path: ["spotifyUrl"],
 });
 
 export type songSchemaInput = z.infer<typeof songSchema>;
