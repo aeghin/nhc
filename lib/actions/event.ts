@@ -193,15 +193,48 @@ export async function createEvent(
     if (assignedUserIds.length > 0) {
       const assignedUserIdSet = new Set(assignedUserIds);
 
-      const validMemberships = await prisma.membership.count({
+      const memberships = await prisma.membership.findMany({
         where: {
           organizationId,
           userId: { in: assignedUserIds },
         },
+        select: { userId: true, volunteerRoles: true },
       });
 
-      if (validMemberships !== assignedUserIdSet.size) {
+      if (memberships.length !== assignedUserIdSet.size) {
         return { success: false, error: "One or more assigned users are not members of this organization" };
+      }
+
+      // The picker only lists members holding the role, so this catches crafted
+      // requests and the window where a role is revoked while the form is open.
+      const rolesByUser = new Map(
+        memberships.map((m) => [m.userId, m.volunteerRoles]),
+      );
+
+      const unqualifiedIds = new Set<string>();
+
+      for (const [role, userIds] of Object.entries(roleAssignments)) {
+        for (const uid of userIds) {
+          if (!rolesByUser.get(uid)?.includes(role as VolunteerRole)) {
+            unqualifiedIds.add(uid);
+          }
+        }
+      }
+
+      if (unqualifiedIds.size > 0) {
+        const unqualifiedUsers = await prisma.user.findMany({
+          where: { id: { in: [...unqualifiedIds] } },
+          select: { firstName: true, lastName: true },
+        });
+
+        const names = unqualifiedUsers
+          .map((u) => `${u.firstName} ${u.lastName}`)
+          .join(", ");
+
+        return {
+          success: false,
+          error: `Unable to assign ${names} — they don't have the required volunteer role`,
+        };
       }
 
       // Hard block: members with a blockout on any event day can't be assigned.
@@ -654,15 +687,38 @@ export const inviteMembersToEvent = async (
 
     if (!event) return { success: false, error: "Unable to locate event" };
 
-    const validMemberships = await prisma.membership.count({
+    const memberships = await prisma.membership.findMany({
       where: {
         organizationId,
         userId: { in: uniqueUserIds },
       },
+      select: { userId: true, volunteerRoles: true },
     });
 
-    if (validMemberships !== uniqueUserIds.length) {
+    if (memberships.length !== uniqueUserIds.length) {
       return { success: false, error: "One or more members are not part of this organization" };
+    }
+
+    // The picker only lists members holding the role, so this catches crafted
+    // requests and the window where a role is revoked mid-invite.
+    const unqualified = memberships.filter(
+      (m) => !m.volunteerRoles.includes(role),
+    );
+
+    if (unqualified.length > 0) {
+      const unqualifiedUsers = await prisma.user.findMany({
+        where: { id: { in: unqualified.map((m) => m.userId) } },
+        select: { firstName: true, lastName: true },
+      });
+
+      const names = unqualifiedUsers
+        .map((u) => `${u.firstName} ${u.lastName}`)
+        .join(", ");
+
+      return {
+        success: false,
+        error: `Unable to assign ${names} — they don't have the required volunteer role`,
+      };
     }
 
     // Hard block: members with a blockout on any event day can't be assigned.

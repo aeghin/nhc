@@ -276,6 +276,15 @@ interface MemberEventsDashboardProps {
   canManage: boolean;
 }
 
+// Motion only scale-corrects borderRadius when it's a number or a px string —
+// a rem value is passed through uncorrected and the corners visibly stretch flat
+// while the fill slides between tabs. This is `--radius` (0.625rem) in px, so
+// keep it in sync by hand if that token ever changes.
+const TAB_FILL_RADIUS = {
+  borderTopLeftRadius: 10,
+  borderTopRightRadius: 10,
+};
+
 // ─── Component ──────────────────────────────────────────────────
 
 export function MemberEventsDashboard({
@@ -477,72 +486,114 @@ export function MemberEventsDashboard({
         transition={{ delay: 0.05 }}
         className="relative"
       >
-        <div className="flex gap-8 border-b border-border">
+        <div className="flex gap-1 border-b border-border">
           <button
             type="button"
             onClick={() => setActiveTab("pending")}
-            className={`relative flex items-center gap-2 pb-3 text-sm font-medium transition-colors cursor-pointer ${
+            className={`relative flex items-center rounded-t-lg px-3 pt-2 pb-3 text-sm font-medium transition-colors cursor-pointer ${
               activeTab === "pending"
                 ? "text-foreground"
-                : "text-muted-foreground hover:text-foreground"
+                : "text-foreground/70 hover:bg-muted/50 hover:text-foreground"
             }`}
           >
-            <span className="h-2 w-2 rounded-full bg-amber-500" />
-            Pending
-            <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground">
-              {pendingCount}
-            </span>
             {activeTab === "pending" && (
               <m.div
-                layoutId="events-tab-indicator"
-                className="absolute bottom-0 left-0 right-0 h-0.5 bg-foreground"
+                layoutId="events-tab-fill"
+                className="absolute inset-0 bg-muted"
+                style={TAB_FILL_RADIUS}
                 transition={{ type: "spring", stiffness: 500, damping: 30 }}
-              />
+              >
+                <span className="absolute inset-x-0 bottom-0 h-0.5 bg-foreground" />
+              </m.div>
+            )}
+            <span className="relative flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-amber-500" />
+              Pending
+              <span
+                className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                  activeTab === "pending"
+                    ? "bg-background text-foreground/70"
+                    : "bg-secondary text-secondary-foreground"
+                }`}
+              >
+                {pendingCount}
+              </span>
+            </span>
+            {activeTab !== "pending" && (
+              <span className="absolute inset-x-0 bottom-0 h-0.5 rounded-full bg-foreground/20" />
             )}
           </button>
           <button
             type="button"
             onClick={() => setActiveTab("schedule")}
-            className={`relative flex items-center gap-2 pb-3 text-sm font-medium transition-colors cursor-pointer ${
+            className={`relative flex items-center rounded-t-lg px-3 pt-2 pb-3 text-sm font-medium transition-colors cursor-pointer ${
               activeTab === "schedule"
                 ? "text-foreground"
-                : "text-muted-foreground hover:text-foreground"
+                : "text-foreground/70 hover:bg-muted/50 hover:text-foreground"
             }`}
           >
-            <span className="h-2 w-2 rounded-full bg-emerald-500" />
-            My Schedule
-            <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground">
-              {scheduleCount}
-            </span>
             {activeTab === "schedule" && (
               <m.div
-                layoutId="events-tab-indicator"
-                className="absolute bottom-0 left-0 right-0 h-0.5 bg-foreground"
+                layoutId="events-tab-fill"
+                className="absolute inset-0 bg-muted"
+                style={TAB_FILL_RADIUS}
                 transition={{ type: "spring", stiffness: 500, damping: 30 }}
-              />
+              >
+                <span className="absolute inset-x-0 bottom-0 h-0.5 bg-foreground" />
+              </m.div>
+            )}
+            <span className="relative flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-emerald-500" />
+              My Schedule
+              <span
+                className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                  activeTab === "schedule"
+                    ? "bg-background text-foreground/70"
+                    : "bg-secondary text-secondary-foreground"
+                }`}
+              >
+                {scheduleCount}
+              </span>
+            </span>
+            {activeTab !== "schedule" && (
+              <span className="absolute inset-x-0 bottom-0 h-0.5 rounded-full bg-foreground/20" />
             )}
           </button>
           {canManage && (
             <button
               type="button"
               onClick={() => setActiveTab("all")}
-              className={`relative flex items-center gap-2 pb-3 text-sm font-medium transition-colors cursor-pointer ${
+              className={`relative flex items-center rounded-t-lg px-3 pt-2 pb-3 text-sm font-medium transition-colors cursor-pointer ${
                 activeTab === "all"
                   ? "text-foreground"
-                  : "text-muted-foreground hover:text-foreground"
+                  : "text-foreground/70 hover:bg-muted/50 hover:text-foreground"
               }`}
             >
-              <span className="h-2 w-2 rounded-full bg-blue-500" />
-              All Events
-              <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground">
-                {allCount}
-              </span>
               {activeTab === "all" && (
                 <m.div
-                  layoutId="events-tab-indicator"
-                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-foreground"
+                  layoutId="events-tab-fill"
+                  className="absolute inset-0 bg-muted"
+                  style={TAB_FILL_RADIUS}
                   transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                />
+                >
+                  <span className="absolute inset-x-0 bottom-0 h-0.5 bg-foreground" />
+                </m.div>
+              )}
+              <span className="relative flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-blue-500" />
+                All Events
+                <span
+                  className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                    activeTab === "all"
+                      ? "bg-background text-foreground/70"
+                      : "bg-secondary text-secondary-foreground"
+                  }`}
+                >
+                  {allCount}
+                </span>
+              </span>
+              {activeTab !== "all" && (
+                <span className="absolute inset-x-0 bottom-0 h-0.5 rounded-full bg-foreground/20" />
               )}
             </button>
           )}
