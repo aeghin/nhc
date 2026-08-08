@@ -4,7 +4,7 @@ import prisma from "@/lib/prisma";
 import { cacheLife, cacheTag } from "next/cache";
 import type { ActivityType } from "@/generated/prisma/enums";
 
-const PAGE_SIZE = 20;
+export const ACTIVITY_PAGE_SIZE = 10;
 
 export type ActivityItem = {
   id: string;
@@ -15,27 +15,24 @@ export type ActivityItem = {
   createdAt: Date;
 };
 
-export type ActivityPage = {
-  items: ActivityItem[];
-  nextCursor: string | null;
-};
-
+// `page` is 1-based and must already be clamped to the real range — a page
+// below 1 would produce a negative skip.
 export const getOrganizationActivity = async (
   organizationId: string,
-  cursor?: string
-): Promise<ActivityPage> => {
+  page: number
+): Promise<ActivityItem[]> => {
   "use cache";
 
   cacheLife("minutes");
   cacheTag(`org-${organizationId}-activity`);
 
-  const rows = await prisma.activityLog.findMany({
+  return prisma.activityLog.findMany({
     where: { organizationId },
-    // id is the unique tiebreak so the sort is total and the cursor is stable
-    // even when multiple rows share a createdAt.
+    // id is the unique tiebreak so the sort is total and a row can't drift
+    // between pages when several share a createdAt.
     orderBy: [{ createdAt: "desc" }, { id: "desc" }],
-    take: PAGE_SIZE + 1, // one extra row tells us whether another page exists
-    ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
+    skip: (page - 1) * ACTIVITY_PAGE_SIZE,
+    take: ACTIVITY_PAGE_SIZE,
     select: {
       id: true,
       type: true,
@@ -45,10 +42,19 @@ export const getOrganizationActivity = async (
       createdAt: true,
     },
   });
+};
 
-  const hasMore = rows.length > PAGE_SIZE;
-  const items = hasMore ? rows.slice(0, PAGE_SIZE) : rows;
-  const last = items.at(-1);
+// Cached apart from the rows so paging through the feed reuses a single count
+// instead of re-running it once per page.
+export const getOrganizationActivityPageCount = async (
+  organizationId: string
+): Promise<number> => {
+  "use cache";
 
-  return { items, nextCursor: hasMore && last ? last.id : null };
+  cacheLife("minutes");
+  cacheTag(`org-${organizationId}-activity`);
+
+  const total = await prisma.activityLog.count({ where: { organizationId } });
+
+  return Math.ceil(total / ACTIVITY_PAGE_SIZE);
 };

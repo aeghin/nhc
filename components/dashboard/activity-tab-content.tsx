@@ -1,8 +1,10 @@
 import { Activity } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ActivityRow } from "@/components/dashboard/activity-row";
-import { LoadMoreActivity } from "@/components/dashboard/load-more-activity";
-import { getOrganizationActivity } from "@/lib/services/activity";
+import { ActivityFeed } from "@/components/dashboard/activity-feed";
+import {
+  getOrganizationActivity,
+  getOrganizationActivityPageCount,
+} from "@/lib/services/activity";
 
 interface ActivityTabContentProps {
   organizationId: string;
@@ -11,7 +13,10 @@ interface ActivityTabContentProps {
 export const ActivityTabContent = async ({
   organizationId,
 }: ActivityTabContentProps) => {
-  const { items, nextCursor } = await getOrganizationActivity(organizationId);
+  const [items, totalPages] = await Promise.all([
+    getOrganizationActivity(organizationId, 1),
+    getOrganizationActivityPageCount(organizationId),
+  ]);
 
   return (
     <Card className="overflow-hidden rounded-xl border-border/40 bg-linear-to-br from-card to-card/80 shadow-sm">
@@ -40,17 +45,11 @@ export const ActivityTabContent = async ({
             </p>
           </div>
         ) : (
-          <div className="divide-y divide-border/40">
-            {items.map((item, i) => (
-              <ActivityRow key={item.id} item={item} index={i} />
-            ))}
-            {nextCursor && (
-              <LoadMoreActivity
-                organizationId={organizationId}
-                initialCursor={nextCursor}
-              />
-            )}
-          </div>
+          <ActivityFeed
+            organizationId={organizationId}
+            initialItems={items}
+            initialTotalPages={totalPages}
+          />
         )}
       </CardContent>
     </Card>
