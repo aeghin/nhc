@@ -2,11 +2,13 @@ import { Badge } from "@/components/ui/badge";
 import { EventDeleteMenu } from "./event-delete-menu";
 import { cn } from "@/lib/utils";
 import { colorClasses } from "@/lib/config/service-types-config";
+import { InvitationStatus } from "@/generated/prisma/enums";
 
 type Event = {
   id: string
   name: string
   description: string
+  location: string
   createdAt: Date
   updatedAt: Date
   dates: {
@@ -14,6 +16,14 @@ type Event = {
         eventId: string;
         startTime: Date;
         endTime: Date;
+  }[],
+  assignments: {
+    userId: string;
+    status: InvitationStatus;
+    user: {
+      firstName: string;
+      lastName: string;
+    };
   }[],
 };
 
@@ -74,6 +84,19 @@ export function EventHeader({
         eventId={event.id}
         organizationId={serviceType.organizationId}
         eventName={event.name}
+        serviceColor={serviceType.color}
+        eventDetails={{
+          description: event.description,
+          location: event.location,
+          dates: event.dates,
+          assignees: event.assignments
+            .filter((a) => a.status !== InvitationStatus.DECLINED)
+            .map((a) => ({
+              userId: a.userId,
+              firstName: a.user.firstName,
+              lastName: a.user.lastName,
+            })),
+        }}
         />
       }
 

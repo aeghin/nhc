@@ -1,12 +1,18 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { MoreVertical, Trash2, AlertCircle } from "lucide-react";
+import { MoreVertical, Pencil, Trash2, AlertCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { deleteEvent } from "@/lib/actions/event";
 import { toast } from "sonner";
+
+import {
+  EditEventDetailsDialog,
+  type EditableAssignee,
+  type EditableEventDates,
+} from "./edit-event-details-dialog";
 
 
 import {
@@ -30,14 +36,24 @@ interface EventDeleteMenuProps {
   eventId: string;
   organizationId: string;
   eventName: string;
+  serviceColor: string;
+  eventDetails: {
+    description: string;
+    location: string;
+    dates: EditableEventDates;
+    assignees: EditableAssignee[];
+  };
 };
 
 export const EventDeleteMenu = ({
   eventId,
   organizationId,
   eventName,
+  serviceColor,
+  eventDetails,
 }: EventDeleteMenuProps) => {
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
   const router = useRouter();
@@ -74,6 +90,13 @@ export const EventDeleteMenu = ({
             ACTION(s)
           </DropdownMenuLabel>
           <DropdownMenuItem
+            onClick={() => setEditOpen(true)}
+            className="cursor-pointer"
+          >
+            <Pencil className="mr-2 h-4 w-4" />
+            Edit Details
+          </DropdownMenuItem>
+          <DropdownMenuItem
             onClick={() => setConfirmOpen(true)}
             className="cursor-pointer text-destructive focus:text-destructive"
           >
@@ -82,6 +105,21 @@ export const EventDeleteMenu = ({
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+
+      <EditEventDetailsDialog
+        open={editOpen}
+        onOpenChange={setEditOpen}
+        eventId={eventId}
+        organizationId={organizationId}
+        serviceColor={serviceColor}
+        assignees={eventDetails.assignees}
+        initial={{
+          name: eventName,
+          description: eventDetails.description,
+          location: eventDetails.location,
+          dates: eventDetails.dates,
+        }}
+      />
 
       <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <DialogContent className="sm:max-w-120">

@@ -17,6 +17,8 @@ import {
   createEventInputSchema,
   InviteToEventInput,
   inviteToEventSchema,
+  editEventDetailsSchema,
+  EditEventDetailsInput
 } from "@/lib/validations/event";
 
 import {
@@ -30,9 +32,13 @@ import EventMessageEmail from "@/components/email/event-message-template";
 import {
   findBestReplacement,
   getConflictingAssignments,
+  getConflictingUserIds,
 } from "@/lib/services/scheduling";
 
-import { getBlockoutsForDates } from "@/lib/services/blockouts";
+import {
+  getBlockedUserIds,
+  getBlockoutsForDates,
+} from "@/lib/services/blockouts";
 
 import { Resend } from "resend";
 import { revalidatePath, updateTag } from "next/cache";
@@ -1063,4 +1069,120 @@ export const emailAcceptedVolunteers = async (
     return { success: false, error: "Something went wrong, please try again" };
 
   };
+};
+
+export const editEventDetails = async (data: EditEventDetailsInput): Promise<ActionResponse> => {
+    
+    try {
+
+      const user = await currentUser();
+
+      if (!user) return { success: false, error: "Unable to find user" };
+
+      const parsed = editEventDetailsSchema.safeParse(data);
+
+      if (!parsed.success) return { success: false, error: parsed.error.message };
+
+      const { eventId, organizationId, name, dayTimes, location, description } = parsed.data;
+
+      const [membership, event] = await Promise.all([
+        prisma.membership.findUnique({
+          where: {
+            userId_organizationId: {
+              userId: user.id,
+              organizationId
+            }
+          },
+          select: {
+            role: true
+          }
+        }),
+        prisma.event.findFirst({
+          where: { id: eventId, organizationId },
+          select: { assignments: { select: { userId: true, status: true } } },
+        }),
+      ]);
+
+      if (!membership) return { success: false, error: "Unable to find membership" };
+
+      if (membership.role === OrgRole.MEMBER) return { success: false, error: "Insufficient permissions" };
+
+      if (!event) return { success: false, error: "Event doesn't exist" };
+
+      if (Object.keys(dayTimes).length === 0) {
+        return { success: false, error: "An event needs at least one day" };
+      }
+
+      const activeUserIds = event.assignments
+        .filter((a) => a.status !== InvitationStatus.DECLINED)
+        .map((a) => a.userId);
+
+      if (activeUserIds.length > 0) {
+        const dates = Object.values(dayTimes).map((times) => ({
+          startTime: times.startTime,
+          endTime: times.endTime,
+        }));
+
+        const [blockedIds, conflictingIds] = await Promise.all([
+          getBlockedUserIds(organizationId, dates),
+          getConflictingUserIds(organizationId, dates, eventId),
+        ]);
+
+        const affectedIds = activeUserIds.filter(
+          (uid) => blockedIds.has(uid) || conflictingIds.has(uid),
+        );
+
+        if (affectedIds.length > 0) {
+          const affectedUsers = await prisma.user.findMany({
+            where: { id: { in: affectedIds } },
+            select: { firstName: true, lastName: true },
+          });
+
+          const names = affectedUsers
+            .map((u) => `${u.firstName} ${u.lastName}`)
+            .join(", ");
+
+          return {
+            success: false,
+            error: `These dates don't work for ${names}. Remove them from the event or choose different dates.`,
+          };
+        }
+      }
+
+      await prisma.$transaction(async (tx) => {
+        await tx.event.update({
+          where: { id: eventId },
+          data: {
+            name,
+            location,
+            description: description ?? "",
+          },
+        });
+
+
+        await tx.eventDate.deleteMany({ where: { eventId } });
+
+        await tx.eventDate.createMany({
+          data: Object.values(dayTimes).map((times) => ({
+            eventId,
+            startTime: new Date(times.startTime),
+            endTime: new Date(times.endTime),
+          })),
+        });
+      });
+
+      updateTag(`event-${eventId}-org-${organizationId}-details`);
+      updateTag(`org-${organizationId}-events`);
+
+      for (const { userId } of event.assignments) {
+        updateTag(`user-${userId}-events-${organizationId}`);
+      };
+
+      return { success: true };
+
+    } catch {
+
+      return { success: false, error: "Something went wrong. Please try again." };
+
+    }
 };
